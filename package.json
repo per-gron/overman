@@ -1,0 +1,20 @@
+{
+  "name": "overman",
+  "version": "0.0.0",
+  "description": "Test runner for integration tests",
+  "main": "lib/overman.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "test",
+    "runner",
+    "integration",
+    "parallel"
+  ],
+  "author": "Per Eckerdal <per.eckerdal@gmail.com>",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "underscore": "~1.7.0"
+  }
+}
