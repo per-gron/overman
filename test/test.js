@@ -6,4 +6,5 @@ var suiterunner = require('../lib/suite_runner');
 suiterunner({
   suites: ['./test_suite.js'],
   interface: '../lib/interface/bdd',
+  reporters: []
 });
