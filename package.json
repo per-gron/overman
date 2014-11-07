@@ -15,6 +15,7 @@
   "author": "Per Eckerdal <per.eckerdal@gmail.com>",
   "license": "Apache 2.0",
   "dependencies": {
-    "underscore": "~1.7.0"
+    "underscore": "~1.7.0",
+    "when": "~3.5.2"
   }
 }
