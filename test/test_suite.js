@@ -14,6 +14,10 @@ describe('Something', function() {
       console.log('do the thing');
     });
 
+    it('should fail', function() {
+      throw new Error('No!');
+    });
+
     after(function afterHook() {
       console.log('after');
     });
