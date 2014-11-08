@@ -14,7 +14,7 @@ describe('Something', function() {
       console.log('do the thing');
     });
 
-    it('should fail', function() {
+    it.skip('should fail', function() {
       throw new Error('No!');
     });
 
