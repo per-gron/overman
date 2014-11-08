@@ -1,3 +1,5 @@
+var when = require('when');
+
 it('should be awesome', function() {
 });
 
@@ -16,6 +18,10 @@ describe('Something', function() {
 
     it.skip('should fail', function() {
       throw new Error('No!');
+    });
+
+    it.skip('should never finish', function() {
+      return when.promise(function() {});
     });
 
     after(function afterHook() {
