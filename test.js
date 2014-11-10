@@ -1,6 +1,5 @@
 var fs = require('fs');
 var path = require('path');
-var bdd = require('./lib/interface/bdd');
 var suiterunner = require('./lib/suite_runner');
 
 var suiteFiles = fs.readdirSync('test')
@@ -9,7 +8,7 @@ var suiteFiles = fs.readdirSync('test')
 
 suiterunner({
     suites: suiteFiles,
-    interface: './lib/interface/bdd',
+    interface: './lib/interface/bdd_mocha',
     reporters: [],
     parallelism: 2,
     timeout: 1000
