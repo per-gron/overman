@@ -5,7 +5,7 @@ var expect = require('chai').expect;
 var bddMocha = require('../lib/interface/bdd_mocha');
 
 function parseSuite(name) {
-  return bddMocha(__dirname + '/' + name);
+  return bddMocha(__dirname + '/suite/' + name);
 }
 
 function getKeypath(object, keypath) {

@@ -12,7 +12,7 @@ var suiteRunner = require('../lib/suite_runner');
 
 function runTestSuite(suite, reporter) {
   return suiteRunner({
-      suites: [__dirname + '/' + suite],
+      suites: [__dirname + '/suite/' + suite],
       interface: __dirname + '/../lib/interface/bdd_mocha',
       timeout: 500,
       reporters: [reporter]
@@ -134,7 +134,7 @@ describe('Reporter API', function() {
   it('should emit messages with a correct test path', function() {
     var suite = 'suite_single_skipped_test';
     return ensureAllMessages(suite, function(testPath, message) {
-      return (testPath.file === path.resolve(__dirname + '/' + suite));
+      return (testPath.file === path.resolve(__dirname + '/suite/' + suite));
     });
   });
 });
