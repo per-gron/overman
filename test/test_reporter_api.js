@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Test suite that verifies that reporters get the messages they're supposed to
  * get.

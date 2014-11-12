@@ -1,3 +1,5 @@
+'use strict';
+
 var when = require('when');
 
 it('should be awesome', function() {
