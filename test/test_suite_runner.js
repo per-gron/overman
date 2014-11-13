@@ -31,14 +31,13 @@ function listNames(names) {
     .join(', ');
 }
 
-function runTestSuite(suite, reporters, parallelism) {
-  return suiteRunner({
+function runTestSuite(suite, reporters, options) {
+  return suiteRunner(_.extend({
       suites: [__dirname + '/suite/' + suite],
       interface: __dirname + '/../lib/interface/bdd_mocha',
       timeout: 500,
-      parallelism: parallelism,
       reporters: reporters || []
-    });
+    }, options));
 }
 
 function ensureOutputFromTests(suite, tests) {
@@ -147,10 +146,19 @@ describe('Suite runner', function() {
 
   it('should run tests in parallel', function() {
     var counter = new ParallelismCounter();
-    return runTestSuite('suite_various_tests', [counter], 3)
+    return runTestSuite('suite_various_tests', [counter], { parallelism: 3 })
       .then(function() {}, function() {}) // Discard test result
       .then(function() {
         expect(counter).to.have.property('maxParallelism').that.is.equal(3);
+      });
+  });
+
+  it('should fail when encountering .only tests and disallow_only is set', function() {
+    return runTestSuite('suite_single_only_test', [], { disallow_only: true })
+      .then(function() {
+        throw new Error('should fail');
+      }, function() {
+        // Should fail
       });
   });
 });
