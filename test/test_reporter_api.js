@@ -83,6 +83,8 @@ describe('Reporter API', function() {
     });
   });
 
+  it('should emit startedBeforeHook message');
+
   it('should emit startedTest message', function() {
     return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
       return message.type === 'startedTest';
@@ -94,6 +96,10 @@ describe('Reporter API', function() {
       return message.type === 'startedAfterHooks';
     });
   });
+
+  it('should emit startedAfterHook message');
+  it('should emit finishedAfterHooks message');
+  it('should not emit finishedAfterHooks message when after hook never finishes');
 
   it('should emit finish message for successful test', function() {
     return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
@@ -137,4 +143,10 @@ describe('Reporter API', function() {
       return (testPath.file === path.resolve(__dirname + '/suite/' + suite));
     });
   });
+
+  it('should report syntax errors');
+  it('should gracefully handle when the interface takes forever');
+  it('should report error for failing before hook');
+  it('should report error for failing test');
+  it('should report error for failing after hook');
 });
