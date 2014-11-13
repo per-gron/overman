@@ -27,7 +27,7 @@ ParallelismCounter.prototype.gotMessage = function(testPath, message) {
 
 function listNames(names) {
   return names
-    .map(function(name) { return '"' + names + '"'; })
+    .map(function(name) { return '"' + name + '"'; })
     .join(', ');
 }
 
