@@ -7,7 +7,7 @@
 
 var path = require('path');
 var when = require('when');
-var OnMessage = require('../lib/reporter/on_message');
+var OnMessage = require('./util/on_message');
 var suiteRunner = require('../lib/suite_runner');
 
 function runTestSuite(suite, reporter) {
