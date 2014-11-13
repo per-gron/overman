@@ -83,7 +83,12 @@ describe('Reporter API', function() {
     });
   });
 
-  it('should emit startedBeforeHook message');
+  it('should emit startedBeforeHook message', function() {
+    return ensureOneMessage('suite_test_with_named_before_hook', function(testPath, message) {
+      return (message.type === 'startedBeforeHook' &&
+              message.name === 'beforeHookName');
+    });
+  });
 
   it('should emit startedTest message', function() {
     return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
@@ -97,9 +102,24 @@ describe('Reporter API', function() {
     });
   });
 
-  it('should emit startedAfterHook message');
-  it('should emit finishedAfterHooks message');
-  it('should not emit finishedAfterHooks message when after hook never finishes');
+  it('should emit startedAfterHook message', function() {
+    return ensureOneMessage('suite_test_with_named_after_hook', function(testPath, message) {
+      return (message.type === 'startedAfterHook' &&
+              message.name === 'afterHookName');
+    });
+  });
+
+  it('should emit finishedAfterHooks message', function() {
+    return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
+      return message.type === 'finishedAfterHooks';
+    });
+  });
+
+  it('should not emit finishedAfterHooks message when after hook never finishes', function() {
+    return ensureAllMessages('suite_after_hook_that_never_finishes', function(testPath, message) {
+      return message.type !== 'finishedAfterHooks';
+    });
+  });
 
   it('should emit finish message for successful test', function() {
     return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
