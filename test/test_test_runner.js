@@ -42,22 +42,24 @@ function waitForStreamToEmitLines(stream, linesToWatchFor) {
   return when.promise(function(resolve, reject) {
     var lines = readline.createInterface({ input: stream, output: stream });
 
-    function checkForDone() {
-      if (linesToWatchFor.length === 0) {
-        resolve();
-        lines.close();
-        return;
-      }
-    }
-
-    checkForDone();
     lines.on('line', function(line) {
+      if (linesToWatchFor.length === 0) {
+        reject(new Error('Encountered unexpected line ' + line + ' when expecting no more output'));
+      }
+
       if (line.match(linesToWatchFor[0])) {
         linesToWatchFor.shift();
-        checkForDone();
       } else {
         reject(new Error('Encountered unexpected line ' + line + ', expected ' + linesToWatchFor[0]));
         lines.close();
+      }
+    });
+
+    lines.on('close', function() {
+      if (linesToWatchFor.length === 0) {
+        resolve();
+      } else {
+        reject(new Error('Encountered end of output while still waiting for ' + linesToWatchFor));
       }
     });
   });
@@ -163,10 +165,39 @@ describe('Test runner', function() {
     ]);
   });
 
-  it.skip('should run tests that return a promise asynchronously', function() {
+  it('should run tests that return a promise asynchronously', function() {
+    var process = runTest('suite_test_returning_promise', 'should succeed');
+    return when.all([
+      waitForProcessToExit(process),
+      waitForStreamToEmitLines(process.stdout, [
+        /running_test/,
+        /still_running_test/,
+        /running_after_hook/
+      ])
+    ]);
   });
 
-  it.skip('should run tests that take a done callback', function() {
+  it('should run tests that take a done callback', function() {
+    var process = runTest('suite_test_invoking_done', 'should succeed');
+    return when.all([
+      waitForProcessToExit(process),
+      waitForStreamToEmitLines(process.stdout, [
+        /running_test/,
+        /still_running_test/,
+        /running_after_hook/
+      ])
+    ]);
+  });
+
+  it('should fail tests invoke the done with an error', function() {
+    var process = runTest('suite_test_invoking_done_with_error', 'should fail');
+    return when.all([
+      waitForProcessToFail(process),
+      waitForStreamToEmitLines(process.stdout, [
+        /running_test/,
+        /failed_test/
+      ])
+    ]);
   });
 
   it('should mark tests that throw an exception as failing', function() {
@@ -179,6 +210,16 @@ describe('Test runner', function() {
     return waitForProcessToFail(process);
   });
 
-  it.skip('should not exit if the test is done but there are still things on the runloop', function() {
+  it('should not exit if the test is done but there are still things on the runloop', function() {
+    var process = runTest('suite_with_nonempty_runloop', 'should succeed');
+    return when.race([
+      waitForProcessToExit(process)
+        .then(function() { throw new Error('Should never finish'); }),
+      when()
+        .delay(1000)
+        .ensure(function() {
+          process.kill('SIGKILL');
+        })
+    ]);
   });
 });
