@@ -31,6 +31,15 @@ function listNames(names) {
     .join(', ');
 }
 
+function shouldFail(promise) {
+  return promise
+      .then(function() {
+        throw new Error('Should fail');
+      }, function() {
+        // Should fail
+      });
+}
+
 function runTestSuite(suite, reporters, options) {
   return suiteRunner(_.extend({
       suites: [__dirname + '/suite/' + suite],
@@ -106,30 +115,15 @@ describe('Suite runner', function() {
   });
 
   it('should fail if a test fails', function() {
-    return runTestSuite('suite_various_tests')
-      .then(function() {
-        throw new Error('should fail');
-      }, function() {
-        // Should fail
-      });
+    return shouldFail(runTestSuite('suite_various_tests'));
   });
 
   it('should cancel tests that time out', function() {
-    return runTestSuite('suite_single_test_that_never_finishes')
-      .then(function() {
-        throw new Error('should fail');
-      }, function() {
-        // Should fail
-      });
+    return shouldFail(runTestSuite('suite_single_test_that_never_finishes'));
   });
 
   it('should cancel tests that time out because they are in an infinite loop', function() {
-    return runTestSuite('suite_single_test_infinite_loop')
-      .then(function() {
-        throw new Error('should fail');
-      }, function() {
-        // Should fail
-      });
+    return shouldFail(runTestSuite('suite_single_test_infinite_loop'));
   });
 
   it('should send SIGTERM to tests that time out');
@@ -154,11 +148,6 @@ describe('Suite runner', function() {
   });
 
   it('should fail when encountering .only tests and disallow_only is set', function() {
-    return runTestSuite('suite_single_only_test', [], { disallow_only: true })
-      .then(function() {
-        throw new Error('should fail');
-      }, function() {
-        // Should fail
-      });
+    return shouldFail(runTestSuite('suite_single_only_test', [], { disallow_only: true }));
   });
 });
