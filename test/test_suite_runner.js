@@ -66,12 +66,10 @@ function ensureOutputFromTests(suite, tests) {
     var lines = tests[testName];
     return when.promise(function(resolve, reject) {
       reporters.push(new OnMessage(function(testPath, message) {
-        if (testPath.path.length !== 1) {
-          throw new Error('Subsuites are not supported');
-        }
-        encounteredTests[testPath.path[0]] = true;
+        var currentTestName = _.last(testPath.path);
+        encounteredTests[currentTestName] = true;
 
-        if (_.isEqual(testPath.path, [testName]) && message.type === 'stdio') {
+        if (currentTestName === testName && message.type === 'stdio') {
           gotStdioForTests.push(testName);
           stream.waitForStreamToEmitLines(message.stdout, lines)
             .done(resolve, reject);
