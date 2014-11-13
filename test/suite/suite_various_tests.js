@@ -9,8 +9,13 @@ describe('Something', function() {
   before(function beforeHook() {
   });
 
-  it('should work', function() {});
-  it('should really work', function() {});
+  it('should work', function() {
+    console.log('should_work');
+  });
+
+  it('should really work', function() {
+    console.log('should_really_work');
+  });
 
   describe('#great', function() {
     it('should do its thing', function() {

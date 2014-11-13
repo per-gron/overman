@@ -57,7 +57,7 @@ function runTestSuite(suite, reporters, options) {
  * that were specified are run and the test output exactly matchess the
  * specification.
  */
-function ensureOutputFromTests(suite, tests) {
+function ensureOutputFromTests(suite, tests, options) {
   var gotStdioForTests = [];
   var reporters = [];
   var encounteredTests = {};
@@ -78,7 +78,7 @@ function ensureOutputFromTests(suite, tests) {
     });
   });
 
-  var suitePromise = runTestSuite(suite, reporters)
+  var suitePromise = runTestSuite(suite, reporters, options)
     .then(function() {
       var testNames = _.keys(tests);
       if (gotStdioForTests.length < testNames.length) {
@@ -155,5 +155,19 @@ describe('Suite runner', function() {
 
   it('should fail when encountering .only tests and disallow_only is set', function() {
     return shouldFail(runTestSuite('suite_single_only_test', [], { disallow_only: true }));
+  });
+
+  it('should run only tests that match the specified match regex', function() {
+    return ensureOutputFromTests('suite_various_tests', {
+      'should work': [ /should_work/ ],
+      'should really work': [ /should_really_work/ ]
+    }, { match: /should.*work$/ });
+  });
+
+  it('should run only tests that match the specified match string', function() {
+    return ensureOutputFromTests('suite_various_tests', {
+      'should work': [ /should_work/ ],
+      'should really work': [ /should_really_work/ ]
+    }, { match: 'work' });
   });
 });
