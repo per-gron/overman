@@ -2,8 +2,8 @@
 
 var _ = require('underscore');
 var childProcess = require('child_process');
-var readline = require('readline');
 var when = require('when');
+var stream = require('./util/stream');
 
 function runTest(suite) {
   var testPath = _.toArray(arguments).slice(1);
@@ -38,43 +38,12 @@ function waitForProcessToFail(process) {
   });
 }
 
-function waitForStreamToEmitLines(stream, linesToWatchFor) {
-  return when.promise(function(resolve, reject) {
-    var lines = readline.createInterface({ input: stream, output: stream });
-
-    lines.on('line', function(line) {
-      if (linesToWatchFor.length === 0) {
-        reject(new Error('Encountered unexpected line ' + line + ' when expecting no more output'));
-      }
-
-      if (line.match(linesToWatchFor[0])) {
-        linesToWatchFor.shift();
-      } else {
-        reject(new Error('Encountered unexpected line ' + line + ', expected ' + linesToWatchFor[0]));
-        lines.close();
-      }
-    });
-
-    lines.on('close', function() {
-      if (linesToWatchFor.length === 0) {
-        resolve();
-      } else {
-        reject(new Error('Encountered end of output while still waiting for ' + linesToWatchFor));
-      }
-    });
-  });
-}
-
-function waitForStreamToEmitLine(stream, lineToWatchFor) {
-  return waitForStreamToEmitLines(stream, [lineToWatchFor]);
-}
-
 describe('Test runner', function() {
   it('should run before hooks', function() {
     var process = runTest('suite_before_hook_and_test', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_before_hook/,
         /running_test/
       ])
@@ -85,7 +54,7 @@ describe('Test runner', function() {
     var process = runTest('suite_after_hook_and_test', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_test/,
         /running_after_hook/
       ])
@@ -96,7 +65,7 @@ describe('Test runner', function() {
     var process = runTest('suite_before_hooks_and_test', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_before_hook_1/,
         /running_before_hook_2/
       ])
@@ -107,7 +76,7 @@ describe('Test runner', function() {
     var process = runTest('suite_after_hooks_and_test', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_after_hook_1/,
         /running_after_hook_2/
       ])
@@ -118,7 +87,7 @@ describe('Test runner', function() {
     var process = runTest('suite_before_hooks_in_subsuite', 'Suite', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_outer_before_hook/,
         /running_inner_before_hook/,
         /running_test/
@@ -130,7 +99,7 @@ describe('Test runner', function() {
     var process = runTest('suite_after_hooks_in_subsuite', 'Suite', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_test/,
         /running_inner_after_hook/,
         /running_outer_after_hook/
@@ -142,7 +111,7 @@ describe('Test runner', function() {
     var process = runTest('suite_failing_before_hook', 'should succeed');
     return when.all([
       waitForProcessToFail(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_before_hook/,
         /running_after_hook/
       ])
@@ -153,7 +122,9 @@ describe('Test runner', function() {
     var process = runTest('suite_after_hook_and_failing_test', 'should fail');
     return when.all([
       waitForProcessToFail(process),
-      waitForStreamToEmitLine(process.stdout, /running_after_hook/)
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /running_after_hook/
+      ])
     ]);
   });
 
@@ -161,7 +132,9 @@ describe('Test runner', function() {
     var process = runTest('suite_single_successful_test', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLine(process.stdout, /running_test/)
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /running_test/
+      ])
     ]);
   });
 
@@ -169,7 +142,7 @@ describe('Test runner', function() {
     var process = runTest('suite_test_returning_promise', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_test/,
         /still_running_test/,
         /running_after_hook/
@@ -181,7 +154,7 @@ describe('Test runner', function() {
     var process = runTest('suite_test_invoking_done', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_test/,
         /still_running_test/,
         /running_after_hook/
@@ -193,7 +166,7 @@ describe('Test runner', function() {
     var process = runTest('suite_test_invoking_done_with_error', 'should fail');
     return when.all([
       waitForProcessToFail(process),
-      waitForStreamToEmitLines(process.stdout, [
+      stream.waitForStreamToEmitLines(process.stdout, [
         /running_test/,
         /failed_test/
       ])
