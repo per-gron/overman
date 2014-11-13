@@ -49,6 +49,14 @@ function runTestSuite(suite, reporters, options) {
     }, options));
 }
 
+/**
+ * A function that takes a test suite and a dictionary from test names to
+ * an array of the lines that the given test should print to stdout.
+ *
+ * Returns a promise that succeeds only if all tests succeed, only tests
+ * that were specified are run and the test output exactly matchess the
+ * specification.
+ */
 function ensureOutputFromTests(suite, tests) {
   var gotStdioForTests = [];
   var reporters = [];
