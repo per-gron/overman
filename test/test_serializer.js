@@ -112,6 +112,30 @@ describe('Serializer reporter', function() {
     ]);
   });
 
+  it('should emit begin message for a test as soon as it can', function() {
+    var test1Path = { file: 'file', path: ['test1'] };
+    var test2Path = { file: 'file', path: ['test2'] };
+    var test3Path = { file: 'file', path: ['test3'] };
+
+    expect(processMessages([
+      [test1Path, { type: 'begin' }],
+      [test2Path, { type: 'begin' }],
+      [test3Path, { type: 'begin' }],
+      [test1Path, { type: 'finish' }],
+    ], { dontSendDone: true })).to.be.deep.equal([
+      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'finish' }],
+      // Here, the second test should be chosen to begin, even though it doens't know
+      // if the second or the third test will actually finish first. The reason this
+      // behavior is desirable is that it makes it possible for a sequential run to
+      // emit messages continuously, as if it wasn't being serialized at all.
+      //
+      // This will make it possible for reporters to show output of a test as it runs,
+      // and not just after it finishes.
+      [test2Path, { type: 'begin' }],
+    ]);
+  });
+
   it('should emit messages for finished tests as soon as possible', function() {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
