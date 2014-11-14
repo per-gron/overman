@@ -311,6 +311,28 @@ describe('Serializer reporter', function() {
     ]);
   });
 
+  it('should move from one suite to another, after overlap', function() {
+    var test1Path = { file: 'file', path: ['suite1', 'test1'] };
+    var test2Path = { file: 'file', path: ['suite1', 'test2'] };
+    var test3Path = { file: 'file', path: ['suite2', 'test3'] };
+
+    expect(processMessages([
+      [ test1Path, { 'type': 'begin' } ],
+      [ test2Path, { 'type': 'begin' } ],
+      [ test2Path, { 'type': 'finish' } ],
+      [ test1Path, { 'type': 'finish' } ],
+      [ test3Path, { 'type': 'begin' } ],
+      [ test3Path, { 'type': 'finish' } ]
+    ])).to.be.deep.equal([
+      [ test1Path, { 'type': 'begin' } ],
+      [ test1Path, { 'type': 'finish' } ],
+      [ test2Path, { 'type': 'begin' } ],
+      [ test2Path, { 'type': 'finish' } ],
+      [ test3Path, { 'type': 'begin' } ],
+      [ test3Path, { 'type': 'finish' } ]
+    ]);
+  });
+
   it('should allow tests in subsuites to run while there are pending tests in that suite', function() {
     var test11Path = { file: 'file', path: ['suite', 'test1'] };
     var test12Path = { file: 'file', path: ['suite', 'subsuite', 'test2'] };
