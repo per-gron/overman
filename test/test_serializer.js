@@ -197,4 +197,109 @@ describe('Serializer reporter', function() {
       [test2Path, { type: 'finish' }],
     ]);
   });
+
+  it('should not serialize tests from within a test file', function() {  // Only suites are serialized, and files don't count as suites
+    var test11Path = { file: 'file1', path: ['test1'] };
+    var test12Path = { file: 'file1', path: ['test2'] };
+    var test2Path = { file: 'file2', path: ['test3'] };
+
+    expect(processMessages([
+      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'finish' }],
+    ])).to.be.deep.equal([
+      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'finish' }],
+    ]);
+  });
+
+  it('should not pick a test from another suite unless the current suite is done', function() {
+    var test11Path = { file: 'file', path: ['suite', 'test1'] };
+    var test12Path = { file: 'file', path: ['suite', 'test2'] };
+    var test2Path = { file: 'file', path: ['test3'] };
+
+    expect(processMessages([
+      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test12Path, { type: 'begin' }],
+    ], { dontSendDone: true })).to.be.deep.equal([
+      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test12Path, { type: 'begin' }],
+    ]);
+  });
+
+  it('should suppress messages from a different suite until the current one is done', function() {
+    var test11Path = { file: 'file', path: ['suite', 'test1'] };
+    var test12Path = { file: 'file', path: ['suite', 'test2'] };
+    var test2Path = { file: 'file', path: ['test3'] };
+
+    expect(processMessages([
+      [test11Path, { type: 'begin' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+      [test12Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test12Path, { type: 'finish' }],
+    ])).to.be.deep.equal([
+      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+    ]);
+  });
+
+  it('should suppress messages from a suite until all tests in a subsuite is done', function() {
+    var test11Path = { file: 'file', path: ['suite', 'subsuite', 'test1'] };
+    var test12Path = { file: 'file', path: ['suite', 'subsuite', 'test2'] };
+    var test2Path = { file: 'file', path: ['suitr', 'test3'] };
+
+    expect(processMessages([
+      [test11Path, { type: 'begin' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+      [test12Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test12Path, { type: 'finish' }],
+    ])).to.be.deep.equal([
+      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+    ]);
+  });
+
+  it('should allow tests in subsuites to run while there are pending tests in that suite', function() {
+    var test11Path = { file: 'file', path: ['suite', 'test1'] };
+    var test12Path = { file: 'file', path: ['suite', 'subsuite', 'test2'] };
+    var test2Path = { file: 'file', path: ['suite', 'test3'] };
+
+    expect(processMessages([
+      [test11Path, { type: 'begin' }],
+      [test12Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+      [test12Path, { type: 'finish' }],
+    ])).to.be.deep.equal([
+      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'finish' }],
+      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+    ]);
+  });
 });
