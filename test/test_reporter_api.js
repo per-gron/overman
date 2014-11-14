@@ -5,14 +5,19 @@
  * get.
  */
 
+var expect = require('chai').expect;
 var path = require('path');
 var when = require('when');
 var OnMessage = require('./util/on_message');
 var suiteRunner = require('../lib/suite_runner');
 
+function pathForSuite(suite) {
+  return path.resolve(__dirname + '/suite/' + suite);
+}
+
 function runTestSuite(suite, reporter) {
   return suiteRunner({
-      suites: [__dirname + '/suite/' + suite],
+      suites: [pathForSuite(suite)],
       interface: __dirname + '/../lib/interface/bdd_mocha',
       timeout: 500,
       reporters: [reporter]
@@ -70,6 +75,22 @@ function ensureAllMessages(suite, predicate) {
 }
 
 describe('Reporter API', function() {
+  it('should invoke registerTests with a list of the tests about to be run', function() {
+    var deferred = when.defer();
+
+    var testSuitePromise = runTestSuite('suite_single_successful_test', {
+      registerTests: function(tests) {
+        expect(tests).to.be.deep.equal([{
+          file: pathForSuite('suite_single_successful_test'),
+          path: [ 'should succeed' ]
+        }]);
+        deferred.resolve();
+      },
+      gotMessage: function() {}
+    });
+    return when.all([testSuitePromise, deferred.promise]);
+  });
+
   it('should emit begin message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       return message.type === 'begin';
@@ -168,7 +189,7 @@ describe('Reporter API', function() {
   it('should emit messages with a correct test path', function() {
     var suite = 'suite_single_skipped_test';
     return ensureAllMessages(suite, function(testPath, message) {
-      return (testPath.file === path.resolve(__dirname + '/suite/' + suite));
+      return testPath.file === pathForSuite(suite);
     });
   });
 
