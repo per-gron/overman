@@ -5,8 +5,11 @@
  * get.
  */
 
+var _ = require('lodash');
+var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var path = require('path');
+var stream = require('stream');
 var when = require('when');
 var OnMessage = require('./util/on_message');
 var suiteRunner = require('../lib/suite_runner');
@@ -15,13 +18,13 @@ function pathForSuite(suite) {
   return path.resolve(__dirname + '/suite/' + suite);
 }
 
-function runTestSuite(suite, reporter) {
-  return suiteRunner({
+function runTestSuite(suite, reporter, options) {
+  return suiteRunner(_.extend({
       suites: [pathForSuite(suite)],
       interface: __dirname + '/../lib/interface/bdd_mocha',
       timeout: 500,
       reporters: [reporter]
-    });
+    }, options));
 }
 
 /**
@@ -32,7 +35,7 @@ function runTestSuite(suite, reporter) {
  * and also if there are non-matching messages in between the matching
  * ones.
  */
-function ensureMessages(suite, predicates) {
+function ensureMessages(suite, predicates, options) {
   return when.promise(function(resolve, reject) {
     var reporter = new OnMessage(function(testPath, message) {
       if (predicates.length !== 0 && predicates[0](testPath, message)) {
@@ -48,7 +51,7 @@ function ensureMessages(suite, predicates) {
       }
     }
 
-    runTestSuite(suite, reporter).done(finish, finish);
+    runTestSuite(suite, reporter, options).done(finish, finish);
   });
 }
 
@@ -183,6 +186,29 @@ describe('Reporter API', function() {
   it('should emit only begin and finish message for skipped test', function() {
     return ensureAllMessages('suite_single_skipped_test', function(testPath, message) {
       return message.type === 'begin' || message.type === 'finish';
+    });
+  });
+
+  it('should emit finish message last, even when messages arrive after process exit', function() {
+    function fork() {
+      var child = new EventEmitter();
+      child.stdin = new stream.Readable();
+
+      process.nextTick(function() {
+        child.emit('exit', 0, null);
+        child.emit('message', { type: 'testMessage' });
+        child.emit('close');
+      });
+
+      return child;
+    }
+
+    return ensureMessages('suite_single_test_that_never_finishes', [
+      function(testPath, message) { return message.type === 'begin'; },
+      function(testPath, message) { return message.type === 'testMessage'; },
+      function(testPath, message) { return message.type === 'finish'; }
+    ], {
+      child_process: { fork: fork }
     });
   });
 
