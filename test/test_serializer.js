@@ -262,7 +262,7 @@ describe('Serializer reporter', function() {
   it('should suppress messages from a suite until all tests in a subsuite is done', function() {
     var test11Path = { file: 'file', path: ['suite', 'subsuite', 'test1'] };
     var test12Path = { file: 'file', path: ['suite', 'subsuite', 'test2'] };
-    var test2Path = { file: 'file', path: ['suitr', 'test3'] };
+    var test2Path = { file: 'file', path: ['suite', 'test3'] };
 
     expect(processMessages([
       [test11Path, { type: 'begin' }],
