@@ -112,6 +112,23 @@ describe('Serializer reporter', function() {
     ]);
   });
 
+  it('should complain when getting mismatched begins', function() {
+    expect(function() {
+      processMessages([
+        [{ file: 'file', path: ['test'] }, { type: 'begin' }],
+      ]);
+    }).to.throw(Error);
+  });
+
+  it('should complain when getting mismatched pending begins', function() {
+    expect(function() {
+      processMessages([
+        [{ file: 'file', path: ['test'] }, { type: 'begin' }],
+        [{ file: 'file', path: ['test2'] }, { type: 'begin' }],
+      ]);
+    }).to.throw(Error);
+  });
+
   it('should emit begin message for a test as soon as it can', function() {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
