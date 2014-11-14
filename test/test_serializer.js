@@ -136,6 +136,29 @@ describe('Serializer reporter', function() {
     ]);
   });
 
+  it('should emit multiple finished tests if it can', function() {
+    var test1Path = { file: 'file', path: ['test1'] };
+    var test2Path = { file: 'file', path: ['test2'] };
+    var test3Path = { file: 'file', path: ['test3'] };
+    var test4Path = { file: 'file', path: ['test4'] };
+
+    expect(processMessages([
+      [test1Path, { type: 'begin' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+      [test3Path, { type: 'begin' }],
+      [test3Path, { type: 'finish' }],
+      [test1Path, { type: 'finish' }],
+    ], { dontSendDone: true })).to.be.deep.equal([
+      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+      [test3Path, { type: 'begin' }],
+      [test3Path, { type: 'finish' }],
+    ]);
+  });
+
   it('should emit messages for finished tests as soon as possible', function() {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
