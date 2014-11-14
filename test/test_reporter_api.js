@@ -19,19 +19,27 @@ function runTestSuite(suite, reporter) {
     });
 }
 
-function ensureOneMessage(suite, predicate) {
+/**
+ * Runs the given test suite and listens to the messages from the run.
+ *
+ * Returns a promise that succeeds if there was a message that matched
+ * each predicate, in order. It succeeds even if the test itself fails,
+ * and also if there are non-matching messages in between the matching
+ * ones.
+ */
+function ensureMessages(suite, predicates) {
   return when.promise(function(resolve, reject) {
-    var foundMessage = false;
-
     var reporter = new OnMessage(function(testPath, message) {
-      foundMessage = foundMessage || predicate(testPath, message);
+      if (predicates.length !== 0 && predicates[0](testPath, message)) {
+        predicates.shift();
+      }
     });
 
     function finish() {
-      if (foundMessage) {
+      if (predicates.length === 0) {
         resolve();
       } else {
-        reject(new Error('Did not get expected message'));
+        reject(new Error('Did not get expected message (' + predicates.length + ' remaining)'));
       }
     }
 
@@ -63,56 +71,56 @@ function ensureAllMessages(suite, predicate) {
 
 describe('Reporter API', function() {
   it('should emit begin message', function() {
-    return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
+    return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       return message.type === 'begin';
-    });
+    }]);
   });
 
   it('should emit stdio message', function() {
-    return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
+    return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       return (message.type === 'stdio' &&
               message.stdin &&
               message.stdout &&
               message.stderr);
-    });
+    }]);
   });
 
   it('should emit startedBeforeHooks message', function() {
-    return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
+    return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       return message.type === 'startedBeforeHooks';
-    });
+    }]);
   });
 
   it('should emit startedBeforeHook message', function() {
-    return ensureOneMessage('suite_test_with_named_before_hook', function(testPath, message) {
+    return ensureMessages('suite_test_with_named_before_hook', [function(testPath, message) {
       return (message.type === 'startedBeforeHook' &&
               message.name === 'beforeHookName');
-    });
+    }]);
   });
 
   it('should emit startedTest message', function() {
-    return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
+    return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       return message.type === 'startedTest';
-    });
+    }]);
   });
 
   it('should emit startedAfterHooks message', function() {
-    return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
+    return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       return message.type === 'startedAfterHooks';
-    });
+    }]);
   });
 
   it('should emit startedAfterHook message', function() {
-    return ensureOneMessage('suite_test_with_named_after_hook', function(testPath, message) {
+    return ensureMessages('suite_test_with_named_after_hook', [function(testPath, message) {
       return (message.type === 'startedAfterHook' &&
               message.name === 'afterHookName');
-    });
+    }]);
   });
 
   it('should emit finishedAfterHooks message', function() {
-    return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
+    return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       return message.type === 'finishedAfterHooks';
-    });
+    }]);
   });
 
   it('should not emit finishedAfterHooks message when after hook never finishes', function() {
@@ -122,33 +130,33 @@ describe('Reporter API', function() {
   });
 
   it('should emit finish message for successful test', function() {
-    return ensureOneMessage('suite_single_successful_test', function(testPath, message) {
+    return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       return (message.type === 'finish' &&
               message.result === 'success' &&
               message.code === 0);
-    });
+    }]);
   });
 
   it('should emit finish message for failing test', function() {
-    return ensureOneMessage('suite_single_throwing_test', function(testPath, message) {
+    return ensureMessages('suite_single_throwing_test', [function(testPath, message) {
       return (message.type === 'finish' &&
               message.result === 'failure' &&
               message.code === 1);
-    });
+    }]);
   });
 
   it('should emit finish message for skipped test', function() {
-    return ensureOneMessage('suite_single_skipped_test', function(testPath, message) {
+    return ensureMessages('suite_single_skipped_test', [function(testPath, message) {
       return (message.type === 'finish' &&
               message.result === 'skipped');
-    });
+    }]);
   });
 
   it('should emit finish message for test that times out', function() {
-    return ensureOneMessage('suite_single_test_that_never_finishes', function(testPath, message) {
+    return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
       return (message.type === 'finish' &&
               message.result === 'timeout');
-    });
+    }]);
   });
 
   it('should emit only begin and finish message for skipped test', function() {
@@ -162,6 +170,40 @@ describe('Reporter API', function() {
     return ensureAllMessages(suite, function(testPath, message) {
       return (testPath.file === path.resolve(__dirname + '/suite/' + suite));
     });
+  });
+
+  it('should emit error message when before hook fails', function() {
+    return ensureMessages('suite_failing_before_hook', [function(testPath, message) {
+      return (message.type === 'error' &&
+              message.in === 'beforeHook',
+              message.inName === 'before hook');
+    }]);
+  });
+
+  it('should emit error message when test fails', function() {
+    return ensureMessages('suite_single_throwing_test', [function(testPath, message) {
+      return (message.type === 'error' &&
+              message.in === 'test');
+    }]);
+  });
+
+  it('should emit error message when after hook fails', function() {
+    return ensureMessages('suite_failing_after_hook', [function(testPath, message) {
+      return (message.type === 'error' &&
+              message.in === 'afterHook',
+              message.inName === 'after hook');
+    }]);
+  });
+
+  it('should report errors from both the test and after hook when both fail', function() {
+    return ensureMessages('suite_failing_after_hook_and_failing_test', [function(testPath, message) {
+      return (message.type === 'error' &&
+              message.in === 'test');
+    }, function(testPath, message) {
+      return (message.type === 'error' &&
+              message.in === 'afterHook',
+              message.inName === 'after hook');
+    }]);
   });
 
   it('should report syntax errors');

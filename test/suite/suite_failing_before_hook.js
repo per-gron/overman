@@ -1,6 +1,6 @@
 'use strict';
 
-before(function() {
+before('before hook', function() {
   console.log('running_before_hook');
   throw new Error('fail');
 });
