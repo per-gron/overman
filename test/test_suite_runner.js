@@ -53,9 +53,9 @@ function runTestSuite(suite, reporters, options) {
  * A function that takes a test suite and a dictionary from test names to
  * an array of the lines that the given test should print to stdout.
  *
- * Returns a promise that succeeds only if all tests succeed, only tests
- * that were specified are run and the test output exactly matchess the
- * specification.
+ * Returns a promise that succeeds only if all tests succeed (unless
+ * options.allowTestsToFail), only tests that were specified are run and
+ * the test output exactly matches the specification.
  */
 function ensureOutputFromTests(suite, tests, options) {
   var gotStdioForTests = [];
@@ -79,6 +79,11 @@ function ensureOutputFromTests(suite, tests, options) {
   });
 
   var suitePromise = runTestSuite(suite, reporters, options)
+    .catch(function(error) {
+      if (!options.allowTestsToFail) {
+        throw error;
+      }
+    })
     .then(function() {
       var testNames = _.keys(tests);
       if (gotStdioForTests.length < testNames.length) {
@@ -122,6 +127,13 @@ describe('Suite runner', function() {
 
   it('should fail if a test fails', function() {
     return shouldFail(runTestSuite('suite_various_tests'));
+  });
+
+  it('should keep running tests after a test fails', function() {
+    return ensureOutputFromTests('suite_two_failing_tests', {
+      'should fail 1': [],
+      'should fail 2': []
+    }, { allowTestsToFail: true });
   });
 
   it('should cancel tests that time out', function() {
