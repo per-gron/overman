@@ -281,6 +281,36 @@ describe('Serializer reporter', function() {
     ]);
   });
 
+  it('should move from one suite to another', function() {
+    var test1Path = { file: 'file', path: ['suite1', 'test'] };
+    var test2Path = { file: 'file', path: ['suite2', 'test'] };
+
+    var messages = [
+      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+    ];
+    expect(processMessages(messages)).to.be.deep.equal(messages);
+  });
+
+  it('should move from one suite to another, with overlap', function() {
+    var test1Path = { file: 'file', path: ['suite1', 'test'] };
+    var test2Path = { file: 'file', path: ['suite2', 'test'] };
+
+    expect(processMessages([
+      [test1Path, { type: 'begin' }],
+      [test2Path, { type: 'begin' }],
+      [test1Path, { type: 'finish' }],
+      [test2Path, { type: 'finish' }],
+    ])).to.be.deep.equal([
+      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'finish' }],
+      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'finish' }],
+    ]);
+  });
+
   it('should allow tests in subsuites to run while there are pending tests in that suite', function() {
     var test11Path = { file: 'file', path: ['suite', 'test1'] };
     var test12Path = { file: 'file', path: ['suite', 'subsuite', 'test2'] };
