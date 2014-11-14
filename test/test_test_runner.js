@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('underscore');
+var _ = require('lodash');
 var childProcess = require('child_process');
 var when = require('when');
 var stream = require('./util/stream');

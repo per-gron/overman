@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('underscore');
+var _ = require('lodash');
 var expect = require('chai').expect;
 var when = require('when');
 var OnMessage = require('./util/on_message');
