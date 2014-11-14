@@ -129,6 +129,16 @@ describe('Serializer reporter', function() {
     }).to.throw(Error);
   });
 
+  it('should complain when getting messages from tests that have finished', function() {
+    expect(function() {
+      processMessages([
+        [{ file: 'file', path: ['test'] }, { type: 'begin' }],
+        [{ file: 'file', path: ['test'] }, { type: 'finish' }],
+        [{ file: 'file', path: ['test'] }, { type: 'begin' }],
+      ]);
+    }).to.throw('Got message (type begin) for test that has already finished: {"file":"file","path":["test"]}');
+  });
+
   it('should emit begin message for a test as soon as it can', function() {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
