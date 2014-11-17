@@ -4,8 +4,8 @@ var expect = require('chai').expect;
 
 var bddMocha = require('../lib/interface/bdd_mocha');
 
-function parseSuite(name) {
-  return bddMocha(__dirname + '/suite/' + name);
+function parseSuite(name, runtimeContext) {
+  return bddMocha(__dirname + '/suite/' + name, runtimeContext);
 }
 
 function getKeypath(object, keypath) {
@@ -191,5 +191,23 @@ describe('BDD interface (Mocha flavor)', function() {
         before: [{ run: null }]
       }]
     });
+  });
+
+  it('should allow getting the timeout for the current test', function() {
+    var suite = parseSuite('suite_timeout_return', { getTimeout: function() {
+      return 12345;
+    }});
+    var fn = getKeypath(suite, '.contents[0].run');
+    expect(fn).to.be.a('function');
+    expect(fn()).to.be.equal(12345);
+  });
+
+  it('should allow setting the timeout for the current test', function(done) {
+    var suite = parseSuite('suite_timeout_set', { setTimeout: function(value) {
+      expect(value).to.be.equal(10);
+      done();
+    }});
+    var fn = getKeypath(suite, '.contents[0].run');
+    fn();
   });
 });
