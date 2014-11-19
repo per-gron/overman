@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var suiterunner = require('./lib/suite_runner');
+var PipeReporter = require('./lib/reporter/pipe');
 
 var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
@@ -9,7 +10,7 @@ var suiteFiles = fs.readdirSync('test')
 suiterunner({
     suites: suiteFiles,
     interface: './lib/interface/bdd_mocha',
-    reporters: [],
+    reporters: [new PipeReporter(process)],
     parallelism: 8,
     timeout: 10000
   })
