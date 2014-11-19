@@ -10,7 +10,7 @@ suiterunner({
     suites: suiteFiles,
     interface: './lib/interface/bdd_mocha',
     reporters: [],
-    parallelism: 2,
-    timeout: 1000
+    parallelism: 8,
+    timeout: 10000
   })
   .then(function() {}, function() { process.exit(1); });
