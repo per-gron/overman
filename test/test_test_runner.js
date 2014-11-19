@@ -173,6 +173,20 @@ describe('Test runner', function() {
     ]);
   });
 
+  it('should not let tests call the done callback more than once', function() {
+    var process = runTest('suite_test_that_completes_twice', 'should succeed twice');
+    return when.all([
+      waitForProcessToFail(process),
+      when.promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'error' && message.value.match(/done callback invoked more than once/)) {
+            resolve();
+          }
+        });
+      })
+    ]);
+  });
+
   it('should mark tests that throw an exception as failing', function() {
     var process = runTest('suite_single_throwing_test', 'should throw');
     return waitForProcessToFail(process);
