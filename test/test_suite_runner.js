@@ -236,4 +236,21 @@ describe('Suite runner', function() {
       'should really work': [ /should_really_work/ ]
     }, { match: 'work' });
   });
+
+  it('should pass timeout to test', function() {
+    return ensureOutputFromTests('suite_timeout_print', {
+      'should print its timeout': [1337]
+    }, { timeout: 1337 });
+  });
+
+  it('should let the test set the timeout', function() {
+    return when.race([
+      shouldFail(runTestSuite('suite_timeout_set', [], { timeout: 1000 })),
+      when()
+        .delay(300)
+        .then(function() {
+          throw new Error('Test should have finished by now');
+        })
+    ]);
+  });
 });

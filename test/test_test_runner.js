@@ -2,15 +2,17 @@
 
 var _ = require('lodash');
 var childProcess = require('child_process');
+var expect = require('chai').expect;
 var when = require('when');
 var stream = require('./util/stream');
 
 function runTest(suite) {
   var testPath = _.toArray(arguments).slice(1);
 
+  var timeout = 1234;  // Not actually used, but needs to be provided
   return childProcess.fork(
     __dirname + '/../lib/bin/run_test',
-    [__dirname + '/../lib/interface/bdd_mocha', __dirname + '/suite/' + suite].concat(testPath),
+    [__dirname + '/../lib/interface/bdd_mocha', timeout, __dirname + '/suite/' + suite].concat(testPath),
     { silent: true });
 }
 
@@ -208,5 +210,27 @@ describe('Test runner', function() {
           process.kill('SIGKILL');
         })
     ]);
+  });
+
+  it('should pass test timeout to the interface', function() {
+    var process = runTest('suite_timeout_print', 'should print its timeout');
+    return when.all([
+      waitForProcessToExit(process),
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /1234/
+      ])
+    ]);
+  });
+
+  it('should emit setTimeout messages when the test asks to change the timeout', function() {
+    var process = runTest('suite_timeout_set', 'should set the timeout');
+    return when.promise(function(resolve) {
+      process.on('message', function(message) {
+        if (message.type === 'setTimeout') {
+          expect(message).property('value').to.be.equal(10);
+          resolve();
+        }
+      });
+    });
   });
 });
