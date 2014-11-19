@@ -228,6 +228,7 @@ describe('Test runner', function() {
       process.on('message', function(message) {
         if (message.type === 'setTimeout') {
           expect(message).property('value').to.be.equal(10);
+          process.kill();
           resolve();
         }
       });
