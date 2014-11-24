@@ -213,4 +213,6 @@ describe('Insertion log', function() {
       }).to.throw(/No message found/);
     });
   });
+
+  it('should handle TTY newlines appropriately');
 });
