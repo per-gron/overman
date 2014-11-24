@@ -12,7 +12,8 @@ function waitForStreamToEmitLines(stream, linesToWatchFor) {
         reject(new Error('Encountered unexpected line ' + line + ' when expecting no more output'));
       }
 
-      if (line.match(linesToWatchFor[0])) {
+      var regex = linesToWatchFor[0];
+      if (typeof regex === 'string' ? line === regex : line.match(regex)) {
         linesToWatchFor.shift();
       } else {
         reject(new Error('Encountered unexpected line ' + line + ', expected ' + linesToWatchFor[0]));
