@@ -228,6 +228,19 @@ describe('BDD interface (Mocha flavor)', function() {
     fn();
   });
 
+  it('should allow getting the timeout in a hook', function() {
+    var suite = parseSuite('suite_timeout_return_in_hook', { getTimeout: function() {
+      return 12345;
+    }});
+    var beforeFn = getKeypath(suite, '.before[0].run');
+    expect(beforeFn).to.be.a('function');
+    beforeFn();
+
+    var fn = getKeypath(suite, '.contents[0].run');
+    expect(fn).to.be.a('function');
+    expect(fn()).to.be.equal(12345);
+  });
+
   it('should declare context global', function() {
     return suiteRunner({
       suites: [__dirname + '/suite/suite_access_context'],
