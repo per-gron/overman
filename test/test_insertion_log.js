@@ -212,6 +212,33 @@ describe('Insertion log', function() {
         log.replace('nonexistent', 'Hey!');
       }).to.throw(/No message found/);
     });
+
+    it('should replace appropriately when replaced message is more than one line', function() {
+      return expectWithLog(function(log, stream) {
+        log.log('A line', 'lid1');
+        log.log('A second line', 'lid2');
+        log.replace('lid1', 'A\nline');
+      }, [
+        clearLine + 'A line',
+        clearLine + 'A second line',
+        cursorUp(2) + clearLine + 'A',
+        clearLine + 'line',
+        clearLine + 'A second line'
+      ]);
+    });
+
+    it('should replace appropriately when replaced message is empty', function() {
+      return expectWithLog(function(log, stream) {
+        log.log('', 'lid1');
+        log.log('A second line', 'lid2');
+        log.replace('lid1', 'A line');
+      }, [
+        clearLine + '',
+        clearLine + 'A second line',
+        cursorUp(2) + clearLine + 'A line',
+        clearLine + 'A second line'
+      ]);
+    });
   });
 
   it('should handle TTY newlines appropriately');
