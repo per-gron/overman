@@ -19,6 +19,7 @@
 var expect = require('chai').expect;
 
 var bddMocha = require('../lib/interface/bdd_mocha');
+var suiteRunner = require('../lib/suite_runner');
 
 function parseSuite(name, runtimeContext) {
   return bddMocha(__dirname + '/suite/' + name, runtimeContext);
@@ -225,5 +226,14 @@ describe('BDD interface (Mocha flavor)', function() {
     }});
     var fn = getKeypath(suite, '.contents[0].run');
     fn();
+  });
+
+  it('should declare context global', function() {
+    return suiteRunner({
+      suites: [__dirname + '/suite/suite_access_context'],
+      interface: __dirname + '/../lib/interface/bdd_mocha',
+      timeout: 500,
+      reporters: []
+    });
   });
 });
