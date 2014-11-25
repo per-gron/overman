@@ -110,17 +110,31 @@ describe('Summary reporter', function() {
     ]);
   });
 
-  it('should report number of skipped and number of failing tests', function() {
+  it('should report number of tests that time out', function() {
+    return performActionsAndCheckOutput(function(summary) {
+      summary.registerTests([]);
+      summary.gotMessage(null, { type: 'finish', result: 'timeout' });
+      summary.done();
+    }, [
+      '',
+      /0 passing/,
+      /1 failing/,
+      ''
+    ]);
+  });
+
+  it('should report number of skipped, timed out and number of failing tests', function() {
     return performActionsAndCheckOutput(function(summary) {
       summary.registerTests([]);
       summary.gotMessage(null, { type: 'finish', result: 'failure' });
       summary.gotMessage(null, { type: 'finish', result: 'skipped' });
+      summary.gotMessage(null, { type: 'finish', result: 'timeout' });
       summary.done();
     }, [
       '',
       /0 passing/,
       /1 skipped/,
-      /1 failing/,
+      /2 failing/,
       ''
     ]);
   });
