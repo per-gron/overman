@@ -110,9 +110,9 @@ describe('Reporter API', function() {
     return when.all([testSuitePromise, deferred.promise]);
   });
 
-  it('should emit begin message', function() {
+  it('should emit start message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      return message.type === 'begin';
+      return message.type === 'start';
     }]);
   });
 
@@ -199,9 +199,9 @@ describe('Reporter API', function() {
     }]);
   });
 
-  it('should emit only begin and finish message for skipped test', function() {
+  it('should emit only start and finish message for skipped test', function() {
     return ensureAllMessages('suite_single_skipped_test', function(testPath, message) {
-      return message.type === 'begin' || message.type === 'finish';
+      return message.type === 'start' || message.type === 'finish';
     });
   });
 
@@ -220,7 +220,7 @@ describe('Reporter API', function() {
     }
 
     return ensureMessages('suite_single_test_that_never_finishes', [
-      function(testPath, message) { return message.type === 'begin'; },
+      function(testPath, message) { return message.type === 'start'; },
       function(testPath, message) { return message.type === 'testMessage'; },
       function(testPath, message) { return message.type === 'finish'; }
     ], {

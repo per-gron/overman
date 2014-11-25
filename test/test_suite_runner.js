@@ -33,7 +33,7 @@ function ParallelismCounter() {
 
 ParallelismCounter.prototype.gotMessage = function(testPath, message) {
   var pathAsString = JSON.stringify(testPath);
-  if (message.type === 'begin') {
+  if (message.type === 'start') {
     this._currentTests[pathAsString] = true;
 
     this.maxParallelism = Math.max(this.maxParallelism, _.keys(this._currentTests).length);

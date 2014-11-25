@@ -42,8 +42,8 @@ function getTestPathsFromMessages(messages) {
  * For example, the following input:
  *
  * [
- *   [{ file: 'file', path: ['test1'] }, { type: 'begin' }],
- *   [{ file: 'file', path: ['test2'] }, { type: 'begin' }],
+ *   [{ file: 'file', path: ['test1'] }, { type: 'start' }],
+ *   [{ file: 'file', path: ['test2'] }, { type: 'start' }],
  *   [{ file: 'file', path: ['test1'] }, { type: 'finish' }],
  *   [{ file: 'file', path: ['test2'] }, { type: 'finish' }]
  * ]
@@ -51,9 +51,9 @@ function getTestPathsFromMessages(messages) {
  * should return
  *
  * [
- *   [{ file: 'file', path: ['test1'] }, { type: 'begin' }],
+ *   [{ file: 'file', path: ['test1'] }, { type: 'start' }],
  *   [{ file: 'file', path: ['test1'] }, { type: 'finish' }],
- *   [{ file: 'file', path: ['test2'] }, { type: 'begin' }],
+ *   [{ file: 'file', path: ['test2'] }, { type: 'start' }],
  *   [{ file: 'file', path: ['test2'] }, { type: 'finish' }]
  * ]
  */
@@ -105,9 +105,9 @@ describe('Serializer reporter', function() {
     var theTestPath = { file: 'file', path: ['test'] };
 
     expect(processMessages([
-      [theTestPath, { type: 'begin' }]
+      [theTestPath, { type: 'start' }]
     ], { dontSendDone: true })).to.be.deep.equal([
-      [theTestPath, { type: 'begin' }]
+      [theTestPath, { type: 'start' }]
     ]);
   });
 
@@ -116,31 +116,31 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file', path: ['test2'] };
 
     expect(processMessages([
-      [test1Path, { type: 'begin' }],
-      [test2Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
+      [test2Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       [test2Path, { type: 'finish' }],
     ])).to.be.deep.equal([
-      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
     ]);
   });
 
-  it('should complain when getting mismatched begins', function() {
+  it('should complain when getting mismatched starts', function() {
     expect(function() {
       processMessages([
-        [{ file: 'file', path: ['test'] }, { type: 'begin' }],
+        [{ file: 'file', path: ['test'] }, { type: 'start' }],
       ]);
     }).to.throw(Error);
   });
 
-  it('should complain when getting mismatched pending begins', function() {
+  it('should complain when getting mismatched pending starts', function() {
     expect(function() {
       processMessages([
-        [{ file: 'file', path: ['test'] }, { type: 'begin' }],
-        [{ file: 'file', path: ['test2'] }, { type: 'begin' }],
+        [{ file: 'file', path: ['test'] }, { type: 'start' }],
+        [{ file: 'file', path: ['test2'] }, { type: 'start' }],
       ]);
     }).to.throw(Error);
   });
@@ -148,25 +148,25 @@ describe('Serializer reporter', function() {
   it('should complain when getting messages from tests that have finished', function() {
     expect(function() {
       processMessages([
-        [{ file: 'file', path: ['test'] }, { type: 'begin' }],
+        [{ file: 'file', path: ['test'] }, { type: 'start' }],
         [{ file: 'file', path: ['test'] }, { type: 'finish' }],
-        [{ file: 'file', path: ['test'] }, { type: 'begin' }],
+        [{ file: 'file', path: ['test'] }, { type: 'start' }],
       ]);
-    }).to.throw('Got message (type begin) for test that has already finished: {"file":"file","path":["test"]}');
+    }).to.throw('Got message (type start) for test that has already finished: {"file":"file","path":["test"]}');
   });
 
-  it('should emit begin message for a test as soon as it can', function() {
+  it('should emit start message for a test as soon as it can', function() {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
     var test3Path = { file: 'file', path: ['test3'] };
 
     expect(processMessages([
-      [test1Path, { type: 'begin' }],
-      [test2Path, { type: 'begin' }],
-      [test3Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
+      [test2Path, { type: 'start' }],
+      [test3Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
     ], { dontSendDone: true })).to.be.deep.equal([
-      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       // Here, the second test should be chosen to begin, even though it doens't know
       // if the second or the third test will actually finish first. The reason this
@@ -175,7 +175,7 @@ describe('Serializer reporter', function() {
       //
       // This will make it possible for reporters to show output of a test as it runs,
       // and not just after it finishes.
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
     ]);
   });
 
@@ -186,18 +186,18 @@ describe('Serializer reporter', function() {
     var test4Path = { file: 'file', path: ['test4'] };
 
     expect(processMessages([
-      [test1Path, { type: 'begin' }],
-      [test2Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
-      [test3Path, { type: 'begin' }],
+      [test3Path, { type: 'start' }],
       [test3Path, { type: 'finish' }],
       [test1Path, { type: 'finish' }],
     ], { dontSendDone: true })).to.be.deep.equal([
-      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
-      [test3Path, { type: 'begin' }],
+      [test3Path, { type: 'start' }],
       [test3Path, { type: 'finish' }],
     ]);
   });
@@ -208,18 +208,18 @@ describe('Serializer reporter', function() {
     var test3Path = { file: 'file', path: ['test3'] };
 
     expect(processMessages([
-      [test1Path, { type: 'begin' }],
-      [test2Path, { type: 'begin' }],
-      [test3Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
+      [test2Path, { type: 'start' }],
+      [test3Path, { type: 'start' }],
       [test3Path, { type: 'finish' }],
       [test1Path, { type: 'finish' }],
       [test2Path, { type: 'finish' }],
     ])).to.be.deep.equal([
-      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
-      [test3Path, { type: 'begin' }],
+      [test3Path, { type: 'start' }],
       [test3Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
     ]);
   });
@@ -230,18 +230,18 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file2', path: ['test3'] };
 
     expect(processMessages([
-      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
-      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'start' }],
       [test12Path, { type: 'finish' }],
     ])).to.be.deep.equal([
-      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
-      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'start' }],
       [test12Path, { type: 'finish' }],
     ]);
   });
@@ -252,14 +252,14 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file', path: ['test3'] };
 
     expect(processMessages([
-      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
-      [test12Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
+      [test12Path, { type: 'start' }],
     ], { dontSendDone: true })).to.be.deep.equal([
-      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
-      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'start' }],
     ]);
   });
 
@@ -269,18 +269,18 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file', path: ['test3'] };
 
     expect(processMessages([
-      [test11Path, { type: 'begin' }],
-      [test2Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
-      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
       [test12Path, { type: 'finish' }],
     ])).to.be.deep.equal([
-      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
-      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'start' }],
       [test12Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
     ]);
   });
@@ -291,18 +291,18 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file', path: ['suite', 'test3'] };
 
     expect(processMessages([
-      [test11Path, { type: 'begin' }],
-      [test2Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
-      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
       [test12Path, { type: 'finish' }],
     ])).to.be.deep.equal([
-      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
-      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'start' }],
       [test12Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
     ]);
   });
@@ -312,9 +312,9 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file', path: ['suite2', 'test'] };
 
     var messages = [
-      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
     ];
     expect(processMessages(messages)).to.be.deep.equal(messages);
@@ -325,14 +325,14 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file', path: ['suite2', 'test'] };
 
     expect(processMessages([
-      [test1Path, { type: 'begin' }],
-      [test2Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
+      [test2Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       [test2Path, { type: 'finish' }],
     ])).to.be.deep.equal([
-      [test1Path, { type: 'begin' }],
+      [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
     ]);
   });
@@ -343,18 +343,18 @@ describe('Serializer reporter', function() {
     var test3Path = { file: 'file', path: ['suite2', 'test3'] };
 
     expect(processMessages([
-      [ test1Path, { 'type': 'begin' } ],
-      [ test2Path, { 'type': 'begin' } ],
+      [ test1Path, { 'type': 'start' } ],
+      [ test2Path, { 'type': 'start' } ],
       [ test2Path, { 'type': 'finish' } ],
       [ test1Path, { 'type': 'finish' } ],
-      [ test3Path, { 'type': 'begin' } ],
+      [ test3Path, { 'type': 'start' } ],
       [ test3Path, { 'type': 'finish' } ]
     ])).to.be.deep.equal([
-      [ test1Path, { 'type': 'begin' } ],
+      [ test1Path, { 'type': 'start' } ],
       [ test1Path, { 'type': 'finish' } ],
-      [ test2Path, { 'type': 'begin' } ],
+      [ test2Path, { 'type': 'start' } ],
       [ test2Path, { 'type': 'finish' } ],
-      [ test3Path, { 'type': 'begin' } ],
+      [ test3Path, { 'type': 'start' } ],
       [ test3Path, { 'type': 'finish' } ]
     ]);
   });
@@ -365,18 +365,18 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file', path: ['suite', 'test3'] };
 
     expect(processMessages([
-      [test11Path, { type: 'begin' }],
-      [test12Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
+      [test12Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
       [test12Path, { type: 'finish' }],
     ])).to.be.deep.equal([
-      [test11Path, { type: 'begin' }],
+      [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
-      [test12Path, { type: 'begin' }],
+      [test12Path, { type: 'start' }],
       [test12Path, { type: 'finish' }],
-      [test2Path, { type: 'begin' }],
+      [test2Path, { type: 'start' }],
       [test2Path, { type: 'finish' }],
     ]);
   });
