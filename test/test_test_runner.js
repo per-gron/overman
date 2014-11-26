@@ -215,17 +215,9 @@ describe('Test runner', function() {
     return waitForProcessToFail(process);
   });
 
-  it('should not exit if the test is done but there are still things on the runloop', function() {
+  it('should exit if the test is done but there are still things on the runloop', function() {
     var process = runTest('suite_with_nonempty_runloop', 'should succeed');
-    return when.race([
-      waitForProcessToExit(process)
-        .then(function() { throw new Error('Should never finish'); }),
-      when()
-        .delay(1000)
-        .ensure(function() {
-          process.kill('SIGKILL');
-        })
-    ]);
+    return waitForProcessToExit(process);
   });
 
   it('should pass test timeout to the interface', function() {
