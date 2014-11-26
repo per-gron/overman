@@ -17,6 +17,8 @@
 'use strict';
 
 var readline = require('readline');
+var stripAnsi = require('strip-ansi');
+var through = require('through');
 var when = require('when');
 
 function waitForStreamToEmitLines(stream, linesToWatchFor) {
@@ -47,3 +49,10 @@ function waitForStreamToEmitLines(stream, linesToWatchFor) {
   });
 }
 exports.waitForStreamToEmitLines = waitForStreamToEmitLines;
+
+function stripAnsiStream() {
+  return through(function(data) {
+    this.emit('data', stripAnsi(data));
+  });
+}
+exports.stripAnsiStream = stripAnsiStream;

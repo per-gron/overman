@@ -16,21 +16,14 @@
 
 'use strict';
 
-var stripAnsi = require('strip-ansi');
 var through = require('through');
 var chalk = require('chalk');
 var Summary = require('../lib/reporter/summary');
 var makeFakeClock = require('./util/fake_clock');
 var streamUtil = require('./util/stream');
 
-function stripAnsiStream() {
-  return through(function(data) {
-    this.emit('data', stripAnsi(data));
-  });
-}
-
 function performActionsAndCheckOutput(actions, output, options) {
-  var stripped = (options || {}).dontStrip ? through() : stripAnsiStream();
+  var stripped = (options || {}).dontStrip ? through() : streamUtil.stripAnsiStream();
   var summary = new Summary(stripped, (options || {}).getTime);
 
   var promise = streamUtil.waitForStreamToEmitLines(stripped, output);
