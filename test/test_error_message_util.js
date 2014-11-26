@@ -16,11 +16,16 @@
 
 'use strict';
 
+var chalk = require('chalk');
 var expect = require('chai').expect;
 var stripAnsi = require('strip-ansi');
 var errorMessageUtil = require('../lib/error_message_util');
 
 describe('Error message utilities', function() {
+  before(function() {
+    chalk.enabled = true;
+  });
+
   describe('prettyErrorLocation', function() {
     it('should return a string even given no input', function() {
       expect(errorMessageUtil.prettyErrorLocation()).to.be.equal('unknown');
