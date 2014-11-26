@@ -17,6 +17,7 @@
 var fs = require('fs');
 var path = require('path');
 var suiterunner = require('./lib/suite_runner');
+var ErrorDetailReporter = require('./lib/reporter/error_detail');
 var PipeReporter = require('./lib/reporter/pipe');
 var SpecProgress = require('./lib/reporter/spec_progress');
 var Summary = require('./lib/reporter/summary');
@@ -31,9 +32,12 @@ suiterunner({
     reporters: [
       new PipeReporter(process),
       new SpecProgress(process.stdout),
-      new Summary(process.stdout)
+      new Summary(process.stdout),
+      new ErrorDetailReporter(process.stdout)
     ],
     parallelism: 8,
     timeout: 10000
   })
-  .then(function() {}, function(err) { process.exit(1); });
+  .then(function() {}, function(err) {
+    process.exit(1);
+  });
