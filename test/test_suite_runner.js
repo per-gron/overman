@@ -261,9 +261,9 @@ describe('Suite runner', function() {
 
   it('should let the test set the timeout', function() {
     return when.race([
-      shouldFail(runTestSuite('suite_timeout_set', [], { timeout: 1000 })),
+      shouldFail(runTestSuite('suite_timeout_set', [], { timeout: 2000 })),
       when()
-        .delay(300)
+        .delay(500)
         .then(function() {
           throw new Error('Test should have finished by now');
         })
