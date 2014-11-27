@@ -25,8 +25,10 @@ var stream = require('./util/stream');
 function runTest(suite) {
   var testPath = _.toArray(arguments).slice(1);
 
-  var timeout = 1234;  // Not actually used, but needs to be provided
-  var parameters = JSON.stringify({ timeout: timeout });
+  var parameters = JSON.stringify({
+    timeout: 1234,
+    slowThreshold: 2345
+  });
   return childProcess.fork(
     __dirname + '/../lib/bin/run_test',
     [__dirname + '/../lib/interface/bdd_mocha', parameters, __dirname + '/suite/' + suite].concat(testPath),
@@ -221,25 +223,52 @@ describe('Test runner', function() {
     return waitForProcessToExit(process);
   });
 
-  it('should pass test timeout to the interface', function() {
-    var process = runTest('suite_timeout_print', 'should print its timeout');
-    return when.all([
-      waitForProcessToExit(process),
-      stream.waitForStreamToEmitLines(process.stdout, [
-        /1234/
-      ])
-    ]);
+  describe('Timeouts', function() {
+    it('should pass test timeout to the interface', function() {
+      var process = runTest('suite_timeout_print', 'should print its timeout');
+      return when.all([
+        waitForProcessToExit(process),
+        stream.waitForStreamToEmitLines(process.stdout, [
+          /1234/
+        ])
+      ]);
+    });
+
+    it('should emit setTimeout messages when the test asks to change the timeout', function() {
+      var process = runTest('suite_timeout_set', 'should set the timeout');
+      return when.promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'setTimeout') {
+            expect(message).property('value').to.be.equal(10);
+            process.kill();
+            resolve();
+          }
+        });
+      });
+    });
   });
 
-  it('should emit setTimeout messages when the test asks to change the timeout', function() {
-    var process = runTest('suite_timeout_set', 'should set the timeout');
-    return when.promise(function(resolve) {
-      process.on('message', function(message) {
-        if (message.type === 'setTimeout') {
-          expect(message).property('value').to.be.equal(10);
-          process.kill();
-          resolve();
-        }
+  describe('Slow thresholds', function() {
+    it('should pass slow threshold to the interface', function() {
+      var process = runTest('suite_slow_print', 'should print its slow threshold');
+      return when.all([
+        waitForProcessToExit(process),
+        stream.waitForStreamToEmitLines(process.stdout, [
+          /2345/
+        ])
+      ]);
+    });
+
+    it('should emit setSlowThreshold messages when the test asks to change the slow threshold', function() {
+      var process = runTest('suite_slow_set', 'should set the slow threshold');
+      return when.promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'setSlowThreshold') {
+            expect(message).property('value').to.be.equal(20);
+            process.kill();
+            resolve();
+          }
+        });
       });
     });
   });

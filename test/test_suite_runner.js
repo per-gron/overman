@@ -253,20 +253,30 @@ describe('Suite runner', function() {
     }, { match: 'work' });
   });
 
-  it('should pass timeout to test', function() {
-    return ensureOutputFromTests('suite_timeout_print', {
-      'should print its timeout': [1337]
-    }, { timeout: 1337 });
+  describe('Timeouts', function() {
+    it('should pass timeout to test', function() {
+      return ensureOutputFromTests('suite_timeout_print', {
+        'should print its timeout': [1337]
+      }, { timeout: 1337 });
+    });
+
+    it('should let the test set the timeout', function() {
+      return when.race([
+        shouldFail(runTestSuite('suite_timeout_set', [], { timeout: 2000 })),
+        when()
+          .delay(500)
+          .then(function() {
+            throw new Error('Test should have finished by now');
+          })
+      ]);
+    });
   });
 
-  it('should let the test set the timeout', function() {
-    return when.race([
-      shouldFail(runTestSuite('suite_timeout_set', [], { timeout: 2000 })),
-      when()
-        .delay(500)
-        .then(function() {
-          throw new Error('Test should have finished by now');
-        })
-    ]);
+  describe('Slow thresholds', function() {
+    it('should pass slow threshold to test', function() {
+      return ensureOutputFromTests('suite_slow_print', {
+        'should print its slow threshold': [1337]
+      }, { slowThreshold: 1337 });
+    });
   });
 });

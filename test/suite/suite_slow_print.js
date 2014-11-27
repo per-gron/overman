@@ -16,9 +16,6 @@
 
 'use strict';
 
-var when = require('when');
-
-it('should set the slow threshold', function() {
-  this.slow(20);
-  return when.promise(function() {});  // Never complete the test
+it('should print its slow threshold', function() {
+  console.log(this.slow());
 });

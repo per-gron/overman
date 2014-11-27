@@ -270,7 +270,7 @@ describe('BDD interface (Mocha flavor)', function() {
 
     it('should allow setting the slow threshold for the current test', function(done) {
       var suite = parseSuite('suite_slow_set', { setSlowThreshold: function(value) {
-        expect(value).to.be.equal(10);
+        expect(value).to.be.equal(20);
         done();
       }});
       var fn = getKeypath(suite, '.contents[0].run');
