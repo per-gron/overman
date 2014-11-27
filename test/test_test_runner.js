@@ -26,9 +26,10 @@ function runTest(suite) {
   var testPath = _.toArray(arguments).slice(1);
 
   var timeout = 1234;  // Not actually used, but needs to be provided
+  var parameters = JSON.stringify({ timeout: timeout });
   return childProcess.fork(
     __dirname + '/../lib/bin/run_test',
-    [__dirname + '/../lib/interface/bdd_mocha', timeout, __dirname + '/suite/' + suite].concat(testPath),
+    [__dirname + '/../lib/interface/bdd_mocha', parameters, __dirname + '/suite/' + suite].concat(testPath),
     { silent: true });
 }
 
