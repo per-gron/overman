@@ -258,6 +258,26 @@ describe('BDD interface (Mocha flavor)', function() {
     });
   });
 
+  describe('Slow thresholds', function() {
+    it('should allow getting the timeout for the current test', function() {
+      var suite = parseSuite('suite_slow_return', { getSlowThreshold: function() {
+        return 23456;
+      }});
+      var fn = getKeypath(suite, '.contents[0].run');
+      expect(fn).to.be.a('function');
+      expect(fn()).to.be.equal(23456);
+    });
+
+    it('should allow setting the slow threshold for the current test', function(done) {
+      var suite = parseSuite('suite_slow_set', { setSlowThreshold: function(value) {
+        expect(value).to.be.equal(10);
+        done();
+      }});
+      var fn = getKeypath(suite, '.contents[0].run');
+      fn();
+    });
+  });
+
   it('should declare context global', function() {
     return suiteRunner({
       suites: [__dirname + '/suite/suite_access_context'],
