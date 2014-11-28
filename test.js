@@ -21,6 +21,7 @@ var ErrorDetailReporter = require('./lib/reporter/error_detail');
 var PipeReporter = require('./lib/reporter/pipe');
 var SpecProgress = require('./lib/reporter/spec_progress');
 var Summary = require('./lib/reporter/summary');
+var TestFailureError = require('./lib/test_failure_error');
 
 var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
@@ -39,5 +40,10 @@ suiterunner({
     timeout: 10000
   })
   .then(function() {}, function(err) {
+    if (!(err instanceof TestFailureError)) {
+      // Test failures will already have been reported by reporters, so there
+      // is no need for us to report them here.
+      console.log(err.stack);
+    }
     process.exit(1);
   });
