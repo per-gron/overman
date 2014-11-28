@@ -28,26 +28,26 @@ describe('Error message utilities', function() {
 
   describe('prettyErrorLocation', function() {
     it('should return a string even given no input', function() {
-      expect(errorMessageUtil.prettyErrorLocation()).to.be.equal('unknown');
+      expect(errorMessageUtil.prettyErrorLocation()).to.be.equal('Unknown location');
     });
 
     it('should pretty print before hooks', function() {
-      expect(errorMessageUtil.prettyErrorLocation({ in: 'beforeHook' })).to.be.equal('before hook');
+      expect(errorMessageUtil.prettyErrorLocation({ in: 'beforeHook' })).to.be.equal('In before hook');
     });
 
     it('should pretty print after hooks', function() {
-      expect(errorMessageUtil.prettyErrorLocation({ in: 'afterHook' })).to.be.equal('after hook');
+      expect(errorMessageUtil.prettyErrorLocation({ in: 'afterHook' })).to.be.equal('In after hook');
     });
 
     it('should pretty print tests', function() {
-      expect(errorMessageUtil.prettyErrorLocation({ in: 'test' })).to.be.equal('test');
+      expect(errorMessageUtil.prettyErrorLocation({ in: 'test' })).to.be.equal('In test');
     });
 
     it('should include hook names when provided', function() {
       expect(errorMessageUtil.prettyErrorLocation({
         in: 'beforeHook',
         inName: 'do stuff'
-      })).to.be.equal('before hook "do stuff"');
+      })).to.be.equal('In before hook "do stuff"');
     });
   });
 
