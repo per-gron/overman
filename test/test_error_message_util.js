@@ -43,6 +43,10 @@ describe('Error message utilities', function() {
       expect(errorMessageUtil.prettyErrorLocation({ in: 'test' })).to.be.equal('In test');
     });
 
+    it('should pretty print uncaught errors', function() {
+      expect(errorMessageUtil.prettyErrorLocation({ in: 'uncaught' })).to.be.equal('Uncaught error');
+    });
+
     it('should include hook names when provided', function() {
       expect(errorMessageUtil.prettyErrorLocation({
         in: 'beforeHook',
