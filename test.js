@@ -22,6 +22,7 @@ var PipeReporter = require('./lib/reporter/pipe');
 var SpecProgress = require('./lib/reporter/spec_progress');
 var Summary = require('./lib/reporter/summary');
 var TestFailureError = require('./lib/test_failure_error');
+var errorMessageUtil = require('./lib/error_message_util');
 
 var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
@@ -43,7 +44,10 @@ suiterunner({
     if (!(err instanceof TestFailureError)) {
       // Test failures will already have been reported by reporters, so there
       // is no need for us to report them here.
-      console.log(err.stack);
+      console.error('Internal error in Overman or a reporter:');
+      console.error(errorMessageUtil.indent(errorMessageUtil.prettyError({
+        value: err.stack
+      }), 2));
     }
     process.exit(1);
   });
