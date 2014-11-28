@@ -250,6 +250,13 @@ describe('Reporter API', function() {
     }]);
   });
 
+  it('should emit error message when test fails with an uncaught exception', function() {
+    return ensureMessages('suite_single_test_uncaught_exception', [function(testPath, message) {
+      return (message.type === 'error' &&
+              message.in === 'uncaught');
+    }]);
+  });
+
   it('should emit error message when after hook fails', function() {
     return ensureMessages('suite_failing_after_hook', [function(testPath, message) {
       return (message.type === 'error' &&

@@ -208,6 +208,20 @@ describe('Test runner', function() {
     ]);
   });
 
+  it('should catch and propagate uncaught exceptions', function() {
+    var process = runTest('suite_single_test_uncaught_exception', 'should throw uncaught error');
+    return when.all([
+      waitForProcessToFail(process),
+      when.promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'error' && message.value.match(/Uncaught/)) {
+            resolve();
+          }
+        });
+      })
+    ]);
+  });
+
   it('should mark tests that throw an exception as failing', function() {
     var process = runTest('suite_single_throwing_test', 'should throw');
     return waitForProcessToFail(process);
