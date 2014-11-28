@@ -23,6 +23,7 @@ var stream = require('stream');
 var when = require('when');
 var OnMessage = require('./util/on_message');
 var streamUtil = require('./util/stream');
+var TestFailureError = require('../lib/test_failure_error');
 var suiteRunner = require('../lib/suite_runner');
 
 
@@ -49,12 +50,14 @@ function listNames(names) {
     .join(', ');
 }
 
-function shouldFail(promise) {
+function shouldFail(promise, errorClass) {
   return promise
       .then(function() {
         throw new Error('Should fail');
-      }, function() {
-        // Should fail
+      }, function(error) {
+        if (errorClass && !(error instanceof errorClass)) {
+          throw new Error('Got unexpected error: ' + error);
+        }
       });
 }
 
@@ -144,7 +147,7 @@ describe('Suite runner', function() {
   });
 
   it('should fail if a test fails', function() {
-    return shouldFail(runTestSuite('suite_various_tests'));
+    return shouldFail(runTestSuite('suite_various_tests'), TestFailureError);
   });
 
   it('should keep running tests after a test fails', function() {
