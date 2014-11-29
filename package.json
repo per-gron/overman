@@ -4,7 +4,7 @@
   "description": "Test runner for integration tests",
   "main": "lib/overman.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node node_modules/mocha/bin/mocha"
   },
   "keywords": [
     "test",
@@ -28,6 +28,7 @@
   "devDependencies": {
     "through": "~2.3.6",
     "chai": "~1.10.0",
-    "strip-ansi": "~2.0.0"
+    "strip-ansi": "~2.0.0",
+    "mocha": "~2.0.1"
   }
 }
