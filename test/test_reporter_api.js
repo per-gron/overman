@@ -28,6 +28,8 @@ var path = require('path');
 var stream = require('stream');
 var when = require('when');
 var OnMessage = require('./util/on_message');
+var shouldFail = require('./util/should_fail');
+var TestFailureError = require('../lib/test_failure_error');
 var suiteRunner = require('../lib/suite_runner');
 
 function pathForSuite(suite) {
@@ -275,6 +277,22 @@ describe('Reporter API', function() {
     }]);
   });
 
-  it('should report syntax errors');
+  it('should report syntax errors', function() {
+    var deferred = when.defer();
+
+    var testSuitePromise = runTestSuite('suite_syntax_error', {
+      registrationFailed: function(error) {
+        expect(error).property('message').to.match(/Failed to process .*suite_syntax_error/);
+        expect(error).property('stack').to.match(/SyntaxError: Unexpected identifier/);
+        deferred.resolve();
+      }
+    });
+
+    return when.all([
+      shouldFail(testSuitePromise, TestFailureError),
+      deferred.promise
+    ]);
+  });
+
   it('should gracefully handle when the interface takes forever');
 });

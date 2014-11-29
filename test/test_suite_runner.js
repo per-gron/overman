@@ -140,6 +140,10 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_various_tests'), TestFailureError);
   });
 
+  it('should fail with TestFailureError if a test has a syntax error', function() {
+    return shouldFail(runTestSuite('suite_syntax_error'), TestFailureError);
+  });
+
   it('should keep running tests after a test fails', function() {
     return ensureOutputFromTests('suite_two_failing_tests', {
       'should fail 1': [],
