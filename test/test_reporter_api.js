@@ -278,7 +278,4 @@ describe('Reporter API', function() {
 
   it('should report syntax errors');
   it('should gracefully handle when the interface takes forever');
-  it('should report error for failing before hook');
-  it('should report error for failing test');
-  it('should report error for failing after hook');
 });
