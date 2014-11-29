@@ -22,7 +22,7 @@ var when = require('when');
 var Combined = require('../lib/reporter/combined');
 
 describe('Combined reporter', function() {
-  ['registerTests', 'gotMessage', 'done'].forEach(function(message) {
+  ['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function(message) {
     describe(message, function() {
       it('should not forward ' + message + ' calls when it has no reporters', function() {
         (new Combined([]))[message]('a');
