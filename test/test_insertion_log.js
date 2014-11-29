@@ -20,7 +20,6 @@ var expect = require('chai').expect;
 var through = require('through');
 var when = require('when');
 var InsertionLog = require('../lib/insertion_log');
-var streamUtil = require('./util/stream');
 
 function readEntireStream(stream) {
   return when.promise(function(resolve) {
@@ -230,7 +229,7 @@ describe('Insertion log', function() {
     });
 
     it('should replace appropriately when replaced message is more than one line', function() {
-      return expectWithLog(function(log, stream) {
+      return expectWithLog(function(log) {
         log.log('A line', 'lid1');
         log.log('A second line', 'lid2');
         log.replace('lid1', 'A\nline');
@@ -244,7 +243,7 @@ describe('Insertion log', function() {
     });
 
     it('should replace appropriately when replaced message is empty', function() {
-      return expectWithLog(function(log, stream) {
+      return expectWithLog(function(log) {
         log.log('', 'lid1');
         log.log('A second line', 'lid2');
         log.replace('lid1', 'A line');

@@ -21,7 +21,7 @@ describe('Suite', function() {
     console.log('running_inner_before_hook');
   });
 
-  it('should succeed', function() {
+  it('should succeed', function() {
     console.log('running_test');
   });
 });

@@ -16,8 +16,6 @@
 
 'use strict';
 
-var when = require('when');
-
 var gotTimeout = null;
 
 before(function() {

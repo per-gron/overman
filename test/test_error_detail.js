@@ -35,7 +35,7 @@ function doWithReporterAndCheck(callback, expectedLines) {
 }
 
 describe('Error detail reporter', function() {
-  it('should not print anything if no test failed', function() {
+  it('should not print anything if no test failed', function() {
     return doWithReporterAndCheck(function(reporter) {
       reporter.done();
     }, []);

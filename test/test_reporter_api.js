@@ -207,7 +207,7 @@ describe('Reporter API', function() {
   });
 
   it('should emit finish message last, even when messages arrive after process exit', function() {
-    function fork() {
+    function fork() {
       var child = new EventEmitter();
       child.stdin = new stream.Readable();
 
@@ -231,7 +231,7 @@ describe('Reporter API', function() {
 
   it('should emit messages with a correct test path', function() {
     var suite = 'suite_single_skipped_test';
-    return ensureAllMessages(suite, function(testPath, message) {
+    return ensureAllMessages(suite, function(testPath) {
       return testPath.file === pathForSuite(suite);
     });
   });

@@ -61,7 +61,7 @@ describe('Combined reporter', function() {
 
         (new Combined([reporter1, reporter2]))[message](1, 2, 3);
 
-        return when.all(reporter1, reporter2);
+        return when.all([reporter1Promise, reporter2Promise]);
       });
     });
   });

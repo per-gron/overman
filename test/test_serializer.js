@@ -183,7 +183,6 @@ describe('Serializer reporter', function() {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
     var test3Path = { file: 'file', path: ['test3'] };
-    var test4Path = { file: 'file', path: ['test4'] };
 
     expect(processMessages([
       [test1Path, { type: 'start' }],

@@ -162,7 +162,7 @@ describe('Suite runner', function() {
   it('should send SIGINT to tests that time out', function() {
     var deferred = when.defer();
 
-    function fork() {
+    function fork() {
       var child = new EventEmitter();
       child.stdin = new stream.Readable();
 
@@ -188,7 +188,7 @@ describe('Suite runner', function() {
   it('should send SIGKILL to tests that don\'t die after SIGINT', function() {
     var deferred = when.defer();
 
-    function fork() {
+    function fork() {
       var child = new EventEmitter();
       child.stdin = new stream.Readable();
 
