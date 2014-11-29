@@ -104,8 +104,7 @@ describe('Reporter API', function() {
           path: [ 'should succeed' ]
         }]);
         deferred.resolve();
-      },
-      gotMessage: function() {}
+      }
     });
     return when.all([testSuitePromise, deferred.promise]);
   });
