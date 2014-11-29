@@ -18,6 +18,7 @@
 
 var streamUtil = require('./util/stream');
 var ErrorDetail = require('../lib/reporter/error_detail');
+var listSuite = require('../lib/list_suite');
 
 function doWithReporterAndCheck(callback, expectedLines) {
   // We don't care about colors here, since this is a unit test and ErrorDetail
@@ -38,6 +39,16 @@ describe('Error detail reporter', function() {
     return doWithReporterAndCheck(function(reporter) {
       reporter.done();
     }, []);
+  });
+
+  it('should print registrationFailed information', function() {
+    return doWithReporterAndCheck(function(reporter) {
+      reporter.registrationFailed(new listSuite.ListTestError('suite.js', 'blah\nblah'));
+    }, [
+      /Failed to process suite.js/,
+      /blah/,
+      /blah/
+    ]);
   });
 
   it('should handle missing result in finish message', function() {
