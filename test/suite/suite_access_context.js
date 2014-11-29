@@ -18,7 +18,7 @@
 
 context.outside = true;
 
-before(function() {
+before(function() {
   context.before = true;
 });
 

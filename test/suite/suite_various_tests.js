@@ -37,7 +37,7 @@ describe('Something', function() {
     it('should do its thing', function() {
     });
 
-    it('should fail', function() {
+    it('should fail', function() {
       throw new Error('No!');
     });
 

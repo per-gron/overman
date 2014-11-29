@@ -16,4 +16,6 @@
 
 'use strict';
 
+/* jshint ignore:start */
 a b c;
+/* jshint ignore:end */

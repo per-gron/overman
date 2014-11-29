@@ -55,7 +55,7 @@ describe('TimeoutTimer', function() {
   it('should not immediately clear the not-yet-armed timeout', function() {
     new TimeoutTimer(100, {
       setTimeout: function() {},
-      clearTimeout: function(token) {
+      clearTimeout: function() {
         throw new Error('Should not be called');
       }
     });
@@ -94,7 +94,7 @@ describe('TimeoutTimer', function() {
       setTimeout: function(callback, time) {
         if (!gotInitialTimeoutCall) {
           gotInitialTimeoutCall = true;
-          process.nextTick(function() {
+          process.nextTick(function() {
             clock.step(111);
             timer.updateTimeout(456);
             callback();
@@ -109,11 +109,11 @@ describe('TimeoutTimer', function() {
 
   it('should refuse to updateTimeout on an elapsed timer', function() {
     var timer = new TimeoutTimer(80, {
-      getTime: function() { return 321 },
-      setTimeout: function(callback, time) {
-        process.nextTick(function() {
+      getTime: function() { return 321; },
+      setTimeout: function(callback) {
+        process.nextTick(function() {
           callback();
-          expect(function() {
+          expect(function() {
             timer.updateTimeout(654);
           }).to.throw('timer that has elapsed');
         });
@@ -127,7 +127,7 @@ describe('TimeoutTimer', function() {
     });
 
     timer.cancel();
-    expect(function() {
+    expect(function() {
       timer.updateTimeout(654);  
     }).to.throw('timer that has elapsed');
   });
@@ -161,10 +161,10 @@ describe('TimeoutTimer', function() {
   });
 
   it('should use wall time if no options are specified', function(done) {
-    var startTime = (new Date).getTime();
+    var startTime = (new Date()).getTime();
     var timer = new TimeoutTimer(50);
     timer.on('timeout', function() {
-      expect((new Date).getTime() - startTime, 'timer should wait for the correct amount of time').to.be.within(30, 70);
+      expect((new Date()).getTime() - startTime, 'timer should wait for the correct amount of time').to.be.within(30, 70);
       done();
     });
   });

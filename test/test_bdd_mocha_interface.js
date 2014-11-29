@@ -27,7 +27,9 @@ function parseSuite(name, runtimeContext) {
 
 function getKeypath(object, keypath) {
   try {
+    /* jshint -W054 */
     return (new Function('obj', 'return obj' + keypath))(object);
+    /* jshint +W054 */
   } catch (e) {
     throw new Error('Object ' + object + ' does not contain keypath ' + keypath);
   }
@@ -35,7 +37,9 @@ function getKeypath(object, keypath) {
 
 function setKeypathToNull(object, keypath) {
   try {
+    /* jshint -W054 */
     (new Function('obj', 'obj' + keypath + ' = null;'))(object);
+    /* jshint +W054 */
   } catch (e) {
     throw new Error('Failed to set keypath ' + keypath + ' for object ' + object);
   }

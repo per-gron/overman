@@ -17,6 +17,8 @@
 'use strict';
 
 it('should throw uncaught error', function(done) {
+  done = null;  // To trick linter
+
   process.nextTick(function() {
     throw new Error('Uncaught');
   });
