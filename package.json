@@ -4,7 +4,8 @@
   "description": "Test runner for integration tests",
   "main": "lib/overman.js",
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha"
+    "lint": "node node_modules/.bin/jshint --verbose -c .jshintrc test lib",
+    "test": "npm run lint && node node_modules/mocha/bin/mocha"
   },
   "keywords": [
     "test",
