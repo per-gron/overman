@@ -68,7 +68,7 @@ function processMessages(messages, options) {
     done: function() {}
   });
 
-  serializer.registerTests(getTestPathsFromMessages(messages));
+  serializer.registerTests((options || {}).testPaths || getTestPathsFromMessages(messages));
   messages.forEach(function(message) {
     serializer.gotMessage(message[0], message[1]);
   });
@@ -153,6 +153,29 @@ describe('Serializer reporter', function() {
         [{ file: 'file', path: ['test'] }, { type: 'start' }],
       ]);
     }).to.throw('Got message (type start) for test that has already finished: {"file":"file","path":["test"]}');
+  });
+
+  it('should handle done calls when there are outstanding tests', function() {
+    // When the suite runner is cancelled (for example by the user pressing
+    // Ctrl-C), not all tests will be run. Serializer needs to handle this.
+    // Note that, even when the suite runner is cancelled, all the tests that
+    // have been reported to start will also get a finish message.
+
+    var test1Path = { file: 'file', path: ['suite1', 'test1'] };
+    var test2Path = { file: 'file', path: ['suite2', 'test2'] };
+    var test3Path = { file: 'file', path: ['suite3', 'test3'] };
+
+    expect(processMessages([
+      [test1Path, { type: 'start' }],
+      [test2Path, { type: 'start' }],
+      [test1Path, { type: 'finish' }],
+      [test2Path, { type: 'finish' }],
+    ], { testPaths: [ test1Path, test2Path, test3Path ] })).to.be.deep.equal([
+      [test1Path, { type: 'start' }],
+      [test1Path, { type: 'finish' }],
+      [test2Path, { type: 'start' }],
+      [test2Path, { type: 'finish' }],
+    ]);
   });
 
   it('should emit start message for a test as soon as it can', function() {
