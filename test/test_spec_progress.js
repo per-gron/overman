@@ -16,6 +16,8 @@
 
 'use strict';
 
+require('../lib/reporter/spec_progress');  // Make sure the file is reflected in the coverage report
+
 describe('Spec progress reporter', function() {
   it('should be tested');
 });
