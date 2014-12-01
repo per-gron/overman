@@ -91,6 +91,17 @@ describe('Serializer reporter', function() {
     serializer.registerTests([]);
   });
 
+  it('should forward registrationFailed calls', function(done) {
+    var serializer = new Serializer({
+      registrationFailed: function(error) {
+        expect(error).property('message').to.be.equal('hello');
+        done();
+      }
+    });
+
+    serializer.registrationFailed(new Error('hello'));
+  });
+
   it('should handle reporters that don\'t implement registerTests', function() {
     var serializer = new Serializer({});
     serializer.registerTests([]);
