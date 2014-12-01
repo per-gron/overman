@@ -90,6 +90,19 @@ describe('Summary reporter', function() {
     ]);
   });
 
+  it('should report number of aborted tests', function() {
+    return performActionsAndCheckOutput(function(summary) {
+      summary.registerTests([]);
+      summary.gotMessage(null, { type: 'finish', result: 'aborted' });
+      summary.done();
+    }, [
+      '',
+      /0 passing/,
+      /1 aborted/,
+      ''
+    ]);
+  });
+
   it('should report number of failing tests', function() {
     return performActionsAndCheckOutput(function(summary) {
       summary.registerTests([]);
@@ -116,7 +129,7 @@ describe('Summary reporter', function() {
     ]);
   });
 
-  it('should report number of skipped, timed out and number of failing tests', function() {
+  it('should report number of skipped, aborted, timed out and number of failing tests', function() {
     return performActionsAndCheckOutput(function(summary) {
       summary.registerTests([]);
       summary.gotMessage(null, { type: 'finish', result: 'failure' });
@@ -128,6 +141,24 @@ describe('Summary reporter', function() {
       /0 passing/,
       /1 skipped/,
       /2 failing/,
+      ''
+    ]);
+  });
+
+  it('should report number of skipped, aborted, timed out and number of failing tests', function() {
+    return performActionsAndCheckOutput(function(summary) {
+      summary.registerTests([]);
+      summary.gotMessage(null, { type: 'finish', result: 'failure' });
+      summary.gotMessage(null, { type: 'finish', result: 'skipped' });
+      summary.gotMessage(null, { type: 'finish', result: 'aborted' });
+      summary.gotMessage(null, { type: 'finish', result: 'timeout' });
+      summary.done();
+    }, [
+      '',
+      /0 passing/,
+      /1 skipped/,
+      /2 failing/,
+      /1 aborted/,
       ''
     ]);
   });
@@ -163,6 +194,19 @@ describe('Summary reporter', function() {
       '',
       /passing/,
       new RegExp('\u001b\\[36m1 skipped\u001b\\[39m'),
+      ''
+    ], { dontStrip: true });
+  });
+
+  it('should color the aborted tests text', function() {
+    return performActionsAndCheckOutput(function(summary) {
+      summary.registerTests([]);
+      summary.gotMessage(null, { type: 'finish', result: 'aborted' });
+      summary.done();
+    }, [
+      '',
+      /passing/,
+      new RegExp('\u001b\\[33m1 aborted\u001b\\[39m'),
       ''
     ], { dontStrip: true });
   });
