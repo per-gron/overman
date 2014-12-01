@@ -126,6 +126,13 @@ describe('Error detail reporter', function() {
     }, []);
   });
 
+  it('should not treat aborted tests as failures', function() {
+    return doWithReporterAndCheck(function(reporter) {
+      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'aborted' });
+      reporter.done();
+    }, []);
+  });
+
   it('should report all errors that a test emitted', function() {
     return doWithReporterAndCheck(function(reporter) {
       reporter.gotMessage({ path: ['test1'] }, { type: 'error', value: 'Error: X\n    Trace' });
