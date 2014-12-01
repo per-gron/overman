@@ -91,6 +91,21 @@ describe('Serializer reporter', function() {
     serializer.registerTests([]);
   });
 
+  it('should handle reporters that don\'t implement registerTests', function() {
+    var serializer = new Serializer({});
+    serializer.registerTests([]);
+  });
+
+  it('should handle reporters that don\'t implement gotMessage', function() {
+    var theTestPath = { file: 'file', path: ['test'] };
+    var serializer = new Serializer({});
+
+    serializer.registerTests([theTestPath]);
+    serializer.gotMessage(theTestPath, { type: 'start' });
+    serializer.gotMessage(theTestPath, { type: 'finish' });
+    serializer.done();
+  });
+
   it('should forward done calls', function(done) {
     var serializer = new Serializer({
       registerTests: function() {},
