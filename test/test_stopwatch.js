@@ -67,7 +67,7 @@ describe('Stopwatch', function() {
     return when()
       .delay(300)
       .then(function() {
-        expect(stopwatch.getTimeSinceStart()).to.be.within(300, 400);
+        expect(stopwatch.getTimeSinceStart()).to.be.within(290, 400);
       });
   });
 });
