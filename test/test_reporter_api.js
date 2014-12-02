@@ -294,5 +294,61 @@ describe('Reporter API', function() {
     ]);
   });
 
+  it('should emit an aborted finish message when suite is cancelled while the test is running', function() {
+    var deferred = when.defer();
+    var suitePromise = runTestSuite('suite_single_successful_test', new OnMessage(function(testPath, message) {
+      if (message.type === 'start') {
+        suitePromise.cancel();
+      } else if (message.type === 'finish') {
+        expect(message).property('result').to.be.equal('aborted');
+        deferred.resolve();
+      }
+    }));
+
+    return when.all([
+      shouldFail(suitePromise),
+      deferred.promise
+    ]);
+  });
+
+  it('should not emit any start messages after the suite has been cancelled', function() {
+    var cancelled = false;
+    var deferred = when.defer();
+    var suitePromise = runTestSuite('suite_various_tests', new OnMessage(function(testPath, message) {
+      if (message.type === 'start') {
+        if (cancelled) {
+          deferred.reject(new Error('Got start message after cancellation'));
+        } else {
+          suitePromise.cancel();
+          cancelled = true;
+        }
+      }
+    }));
+
+    return when.race([
+      shouldFail(suitePromise),
+      deferred.promise
+    ]);
+  });
+
+  it('should emit a done message after a suite has been cancelled', function() {
+    var deferred = when.defer();
+    var suitePromise = runTestSuite('suite_single_successful_test', {
+      gotMessage: function(testPath, message) {
+        if (message.type === 'start') {
+          suitePromise.cancel();
+        }
+      },
+      done: function() {
+        deferred.resolve();
+      }
+    });
+
+    return when.all([
+      shouldFail(suitePromise),
+      deferred.promise
+    ]);
+  });
+
   it('should gracefully handle when the interface takes forever');
 });

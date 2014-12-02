@@ -141,11 +141,26 @@ describe('Suite runner', function() {
   });
 
   it('should fail if a test fails', function() {
-    return shouldFail(runTestSuite('suite_various_tests'), isTestFailureError);
+    return shouldFail(runTestSuite('suite_various_tests'), function(error) {
+      return isTestFailureError(error) && error.message.match(/failed/);
+    });
   });
 
   it('should fail with TestFailureError if a test has a syntax error', function() {
     return shouldFail(runTestSuite('suite_syntax_error'), isTestFailureError);
+  });
+
+  it('should fail when the suite is cancelled', function() {
+    var suitePromise = runTestSuite('suite_single_successful_test', [
+      new OnMessage(function(testPath, message) {
+        if (message.type === 'start') {
+          suitePromise.cancel();
+        }
+      })
+    ]);
+    return shouldFail(suitePromise, function(error) {
+      return isTestFailureError(error) && error.message.match(/cancelled/);
+    });
   });
 
   it('should keep running tests after a test fails', function() {
