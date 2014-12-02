@@ -196,9 +196,9 @@ describe('Suite runner', function() {
     }
 
     return when.all([
-      shouldFail(runTestSuite('suite_single_successful_test', [], {
+      shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
         child_process: { fork: fork },
-        timeout: 10
+        timeout: 200
       })),
       deferred.promise
     ]);
@@ -225,9 +225,9 @@ describe('Suite runner', function() {
     }
 
     return when.all([
-      shouldFail(runTestSuite('suite_single_successful_test', [], {
+      shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
         child_process: { fork: fork },
-        timeout: 10
+        timeout: 200
       })),
       deferred.promise
     ]);
