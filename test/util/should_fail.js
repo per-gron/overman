@@ -16,12 +16,12 @@
 
 'use strict';
 
-function shouldFail(promise, errorClass) {
+function shouldFail(promise, errorPredicate) {
   return promise
       .then(function() {
         throw new Error('Should fail');
       }, function(error) {
-        if (errorClass && !(error instanceof errorClass)) {
+        if (errorPredicate && !errorPredicate(error)) {
           throw new Error('Got unexpected error: ' + error);
         }
       });

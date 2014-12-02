@@ -60,6 +60,10 @@ function runTestSuite(suite, reporters, options) {
     }, options));
 }
 
+function isTestFailureError(err) {
+  return err instanceof TestFailureError;
+}
+
 /**
  * A function that takes a test suite and a dictionary from test names to
  * an array of the lines that the given test should print to stdout.
@@ -137,11 +141,11 @@ describe('Suite runner', function() {
   });
 
   it('should fail if a test fails', function() {
-    return shouldFail(runTestSuite('suite_various_tests'), TestFailureError);
+    return shouldFail(runTestSuite('suite_various_tests'), isTestFailureError);
   });
 
   it('should fail with TestFailureError if a test has a syntax error', function() {
-    return shouldFail(runTestSuite('suite_syntax_error'), TestFailureError);
+    return shouldFail(runTestSuite('suite_syntax_error'), isTestFailureError);
   });
 
   it('should keep running tests after a test fails', function() {

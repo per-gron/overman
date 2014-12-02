@@ -289,7 +289,7 @@ describe('Reporter API', function() {
     });
 
     return when.all([
-      shouldFail(testSuitePromise, TestFailureError),
+      shouldFail(testSuitePromise, function(err) { return err instanceof TestFailureError; }),
       deferred.promise
     ]);
   });
