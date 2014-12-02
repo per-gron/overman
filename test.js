@@ -28,7 +28,7 @@ var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
   .map(function(filename) { return path.join('test', filename) });
 
-suiterunner({
+var suitePromise = suiterunner({
     suites: suiteFiles,
     interface: './lib/interface/bdd_mocha',
     reporters: [
@@ -39,15 +39,20 @@ suiterunner({
     ],
     parallelism: 8,
     timeout: 10000
-  })
-  .then(function() {}, function(err) {
-    if (!(err instanceof TestFailureError)) {
-      // Test failures will already have been reported by reporters, so there
-      // is no need for us to report them here.
-      console.error('Internal error in Overman or a reporter:');
-      console.error(errorMessageUtil.indent(errorMessageUtil.prettyError({
-        value: err.stack
-      }), 2));
-    }
-    process.exit(1);
   });
+
+process.on('SIGINT', function() {
+  suitePromise.cancel();
+});
+
+suitePromise.done(function() {}, function(err) {
+  if (!(err instanceof TestFailureError)) {
+    // Test failures will already have been reported by reporters, so there
+    // is no need for us to report them here.
+    console.error('Internal error in Overman or a reporter:');
+    console.error(errorMessageUtil.indent(errorMessageUtil.prettyError({
+      value: err.stack
+    }), 2));
+  }
+  process.exit(1);
+});
