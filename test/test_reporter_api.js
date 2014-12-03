@@ -41,7 +41,7 @@ function runTestSuite(suite, reporter, options) {
       suites: [pathForSuite(suite)],
       interface: __dirname + '/../lib/interface/bdd_mocha',
       timeout: 500,
-      reporters: [reporter]
+      reporters: reporter ? [reporter] : []
     }, options));
 }
 
