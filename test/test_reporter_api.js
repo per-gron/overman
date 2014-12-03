@@ -225,7 +225,7 @@ describe('Reporter API', function() {
       function(testPath, message) { return message.type === 'testMessage'; },
       function(testPath, message) { return message.type === 'finish'; }
     ], {
-      child_process: { fork: fork }
+      childProcess: { fork: fork }
     });
   });
 
