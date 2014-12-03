@@ -292,6 +292,40 @@ describe('Suite runner', function() {
     });
   });
 
+  describe('Retries', function() {
+    function countAttempts(suite, attempts, suiteShouldFail) {
+      var retryAttempts = 0;
+
+      var realChildProcess = require('child_process');
+      var childProcess = Object.create(realChildProcess);
+      childProcess.fork = function() {
+        retryAttempts++;
+        return realChildProcess.fork.apply(this, arguments);
+      };
+
+      var suitePromise = runTestSuite(suite, [], { attempts: attempts, childProcess: childProcess });
+
+      return (suiteShouldFail ? shouldFail(suitePromise, isTestFailureError) : suitePromise)
+        .then(function() {
+          return retryAttempts;
+        });
+    }
+
+    it('should retry failed tests', function() {
+      return countAttempts('suite_single_failing_test', 3, true)
+        .then(function(attempts) {
+          expect(attempts).to.be.equal(3);
+        });
+    });
+
+    it('should not retry successful tests', function() {
+      return countAttempts('suite_single_successful_test', 3)
+        .then(function(attempts) {
+          expect(attempts).to.be.equal(1);
+        });
+    });
+  });
+
   describe('Slow thresholds', function() {
     it('should pass slow threshold to test', function() {
       return ensureOutputFromTests('suite_slow_print', {
