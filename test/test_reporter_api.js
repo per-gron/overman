@@ -41,7 +41,7 @@ function runTestSuite(suite, reporter, options) {
       suites: [pathForSuite(suite)],
       interface: __dirname + '/../lib/interface/bdd_mocha',
       timeout: 500,
-      reporters: [reporter]
+      reporters: reporter ? [reporter] : []
     }, options));
 }
 
@@ -225,7 +225,7 @@ describe('Reporter API', function() {
       function(testPath, message) { return message.type === 'testMessage'; },
       function(testPath, message) { return message.type === 'finish'; }
     ], {
-      child_process: { fork: fork }
+      childProcess: { fork: fork }
     });
   });
 

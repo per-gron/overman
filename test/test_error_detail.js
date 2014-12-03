@@ -43,7 +43,7 @@ describe('Error detail reporter', function() {
 
   it('should print registrationFailed information', function() {
     return doWithReporterAndCheck(function(reporter) {
-      reporter.registrationFailed(new listSuite.ListTestError('suite.js', 'blah\nblah'));
+      reporter.registrationFailed(new listSuite.ListTestError('Failed to process suite.js', 'blah\nblah'));
     }, [
       /Failed to process suite.js/,
       /blah/,
