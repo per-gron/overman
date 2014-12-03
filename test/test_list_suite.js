@@ -17,7 +17,15 @@
 'use strict';
 
 var expect = require('chai').expect;
+var path = require('path');
+var through = require('through');
+var when = require('when');
 var listSuite = require('../lib/list_suite');
+var shouldFail = require('./util/should_fail');
+
+function list(suite, timeout, childProcess) {
+  return listSuite.listTestsOfFile(timeout || 2000, __dirname + '/../lib/interface/bdd_mocha', suite, childProcess);
+}
 
 describe('List suite', function() {
   describe('ListTestError', function() {
@@ -38,6 +46,64 @@ describe('List suite', function() {
     it('should have a stack with the error output', function() {
       var error = new listSuite.ListTestError('suite_name', 'error\noutput');
       expect(error).property('stack').to.contain('error\noutput');
+    });
+  });
+
+  describe('#listTestsOfFile', function() {
+    it('should parse stdout JSON on success', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_single_successful_test');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['should succeed']
+            }
+          }]);
+        });
+    });
+
+    it('should fail with a ListTestError when the listing fails', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_syntax_error');
+      return shouldFail(list(suite), function(error) {
+        expect(error).property('message').to.match(/Failed to process .*suite_syntax_error/);
+        expect(error).property('stack').to.match(/SyntaxError: Unexpected identifier/);
+        return error instanceof listSuite.ListTestError;
+      });
+    });
+
+    it('should fail with a timed out ListTestError when the listing times out', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_neverending_listing');
+      return shouldFail(list(suite, 10), function(error) {
+        expect(error).property('message').to.match(/Timed out while listing tests of .*suite_neverending_listing/);
+        expect(error).property('stack').to.match(/Timed out while listing tests of .*suite_neverending_listing/);
+        expect(error).property('timeout').to.be.true;
+        return error instanceof listSuite.ListTestError;
+      });
+    });
+
+    it('should kill the subprocess on timeout', function() {
+      var killDeferred = when.defer();
+
+      function fork() {
+        return {
+          stdout: through(),
+          stderr: through(),
+          on: function() {},
+          kill: function(signal) {
+            expect(signal).to.be.equal('SIGKILL');
+            killDeferred.resolve();
+          }
+        };
+      }
+
+      var suite = path.resolve(__dirname + '/suite/suite_neverending_listing');
+      return when.all([
+        shouldFail(list(suite, 10, { fork: fork }), function(error) {
+          return error instanceof listSuite.ListTestError;
+        }),
+        killDeferred.promise
+      ]);
     });
   });
 });
