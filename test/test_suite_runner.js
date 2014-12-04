@@ -308,7 +308,7 @@ describe('Suite runner', function() {
       function fork() {
         retryAttempts++;
         return realFork.apply(this, arguments);
-      };
+      }
 
       var suitePromise = runTestSuite(suite, [], {
         attempts: attempts,
@@ -341,7 +341,7 @@ describe('Suite runner', function() {
         var child = new EventEmitter();
         child.stdin = new stream.Readable();
 
-        child.kill = function(signal) {
+        child.kill = function() {
           child.emit('exit', 0, null);
           child.emit('close');
         };
