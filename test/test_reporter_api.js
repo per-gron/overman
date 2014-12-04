@@ -58,13 +58,22 @@ function ensureMessages(suite, predicates, options) {
     var failed = false;
 
     var reporter = new OnMessage(function(testPath, message) {
-      if (predicates.length !== 0 && predicates[0](testPath, message)) {
-        predicates.shift();
-      } else if ((options || {}).requireAll) {
-        if (!failed) {
-          failed = true;
-          reject(new Error('Got unexpected message ' + message.type));
+      var success = false;
+      try {
+        if (predicates.length !== 0) {
+          predicates[0](testPath, message);
+          predicates.shift();
         }
+      } catch (error) {
+        if ((options || {}).requireAll) {
+          if (!failed) {
+            failed = true;
+            reject(error);
+          }
+        }
+      }
+      if (success) {
+        predicates.shift();
       }
     });
 
@@ -124,54 +133,54 @@ describe('Reporter API', function() {
 
   it('should emit start message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      return message.type === 'start';
+      expect(message).property('type').to.be.equal('start');
     }]);
   });
 
   it('should emit stdio message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      return (message.type === 'stdio' &&
-              message.stdin &&
-              message.stdout &&
-              message.stderr);
+      expect(message).property('type').to.be.equal('stdio');
+      expect(message).property('stdin').to.exist;
+      expect(message).property('stdout').to.exist;
+      expect(message).property('stderr').to.exist;
     }]);
   });
 
   it('should emit startedBeforeHooks message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      return message.type === 'startedBeforeHooks';
+      expect(message).property('type').to.be.equal('startedBeforeHooks');
     }]);
   });
 
   it('should emit startedBeforeHook message', function() {
     return ensureMessages('suite_test_with_named_before_hook', [function(testPath, message) {
-      return (message.type === 'startedBeforeHook' &&
-              message.name === 'beforeHookName');
+      expect(message).property('type').to.be.equal('startedBeforeHook');
+      expect(message).property('name').to.be.equal('beforeHookName');
     }]);
   });
 
   it('should emit startedTest message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      return message.type === 'startedTest';
+      expect(message).property('type').to.be.equal('startedTest');
     }]);
   });
 
   it('should emit startedAfterHooks message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      return message.type === 'startedAfterHooks';
+      expect(message).property('type').to.be.equal('startedAfterHooks');
     }]);
   });
 
   it('should emit startedAfterHook message', function() {
     return ensureMessages('suite_test_with_named_after_hook', [function(testPath, message) {
-      return (message.type === 'startedAfterHook' &&
-              message.name === 'afterHookName');
+      expect(message).property('type').to.be.equal('startedAfterHook');
+      expect(message).property('name').to.be.equal('afterHookName');
     }]);
   });
 
   it('should emit finishedAfterHooks message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      return message.type === 'finishedAfterHooks';
+      expect(message).property('type').to.be.equal('finishedAfterHooks');
     }]);
   });
 
@@ -183,31 +192,31 @@ describe('Reporter API', function() {
 
   it('should emit finish message for successful test', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      return (message.type === 'finish' &&
-              message.result === 'success' &&
-              message.code === 0);
+      expect(message).property('type').to.be.equal('finish');
+      expect(message).property('result').to.be.equal('success');
+      expect(message).property('code').to.be.equal(0);
     }]);
   });
 
   it('should emit finish message for failing test', function() {
     return ensureMessages('suite_single_throwing_test', [function(testPath, message) {
-      return (message.type === 'finish' &&
-              message.result === 'failure' &&
-              message.code === 1);
+      expect(message).property('type').to.be.equal('finish');
+      expect(message).property('result').to.be.equal('failure');
+      expect(message).property('code').to.be.equal(1);
     }]);
   });
 
   it('should emit finish message for skipped test', function() {
     return ensureMessages('suite_single_skipped_test', [function(testPath, message) {
-      return (message.type === 'finish' &&
-              message.result === 'skipped');
+      expect(message).property('type').to.be.equal('finish');
+      expect(message).property('result').to.be.equal('skipped');
     }]);
   });
 
   it('should emit finish message for test that times out', function() {
     return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
-      return (message.type === 'finish' &&
-              message.result === 'timeout');
+      expect(message).property('type').to.be.equal('finish');
+      expect(message).property('result').to.be.equal('timeout');
     }]);
   });
 
@@ -232,9 +241,9 @@ describe('Reporter API', function() {
     }
 
     return ensureMessages('suite_single_test_that_never_finishes', [
-      function(testPath, message) { return message.type === 'start'; },
-      function(testPath, message) { return message.type === 'testMessage'; },
-      function(testPath, message) { return message.type === 'finish'; }
+      function(testPath, message) { expect(message).property('type').to.be.equal('start'); },
+      function(testPath, message) { expect(message).property('type').to.be.equal('testMessage'); },
+      function(testPath, message) { expect(message).property('type').to.be.equal('finish'); }
     ], {
       childProcess: { fork: fork }
     });
@@ -262,7 +271,7 @@ describe('Reporter API', function() {
     return ensureMessages(
       'suite_single_failing_test',
       messages.map(function(type) {
-        return function(testPath, message) { return message.type === type; };
+        return function(testPath, message) { expect(message).property('type').to.be.equal(type); };
       }),
       {
         attempts: 2,
@@ -279,42 +288,42 @@ describe('Reporter API', function() {
 
   it('should emit error message when before hook fails', function() {
     return ensureMessages('suite_failing_before_hook', [function(testPath, message) {
-      return (message.type === 'error' &&
-              message.in === 'beforeHook',
-              message.inName === 'before hook');
+      expect(message).property('type').to.be.equal('error');
+      expect(message).property('in').to.be.equal('beforeHook');
+      expect(message).property('inName').to.be.equal('before hook');
     }]);
   });
 
   it('should emit error message when test fails', function() {
     return ensureMessages('suite_single_throwing_test', [function(testPath, message) {
-      return (message.type === 'error' &&
-              message.in === 'test');
+      expect(message).property('type').to.be.equal('error');
+      expect(message).property('in').to.be.equal('test');
     }]);
   });
 
   it('should emit error message when test fails with an uncaught exception', function() {
     return ensureMessages('suite_single_test_uncaught_exception', [function(testPath, message) {
-      return (message.type === 'error' &&
-              message.in === 'uncaught');
+      expect(message).property('type').to.be.equal('error');
+      expect(message).property('in').to.be.equal('uncaught');
     }]);
   });
 
   it('should emit error message when after hook fails', function() {
     return ensureMessages('suite_failing_after_hook', [function(testPath, message) {
-      return (message.type === 'error' &&
-              message.in === 'afterHook',
-              message.inName === 'after hook');
+      expect(message).property('type').to.be.equal('error');
+      expect(message).property('in').to.be.equal('afterHook');
+      expect(message).property('inName').to.be.equal('after hook');
     }]);
   });
 
   it('should report errors from both the test and after hook when both fail', function() {
     return ensureMessages('suite_failing_after_hook_and_failing_test', [function(testPath, message) {
-      return (message.type === 'error' &&
-              message.in === 'test');
+      expect(message).property('type').to.be.equal('error');
+      expect(message).property('in').to.be.equal('test');
     }, function(testPath, message) {
-      return (message.type === 'error' &&
-              message.in === 'afterHook',
-              message.inName === 'after hook');
+      expect(message).property('type').to.be.equal('error');
+      expect(message).property('in').to.be.equal('afterHook');
+      expect(message).property('inName').to.be.equal('after hook');
     }]);
   });
 
