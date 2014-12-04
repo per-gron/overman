@@ -406,4 +406,12 @@ describe('Reporter API', function() {
         error.message.match(/Timed out while listing tests of .*suite_neverending_listing/);
     });
   });
+
+  it('should emit breadcrumb messages when the test leaves a breadcrumb', function() {
+    ensureMessages('suite_leave_breadcrumb', [function(testPath, message) {
+      expect(message).property('type').to.be.equal('breadcrumb');
+      expect(message).property('message').to.be.equal('A breadcrumb');
+      expect(message).property('trace').to.be.contain('suite_leave_breadcrumb.js:');
+    }]);
+  });
 });

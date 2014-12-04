@@ -282,6 +282,18 @@ describe('BDD interface (Mocha flavor)', function() {
     });
   });
 
+  describe('Breadcrumbs', function() {
+    it('should allow leaving breadcrumbs', function(done) {
+      var suite = parseSuite('suite_leave_breadcrumb', { leaveBreadcrumb: function(message, trace) {
+        expect(message).to.be.equal('A breadcrumb');
+        expect(trace).to.contain('suite_leave_breadcrumb.js:');
+        done();
+      }});
+      var fn = getKeypath(suite, '.contents[0].run');
+      fn();
+    });
+  });
+
   it('should declare context global', function() {
     return suiteRunner({
       suites: [__dirname + '/suite/suite_access_context'],

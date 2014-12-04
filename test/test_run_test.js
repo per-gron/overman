@@ -286,4 +286,20 @@ describe('Test runner', function() {
       });
     });
   });
+
+  describe('Breadcrumbs', function() {
+    it('should emit breadcrumb messages when the test leaves a breadcrumb', function() {
+      var process = runTest('suite_leave_breadcrumb', 'should leave breadcrumb');
+      return when.promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'breadcrumb') {
+            expect(message).property('message').to.be.equal('A breadcrumb');
+            expect(message).property('trace').to.be.contain('suite_leave_breadcrumb.js:');
+            process.kill();
+            resolve();
+          }
+        });
+      });
+    });
+  });
 });
