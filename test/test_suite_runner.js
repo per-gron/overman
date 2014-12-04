@@ -198,7 +198,7 @@ describe('Suite runner', function() {
     return when.all([
       shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
         childProcess: { fork: fork },
-        timeout: 500
+        timeout: 10
       }), function(error) {
         return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
       }),
@@ -229,7 +229,7 @@ describe('Suite runner', function() {
     return when.all([
       shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
         childProcess: { fork: fork },
-        timeout: 500
+        timeout: 10
       }), function(error) {
         return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
       }),
