@@ -198,7 +198,7 @@ describe('Suite runner', function() {
     return when.all([
       shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
         childProcess: { fork: fork },
-        timeout: 500
+        timeout: 10
       }), function(error) {
         return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
       }),
@@ -229,7 +229,7 @@ describe('Suite runner', function() {
     return when.all([
       shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
         childProcess: { fork: fork },
-        timeout: 500
+        timeout: 10
       }), function(error) {
         return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
       }),
@@ -289,6 +289,70 @@ describe('Suite runner', function() {
             throw new Error('Test should have finished by now');
           })
       ]);
+    });
+
+    it('should respect listingTimeout', function() {
+      return shouldFail(runTestSuite('suite_single_successful_test', [], {
+        listingTimeout: 1
+      }), function(error) {
+        return isTestFailureError(error) && error.message.match(/Timed out while listing tests/);
+      });
+    });
+  });
+
+  describe('Retries', function() {
+    function countAttempts(suite, attempts, suiteShouldFail, opt_options) {
+      var retryAttempts = 0;
+
+      var realFork = (opt_options || {}).fork || require('child_process').fork;
+      function fork() {
+        retryAttempts++;
+        return realFork.apply(this, arguments);
+      }
+
+      var suitePromise = runTestSuite(suite, [], {
+        attempts: attempts,
+        childProcess: { fork: fork },
+        timeout: (opt_options || {}).timeout
+      });
+
+      return (suiteShouldFail ? shouldFail(suitePromise, isTestFailureError) : suitePromise)
+        .then(function() {
+          return retryAttempts;
+        });
+    }
+
+    it('should retry failed tests', function() {
+      return countAttempts('suite_single_failing_test', 3, true)
+        .then(function(attempts) {
+          expect(attempts).to.be.equal(3);
+        });
+    });
+
+    it('should not retry successful tests', function() {
+      return countAttempts('suite_single_successful_test', 3)
+        .then(function(attempts) {
+          expect(attempts).to.be.equal(1);
+        });
+    });
+
+    it('should retry tests that time out even when the test process exits with a 0 exit code', function() {
+      function fork() {
+        var child = new EventEmitter();
+        child.stdin = new stream.Readable();
+
+        child.kill = function() {
+          child.emit('exit', 0, null);
+          child.emit('close');
+        };
+
+        return child;
+      }
+
+      return countAttempts('suite_single_successful_test', 2, true, { timeout: 10, fork: fork })
+        .then(function(attempts) {
+          expect(attempts).to.be.equal(2);
+        });
     });
   });
 

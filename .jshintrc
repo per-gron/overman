@@ -1,5 +1,6 @@
 {
-  "-W030" : true,
+  "-W030": true,
+  "-W040": false,
   "curly": true,
   "eqeqeq": true,
   "forin": true,

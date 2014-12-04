@@ -161,6 +161,12 @@ describe('Error message utilities', function() {
       tracker.gotMessage({ test: 'path2' }, { type: 'startedAfterHook', name: 'The hook 2' });
       expect(tracker.getLastPhase({ test: 'path1' })).to.be.deep.equal({ in: 'beforeHook', inName: 'The hook 1' });
     });
+
+    it('should reset the phase on retry', function() {
+      tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
+      tracker.gotMessage({ test: 'path' }, { type: 'retry' });
+      expect(tracker.getLastPhase({ test: 'path' })).to.not.exist;
+    });
   });
 
   describe('ErrorTracker', function() {
@@ -200,6 +206,15 @@ describe('Error message utilities', function() {
       tracker.gotMessage(path1, errorMessage1);
       tracker.gotMessage(path2, errorMessage2);
       expect(tracker.getErrors(path1)).to.be.deep.equal([errorMessage1]);
+    });
+
+    it('should reset the error on retry', function() {
+      var path = { test: 'path' };
+      var errorMessage = { type: 'error', value: 'Hey!' };
+
+      tracker.gotMessage(path, errorMessage);
+      tracker.gotMessage(path, { type: 'retry' });
+      expect(tracker.getErrors(path)).to.be.empty;
     });
   });
 });
