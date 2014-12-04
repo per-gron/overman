@@ -301,17 +301,20 @@ describe('Suite runner', function() {
   });
 
   describe('Retries', function() {
-    function countAttempts(suite, attempts, suiteShouldFail) {
+    function countAttempts(suite, attempts, suiteShouldFail, opt_options) {
       var retryAttempts = 0;
 
-      var realChildProcess = require('child_process');
-      var childProcess = Object.create(realChildProcess);
-      childProcess.fork = function() {
+      var realFork = (opt_options || {}).fork || require('child_process').fork;
+      function fork() {
         retryAttempts++;
-        return realChildProcess.fork.apply(this, arguments);
+        return realFork.apply(this, arguments);
       };
 
-      var suitePromise = runTestSuite(suite, [], { attempts: attempts, childProcess: childProcess });
+      var suitePromise = runTestSuite(suite, [], {
+        attempts: attempts,
+        childProcess: { fork: fork },
+        timeout: (opt_options || {}).timeout
+      });
 
       return (suiteShouldFail ? shouldFail(suitePromise, isTestFailureError) : suitePromise)
         .then(function() {
@@ -330,6 +333,25 @@ describe('Suite runner', function() {
       return countAttempts('suite_single_successful_test', 3)
         .then(function(attempts) {
           expect(attempts).to.be.equal(1);
+        });
+    });
+
+    it('should retry tests that time out even when the test process exits with a 0 exit code', function() {
+      function fork() {
+        var child = new EventEmitter();
+        child.stdin = new stream.Readable();
+
+        child.kill = function(signal) {
+          child.emit('exit', 0, null);
+          child.emit('close');
+        };
+
+        return child;
+      }
+
+      return countAttempts('suite_single_successful_test', 2, true, { timeout: 10, fork: fork })
+        .then(function(attempts) {
+          expect(attempts).to.be.equal(2);
         });
     });
   });
