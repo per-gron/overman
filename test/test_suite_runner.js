@@ -290,6 +290,14 @@ describe('Suite runner', function() {
           })
       ]);
     });
+
+    it('should respect listingTimeout', function() {
+      return shouldFail(runTestSuite('suite_single_successful_test', [], {
+        listingTimeout: 1
+      }), function(error) {
+        return isTestFailureError(error) && error.message.match(/Timed out while listing tests/);
+      });
+    });
   });
 
   describe('Retries', function() {
