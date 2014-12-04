@@ -55,13 +55,24 @@ function runTestSuite(suite, reporter, options) {
  */
 function ensureMessages(suite, predicates, options) {
   return when.promise(function(resolve, reject) {
+    var failed = false;
+
     var reporter = new OnMessage(function(testPath, message) {
       if (predicates.length !== 0 && predicates[0](testPath, message)) {
         predicates.shift();
+      } else if ((options || {}).requireAll) {
+        if (!failed) {
+          failed = true;
+          reject(new Error('Got unexpected message ' + message.type));
+        }
       }
     });
 
     function finish() {
+      if (failed) {
+        return;
+      }
+
       if (predicates.length === 0) {
         resolve();
       } else {
@@ -227,6 +238,36 @@ describe('Reporter API', function() {
     ], {
       childProcess: { fork: fork }
     });
+  });
+
+  it('should emit retry message when a test is retried', function() {
+    var messages = [
+      'start',
+      'stdio',
+      'startedBeforeHooks',
+      'startedTest',
+      'error',
+      'startedAfterHooks',
+      'finishedAfterHooks',
+      'retry',
+      'stdio',
+      'startedBeforeHooks',
+      'startedTest',
+      'error',
+      'startedAfterHooks',
+      'finishedAfterHooks',
+      'finish',
+    ];
+
+    return ensureMessages(
+      'suite_single_failing_test',
+      messages.map(function(type) {
+        return function(testPath, message) { return message.type === type; };
+      }),
+      {
+        attempts: 2,
+        requireAll: true
+      });
   });
 
   it('should emit messages with a correct test path', function() {
