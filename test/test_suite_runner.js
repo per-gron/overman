@@ -178,65 +178,6 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_single_test_infinite_loop'));
   });
 
-  it('should send SIGINT to tests that time out', function() {
-    var deferred = when.defer();
-
-    function fork() {
-      var child = new EventEmitter();
-      child.stdin = new stream.Readable();
-
-      child.kill = function(signal) {
-        expect(signal).to.be.equal('SIGINT');
-        child.emit('exit', 0, null);
-        child.emit('close');
-        deferred.resolve();
-      };
-
-      return child;
-    }
-
-    return when.all([
-      shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
-        childProcess: { fork: fork },
-        timeout: 10
-      }), function(error) {
-        return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
-      }),
-      deferred.promise
-    ]);
-  });
-
-  it('should send SIGKILL to tests that don\'t die after SIGINT', function() {
-    var deferred = when.defer();
-
-    function fork() {
-      var child = new EventEmitter();
-      child.stdin = new stream.Readable();
-
-      child.kill = function(signal) {
-        if (signal === 'SIGINT') {
-          return; // Ignore SIGINT, wait until we get SIGKILL
-        }
-        expect(signal).to.be.equal('SIGKILL');
-        child.emit('exit', 0, null);
-        child.emit('close');
-        deferred.resolve();
-      };
-
-      return child;
-    }
-
-    return when.all([
-      shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
-        childProcess: { fork: fork },
-        timeout: 10
-      }), function(error) {
-        return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
-      }),
-      deferred.promise
-    ]);
-  });
-
   it('should run tests sequentially by default', function() {
     var counter = new ParallelismCounter();
     return runTestSuite('suite_various_tests', [counter])
@@ -255,8 +196,8 @@ describe('Suite runner', function() {
       });
   });
 
-  it('should fail when encountering .only tests and disallow_only is set', function() {
-    return shouldFail(runTestSuite('suite_single_only_test', [], { disallow_only: true }));
+  it('should fail when encountering .only tests and disallowOnly is set', function() {
+    return shouldFail(runTestSuite('suite_single_only_test', [], { disallowOnly: true }));
   });
 
   it('should run only tests that match the specified match regex', function() {
@@ -297,6 +238,88 @@ describe('Suite runner', function() {
       }), function(error) {
         return isTestFailureError(error) && error.message.match(/Timed out while listing tests/);
       });
+    });
+
+    it('should send SIGINT to tests that time out', function() {
+      var deferred = when.defer();
+
+      function fork() {
+        var child = new EventEmitter();
+        child.stdin = new stream.Readable();
+
+        child.kill = function(signal) {
+          expect(signal).to.be.equal('SIGINT');
+          child.emit('exit', 0, null);
+          child.emit('close');
+          deferred.resolve();
+        };
+
+        return child;
+      }
+
+      return when.all([
+        shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
+          childProcess: { fork: fork },
+          timeout: 10
+        }), function(error) {
+          return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
+        }),
+        deferred.promise
+      ]);
+    });
+
+    it('should send SIGKILL to tests that don\'t die after SIGINT', function() {
+      var deferred = when.defer();
+
+      function fork() {
+        var child = new EventEmitter();
+        child.stdin = new stream.Readable();
+
+        child.kill = function(signal) {
+          if (signal === 'SIGINT') {
+            return; // Ignore SIGINT, wait until we get SIGKILL
+          }
+          expect(signal).to.be.equal('SIGKILL');
+          child.emit('exit', 0, null);
+          child.emit('close');
+          deferred.resolve();
+        };
+
+        return child;
+      }
+
+      return when.all([
+        shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
+          childProcess: { fork: fork },
+          timeout: 10
+        }), function(error) {
+          return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
+        }),
+        deferred.promise
+      ]);
+    });
+
+    it('should respect the graceTime parameter', function() {
+      var softKillDeferred = when.defer();
+
+      function softKill(process, timeout) {
+        process.kill('SIGKILL');
+        expect(timeout).to.be.equal(1234);
+        softKillDeferred.resolve();
+      }
+
+      var suitePromise = shouldFail(runTestSuite('suite_single_successful_test', [], {
+        timeout: 1,
+        graceTime: 1234,
+        softKill: softKill
+      }), function(error) {
+        return error instanceof TestFailureError;
+      });
+
+      return when.all([
+        softKillDeferred.promise,
+        suitePromise
+      ]);
     });
   });
 
