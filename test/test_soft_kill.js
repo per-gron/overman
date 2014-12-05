@@ -70,12 +70,13 @@ describe('Soft kill', function() {
       process.nextTick(function() {
         self.emit('timeout');
       });
+      this.cancel = function() {};
     }
     TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
 
     softKill(proc, 1, TimeoutTimer);
 
-    process.emit('exit');
+    proc.emit('exit');
   });
 
   it('should immediately send SIGKILL if timeout is 0', function() {
