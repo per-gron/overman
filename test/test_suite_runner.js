@@ -255,8 +255,8 @@ describe('Suite runner', function() {
       });
   });
 
-  it('should fail when encountering .only tests and disallow_only is set', function() {
-    return shouldFail(runTestSuite('suite_single_only_test', [], { disallow_only: true }));
+  it('should fail when encountering .only tests and disallowOnly is set', function() {
+    return shouldFail(runTestSuite('suite_single_only_test', [], { disallowOnly: true }));
   });
 
   it('should run only tests that match the specified match regex', function() {
