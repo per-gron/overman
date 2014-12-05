@@ -414,4 +414,12 @@ describe('Reporter API', function() {
       expect(message).property('trace').to.be.contain('suite_leave_breadcrumb.js:');
     }]);
   });
+
+  it('should emit debugInfo messages when the test emits debug info', function() {
+    ensureMessages('suite_emit_debug_info', [function(testPath, message) {
+      expect(message).property('type').to.be.equal('debugInfo');
+      expect(message).property('name').to.be.equal('name');
+      expect(message).property('value').to.be.deep.equal({ the: 'value' });
+    }]);
+  });
 });

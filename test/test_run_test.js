@@ -302,4 +302,20 @@ describe('Test runner', function() {
       });
     });
   });
+
+  describe('Debug info', function() {
+    it('should emit debugInfo messages info when the test emits debug info', function() {
+      var process = runTest('suite_emit_debug_info', 'should emit debug info');
+      return when.promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'debugInfo') {
+            expect(message).property('name').to.be.equal('name');
+            expect(message).property('value').to.be.deep.equal({ the: 'value' });
+            process.kill();
+            resolve();
+          }
+        });
+      });
+    });
+  });
 });
