@@ -308,6 +308,18 @@ describe('BDD interface (Mocha flavor)', function() {
     });
   });
 
+  describe('Debug info', function() {
+    it('should allow emitting debug info', function(done) {
+      var suite = parseSuite('suite_emit_debug_info', { emitDebugInfo: function(name, value) {
+        expect(name).to.be.equal('name');
+        expect(value).to.be.deep.equal({ the: 'value' });
+        done();
+      }});
+      var fn = getKeypath(suite, '.contents[0].run');
+      fn();
+    });
+  });
+
   it('should declare context global', function() {
     return suiteRunner({
       suites: [__dirname + '/suite/suite_access_context'],
