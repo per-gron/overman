@@ -32,7 +32,7 @@ describe('Soft kill', function() {
 
     softKill(fakeProcess(function kill(signal) {
       sigintWasSent = sigintWasSent || signal === 'SIGINT';
-    }), 0);
+    }), 1);
 
     expect(sigintWasSent, 'SIGINT should be sent immediately').to.be.true;
   });
@@ -53,7 +53,7 @@ describe('Soft kill', function() {
       this.cancel = done;
     };
     TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
-    softKill(process, 0, TimeoutTimer);
+    softKill(process, 1, TimeoutTimer);
 
     process.emit('exit');
   });
@@ -73,8 +73,20 @@ describe('Soft kill', function() {
     }
     TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
 
-    softKill(proc, 0, TimeoutTimer);
+    softKill(proc, 1, TimeoutTimer);
 
     process.emit('exit');
+  });
+
+  it('should immediately send SIGKILL if timeout is 0', function() {
+    var wasKilled = false;
+    var proc = fakeProcess(function kill(signal) {
+      expect(signal).to.be.equal('SIGKILL');
+      wasKilled = true;
+    });
+
+    softKill(proc, 0, {});
+
+    expect(wasKilled, 'process should be immediately killed').to.be.true;
   });
 });
