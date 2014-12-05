@@ -41,7 +41,7 @@ describe('Soft kill', function() {
     function TimeoutTimer(timeout) {
       expect(timeout).to.be.equal(123);
       done();
-    };
+    }
     TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
     softKill(fakeProcess(), 123, TimeoutTimer);
   });
@@ -49,9 +49,9 @@ describe('Soft kill', function() {
   it('should cancel the timer when the process exits', function(done) {
     var process = fakeProcess();
 
-    function TimeoutTimer(timeout) {
+    function TimeoutTimer() {
       this.cancel = done;
-    };
+    }
     TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
     softKill(process, 1, TimeoutTimer);
 
@@ -65,7 +65,7 @@ describe('Soft kill', function() {
       }
     });
 
-    function TimeoutTimer(timeout) {
+    function TimeoutTimer() {
       var self = this;
       process.nextTick(function() {
         self.emit('timeout');
