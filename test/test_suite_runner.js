@@ -298,6 +298,29 @@ describe('Suite runner', function() {
         deferred.promise
       ]);
     });
+
+    it('should respect the graceTime parameter', function() {
+      var softKillDeferred = when.defer();
+
+      function softKill(process, timeout) {
+        process.kill('SIGKILL');
+        expect(timeout).to.be.equal(1234);
+        softKillDeferred.resolve();
+      }
+
+      var suitePromise = shouldFail(runTestSuite('suite_single_successful_test', [], {
+        timeout: 1,
+        graceTime: 1234,
+        softKill: softKill
+      }), function(error) {
+        return error instanceof TestFailureError;
+      });
+
+      return when.all([
+        softKillDeferred.promise,
+        suitePromise
+      ]);
+    });
   });
 
   describe('Retries', function() {
