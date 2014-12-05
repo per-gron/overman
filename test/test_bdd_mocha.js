@@ -222,36 +222,44 @@ describe('BDD interface (Mocha flavor)', function() {
 
   describe('Timeouts', function() {
     it('should allow getting the timeout for the current test', function() {
-      var suite = parseSuite('suite_timeout_return', { getTimeout: function() {
-        return 12345;
-      }});
+      var suite = parseSuite('suite_timeout_return', {
+        getTimeout: function() {
+          return 12345;
+        }
+      });
       var fn = getKeypath(suite, '.contents[0].run');
       expect(fn).to.be.a('function');
       expect(fn()).to.be.equal(12345);
     });
 
     it('should allow getting the timeout for the current test via the currentTest property', function() {
-      var suite = parseSuite('suite_timeout_return_current_test', { getTimeout: function() {
-        return 12345;
-      }});
+      var suite = parseSuite('suite_timeout_return_current_test', {
+        getTimeout: function() {
+          return 12345;
+        }
+      });
       var fn = getKeypath(suite, '.contents[0].run');
       expect(fn).to.be.a('function');
       expect(fn()).to.be.equal(12345);
     });
 
     it('should allow setting the timeout for the current test', function(done) {
-      var suite = parseSuite('suite_timeout_set', { setTimeout: function(value) {
-        expect(value).to.be.equal(10);
-        done();
-      }});
+      var suite = parseSuite('suite_timeout_set', {
+        setTimeout: function(value) {
+          expect(value).to.be.equal(10);
+          done();
+        }
+      });
       var fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
 
     it('should allow getting the timeout in a hook', function() {
-      var suite = parseSuite('suite_timeout_return_in_hook', { getTimeout: function() {
-        return 12345;
-      }});
+      var suite = parseSuite('suite_timeout_return_in_hook', {
+        getTimeout: function() {
+          return 12345;
+        }
+      });
       var beforeFn = getKeypath(suite, '.before[0].run');
       expect(beforeFn).to.be.a('function');
       beforeFn();
@@ -264,19 +272,23 @@ describe('BDD interface (Mocha flavor)', function() {
 
   describe('Slow thresholds', function() {
     it('should allow getting the timeout for the current test', function() {
-      var suite = parseSuite('suite_slow_return', { getSlowThreshold: function() {
-        return 23456;
-      }});
+      var suite = parseSuite('suite_slow_return', {
+        getSlowThreshold: function() {
+          return 23456;
+        }
+      });
       var fn = getKeypath(suite, '.contents[0].run');
       expect(fn).to.be.a('function');
       expect(fn()).to.be.equal(23456);
     });
 
     it('should allow setting the slow threshold for the current test', function(done) {
-      var suite = parseSuite('suite_slow_set', { setSlowThreshold: function(value) {
-        expect(value).to.be.equal(20);
-        done();
-      }});
+      var suite = parseSuite('suite_slow_set', {
+        setSlowThreshold: function(value) {
+          expect(value).to.be.equal(20);
+          done();
+        }
+      });
       var fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
@@ -284,11 +296,13 @@ describe('BDD interface (Mocha flavor)', function() {
 
   describe('Breadcrumbs', function() {
     it('should allow leaving breadcrumbs', function(done) {
-      var suite = parseSuite('suite_leave_breadcrumb', { leaveBreadcrumb: function(message, trace) {
-        expect(message).to.be.equal('A breadcrumb');
-        expect(trace).to.contain('suite_leave_breadcrumb.js:');
-        done();
-      }});
+      var suite = parseSuite('suite_leave_breadcrumb', {
+        leaveBreadcrumb: function(message, trace) {
+          expect(message).to.be.equal('A breadcrumb');
+          expect(trace).to.contain('suite_leave_breadcrumb.js:');
+          done();
+        }
+      });
       var fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
