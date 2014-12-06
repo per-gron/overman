@@ -7,6 +7,10 @@
     "lint": "node node_modules/.bin/jshint --verbose -c .jshintrc test lib",
     "test": "npm run lint && node node_modules/mocha/bin/mocha"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pereckerdal/overman.git"
+  },
   "keywords": [
     "test",
     "runner",
