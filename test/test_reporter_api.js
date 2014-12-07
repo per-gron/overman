@@ -406,6 +406,17 @@ describe('Reporter API', function() {
     ]);
   });
 
+  describe('Test timer', function() {
+    ['time', 'halfSlow', 'slow'].forEach(function(field) {
+      it('should emit finish messages that have ' + field + ' property', function() {
+        return ensureMessages('suite_single_successful_test', [function(testPath, message) {
+          expect(message).property('type').to.be.equal('finish');
+          expect(message).property(field).to.exist;
+        }]);
+      });
+    });
+  });
+
   it('should gracefully handle when the interface takes forever', function() {
     return shouldFail(runTestSuite('suite_neverending_listing'), function(error) {
       return (error instanceof TestFailureError) &&
