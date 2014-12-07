@@ -339,7 +339,9 @@ describe('Reporter API', function() {
     });
 
     return when.all([
-      shouldFail(testSuitePromise, function(err) { return err instanceof TestFailureError; }),
+      shouldFail(testSuitePromise, function(err) {
+        return err instanceof TestFailureError;
+      }),
       deferred.promise
     ]);
   });
@@ -356,7 +358,9 @@ describe('Reporter API', function() {
     }));
 
     return when.all([
-      shouldFail(suitePromise),
+      shouldFail(suitePromise, function(err) {
+        return err instanceof TestFailureError;
+      }),
       deferred.promise
     ]);
   });
@@ -395,7 +399,9 @@ describe('Reporter API', function() {
     });
 
     return when.all([
-      shouldFail(suitePromise),
+      shouldFail(suitePromise, function(error) {
+        return error instanceof TestFailureError;
+      }),
       deferred.promise
     ]);
   });
