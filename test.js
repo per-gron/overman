@@ -38,7 +38,8 @@ var suitePromise = suiterunner({
       new ErrorDetailReporter(process.stdout)
     ],
     parallelism: 8,
-    timeout: 10000
+    timeout: 10000,
+    slowThreshold: 1000
   });
 
 process.on('SIGINT', function() {
