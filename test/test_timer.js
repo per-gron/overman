@@ -34,6 +34,12 @@ describe('Timer reporter', function() {
     timer = new Timer(new OnMessage(messages.emit.bind(messages, 'message')), slowThreshold, clock);
   });
 
+  it('should require the default slow threshold parameter', function() {
+    expect(function() {
+      new Timer({});
+    }).to.throw(/slow threshold/);
+  });
+
   describe('Forwarding', function() {
     ['registrationFailed', 'registerTests', 'done', 'gotMessage'].forEach(function(message) {
       it('should forward ' + message + ' calls', function(done) {
