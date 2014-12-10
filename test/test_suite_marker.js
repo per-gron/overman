@@ -67,7 +67,7 @@ describe('SuiteMarker reporter', function() {
 
       expect(expectations, 'did not expect a message (got ' + JSON.stringify(args) + ')').to.not.be.empty;
 
-      expect(expectations.shift()).to.be.deep.equal(args);
+      expect(args).to.be.deep.equal(expectations.shift());
     }));
 
     function updateExpectations(newExpectations) {
@@ -102,6 +102,34 @@ describe('SuiteMarker reporter', function() {
     ]);
   });
 
+  it('should emit suiteStart message only for the first test in a suite', function() {
+    var path1 = { file: 'file', path: ['test1'] };
+    var path2 = { file: 'file', path: ['test2'] };
+    var suitePath = { file: 'file', path: [] };
+
+    testSuiteMarker([path1, path2], [
+      {
+        emit: { testPath: path1, message: { type: 'start' } },
+        expect: [
+          { testPath: null, message: { type: 'suiteStart', suite: suitePath } },
+          { testPath: path1, message: { type: 'start' } }
+        ]
+      },
+      {
+        emit: { testPath: path1, message: { type: 'finish' } },
+        expect: [
+          { testPath: path1, message: { type: 'finish' } }
+        ]
+      },
+      {
+        emit: { testPath: path2, message: { type: 'start' } },
+        expect: [
+          { testPath: path2, message: { type: 'start' } }
+        ]
+      }
+    ]);
+  });
+
   it('should emit suiteFinish message', function() {
     var path = { file: 'file', path: ['test'] };
     var suitePath = { file: 'file', path: [] };
@@ -125,7 +153,12 @@ describe('SuiteMarker reporter', function() {
 
     testSuiteMarker([path1, path2], [
       { emit: { testPath: path1, message: { type: 'start' } } },
-      { emit: { testPath: path1, message: { type: 'finish' } } },
+      {
+        emit: { testPath: path1, message: { type: 'finish' } },
+        expect: [
+          { testPath: path1, message: { type: 'finish' } },
+        ]
+      },
       { emit: { testPath: path2, message: { type: 'start' } } },
       {
         emit: { testPath: path2, message: { type: 'finish' } },
