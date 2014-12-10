@@ -152,6 +152,23 @@ describe('SuiteMarker reporter', function() {
         }
       ]);
     });
+
+    it('should emit suiteStart messages for ancestor tests as well when needed', function() {
+      var path = { file: 'file', path: ['suite', 'test1'] };
+      var suitePath1 = { file: 'file', path: [] };
+      var suitePath2 = { file: 'file', path: ['suite'] };
+
+      testSuiteMarker([path], [
+        {
+          emit: { testPath: path, message: { type: 'start' } },
+          expect: [
+            { testPath: null, message: { type: 'suiteStart', suite: suitePath1 } },
+            { testPath: null, message: { type: 'suiteStart', suite: suitePath2 } },
+            { testPath: path, message: { type: 'start' } }
+          ]
+        }
+      ]);
+    });
   });
 
   describe('suiteFinish', function() {
