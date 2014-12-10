@@ -87,112 +87,116 @@ describe('SuiteMarker reporter', function() {
     updateExpectations(null);
   }
 
-  it('should emit suiteStart message', function() {
-    var path = { file: 'file', path: ['test'] };
-    var suitePath = { file: 'file', path: [] };
+  describe('suiteStart', function() {
+    it('should emit suiteStart message', function() {
+      var path = { file: 'file', path: ['test'] };
+      var suitePath = { file: 'file', path: [] };
 
-    testSuiteMarker([path], [
-      {
-        emit: { testPath: path, message: { type: 'start' } },
-        expect: [
-          { testPath: null, message: { type: 'suiteStart', suite: suitePath } },
-          { testPath: path, message: { type: 'start' } }
-        ]
-      }
-    ]);
+      testSuiteMarker([path], [
+        {
+          emit: { testPath: path, message: { type: 'start' } },
+          expect: [
+            { testPath: null, message: { type: 'suiteStart', suite: suitePath } },
+            { testPath: path, message: { type: 'start' } }
+          ]
+        }
+      ]);
+    });
+
+    it('should emit suiteStart message only for the first test in a suite', function() {
+      var path1 = { file: 'file', path: ['test1'] };
+      var path2 = { file: 'file', path: ['test2'] };
+      var suitePath = { file: 'file', path: [] };
+
+      testSuiteMarker([path1, path2], [
+        {
+          emit: { testPath: path1, message: { type: 'start' } },
+          expect: [
+            { testPath: null, message: { type: 'suiteStart', suite: suitePath } },
+            { testPath: path1, message: { type: 'start' } }
+          ]
+        },
+        {
+          emit: { testPath: path1, message: { type: 'finish' } },
+          expect: [
+            { testPath: path1, message: { type: 'finish' } }
+          ]
+        },
+        {
+          emit: { testPath: path2, message: { type: 'start' } },
+          expect: [
+            { testPath: path2, message: { type: 'start' } }
+          ]
+        }
+      ]);
+    });
   });
 
-  it('should emit suiteStart message only for the first test in a suite', function() {
-    var path1 = { file: 'file', path: ['test1'] };
-    var path2 = { file: 'file', path: ['test2'] };
-    var suitePath = { file: 'file', path: [] };
+  describe('suiteFinish', function() {
+    it('should emit suiteFinish message', function() {
+      var path = { file: 'file', path: ['test'] };
+      var suitePath = { file: 'file', path: [] };
 
-    testSuiteMarker([path1, path2], [
-      {
-        emit: { testPath: path1, message: { type: 'start' } },
-        expect: [
-          { testPath: null, message: { type: 'suiteStart', suite: suitePath } },
-          { testPath: path1, message: { type: 'start' } }
-        ]
-      },
-      {
-        emit: { testPath: path1, message: { type: 'finish' } },
-        expect: [
-          { testPath: path1, message: { type: 'finish' } }
-        ]
-      },
-      {
-        emit: { testPath: path2, message: { type: 'start' } },
-        expect: [
-          { testPath: path2, message: { type: 'start' } }
-        ]
-      }
-    ]);
-  });
+      testSuiteMarker([path], [
+        { emit: { testPath: path, message: { type: 'start' } } },
+        {
+          emit: { testPath: path, message: { type: 'finish' } },
+          expect: [
+            { testPath: path, message: { type: 'finish' } },
+            { testPath: null, message: { type: 'suiteFinish', suite: suitePath } }
+          ]
+        }
+      ]);
+    });
 
-  it('should emit suiteFinish message', function() {
-    var path = { file: 'file', path: ['test'] };
-    var suitePath = { file: 'file', path: [] };
+    it('should emit suiteFinish message when all tests in the suite are finished', function() {
+      var path1 = { file: 'file', path: ['test1'] };
+      var path2 = { file: 'file', path: ['test2'] };
+      var suitePath = { file: 'file', path: [] };
 
-    testSuiteMarker([path], [
-      { emit: { testPath: path, message: { type: 'start' } } },
-      {
-        emit: { testPath: path, message: { type: 'finish' } },
-        expect: [
-          { testPath: path, message: { type: 'finish' } },
-          { testPath: null, message: { type: 'suiteFinish', suite: suitePath } }
-        ]
-      }
-    ]);
-  });
+      testSuiteMarker([path1, path2], [
+        { emit: { testPath: path1, message: { type: 'start' } } },
+        {
+          emit: { testPath: path1, message: { type: 'finish' } },
+          expect: [
+            { testPath: path1, message: { type: 'finish' } },
+          ]
+        },
+        { emit: { testPath: path2, message: { type: 'start' } } },
+        {
+          emit: { testPath: path2, message: { type: 'finish' } },
+          expect: [
+            { testPath: path2, message: { type: 'finish' } },
+            { testPath: null, message: { type: 'suiteFinish', suite: suitePath } }
+          ]
+        }
+      ]);
+    });
 
-  it('should emit suiteFinish message when all tests in the suite are finished', function() {
-    var path1 = { file: 'file', path: ['test1'] };
-    var path2 = { file: 'file', path: ['test2'] };
-    var suitePath = { file: 'file', path: [] };
+    it('should emit suiteFinish message when all tests, including tests in subsuites, are finished', function() {
+      var path1 = { file: 'file', path: ['test1'] };
+      var suitePath1 = { file: 'file', path: [] };
+      var path2 = { file: 'file', path: ['suite', 'test2'] };
+      var suitePath2 = { file: 'file', path: ['suite'] };
 
-    testSuiteMarker([path1, path2], [
-      { emit: { testPath: path1, message: { type: 'start' } } },
-      {
-        emit: { testPath: path1, message: { type: 'finish' } },
-        expect: [
-          { testPath: path1, message: { type: 'finish' } },
-        ]
-      },
-      { emit: { testPath: path2, message: { type: 'start' } } },
-      {
-        emit: { testPath: path2, message: { type: 'finish' } },
-        expect: [
-          { testPath: path2, message: { type: 'finish' } },
-          { testPath: null, message: { type: 'suiteFinish', suite: suitePath } }
-        ]
-      }
-    ]);
-  });
-
-  it('should emit suiteFinish message when all tests, including tests in subsuites, are finished', function() {
-    var path1 = { file: 'file', path: ['test1'] };
-    var suitePath1 = { file: 'file', path: [] };
-    var path2 = { file: 'file', path: ['suite', 'test2'] };
-    var suitePath2 = { file: 'file', path: ['suite'] };
-
-    testSuiteMarker([path1, path2], [
-      { emit: { testPath: path1, message: { type: 'start' } } },
-      {
-        emit: { testPath: path1, message: { type: 'finish' } },
-        expect: [
-          { testPath: path1, message: { type: 'finish' } }
-        ]
-      },
-      { emit: { testPath: path2, message: { type: 'start' } } },
-      {
-        emit: { testPath: path2, message: { type: 'finish' } },
-        expect: [
-          { testPath: path2, message: { type: 'finish' } },
-          { testPath: null, message: { type: 'suiteFinish', suite: suitePath2 } },
-          { testPath: null, message: { type: 'suiteFinish', suite: suitePath1 } }
-        ]
-      }
-    ]);
+      testSuiteMarker([path1, path2], [
+        { emit: { testPath: path1, message: { type: 'start' } } },
+        {
+          emit: { testPath: path1, message: { type: 'finish' } },
+          expect: [
+            { testPath: path1, message: { type: 'finish' } }
+          ]
+        },
+        { emit: { testPath: path2, message: { type: 'start' } } },
+        {
+          emit: { testPath: path2, message: { type: 'finish' } },
+          expect: [
+            { testPath: path2, message: { type: 'finish' } },
+            { testPath: null, message: { type: 'suiteFinish', suite: suitePath2 } },
+            { testPath: null, message: { type: 'suiteFinish', suite: suitePath1 } }
+          ]
+        }
+      ]);
+    });
   });
 });
