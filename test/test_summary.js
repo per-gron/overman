@@ -129,7 +129,7 @@ describe('Summary reporter', function() {
     ]);
   });
 
-  it('should report number of skipped, aborted, timed out and number of failing tests', function() {
+  it('should report number of skipped, timed out and number of failing tests', function() {
     return performActionsAndCheckOutput(function(summary) {
       summary.registerTests([]);
       summary.gotMessage(null, { type: 'finish', result: 'failure' });
