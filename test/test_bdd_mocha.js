@@ -320,6 +320,26 @@ describe('BDD interface (Mocha flavor)', function() {
     });
   });
 
+  describe('Duplicates', function() {
+    it('should fail when encountering duplicate tests', function() {
+      expect(function() {
+        parseSuite('suite_duplicate_test');
+      }).to.throw(/Redefining test/);
+    });
+
+    it('should fail when encountering duplicate suites', function() {
+      expect(function() {
+        parseSuite('suite_duplicate_suite');
+      }).to.throw(/Redefining suite/);
+    });
+
+    it('should fail when encountering duplicate tests and suites', function() {
+      expect(function() {
+        parseSuite('suite_duplicate_test_and_suite');
+      }).to.throw(/Redefining suite/);
+    });
+  });
+
   it('should declare context global', function() {
     return suiteRunner({
       suites: [__dirname + '/suite/suite_access_context'],

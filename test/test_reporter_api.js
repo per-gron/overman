@@ -206,6 +206,13 @@ describe('Reporter API', function() {
     }]);
   });
 
+  it('should emit start message with skipped marker for skipped test', function() {
+    return ensureMessages('suite_single_skipped_test', [function(testPath, message) {
+      expect(message).property('type').to.be.equal('start');
+      expect(message).property('skipped').to.be.equal(true);
+    }]);
+  });
+
   it('should emit finish message for skipped test', function() {
     return ensureMessages('suite_single_skipped_test', [function(testPath, message) {
       expect(message).property('type').to.be.equal('finish');
