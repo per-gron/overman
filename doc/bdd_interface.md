@@ -7,7 +7,7 @@ tests written for Mocha will work out-of-the-box on Overman.
 
 ## Where to put test files
 
-The test code can be in any file in any location. By convention they reside in a
+The test code can be in any file in any path. By convention they reside in a
 directory `test` in the top level of the project. A common structure is to have
 one test file per source file, but the layout can be anything that makes sense
 for the project.
