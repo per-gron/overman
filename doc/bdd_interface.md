@@ -169,6 +169,12 @@ hooks, the top level suite hooks are run first, then the suite below that etc.
 With after hooks, the order is reversed: The most specific suite's after hooks
 are run first, and the top level suite's after hooks are run last.
 
+Unlike Mocha, when a test times out, the after hooks are *not* run. This is done
+to avoid rare and confusing races where an after each hooks deletes something
+while the still running test needs it. Something really needs to be
+unconditionally done after a test is run, listen to the `process.on('SIGINT')`
+event.
+
 Like tests, before and after hooks can be synchronous or asynchronous. Both the
 `done` style of asynchrony and promises are supported.
 
