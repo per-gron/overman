@@ -183,6 +183,18 @@ describe('Test runner', function() {
     ]);
   });
 
+  it('should run tests that take a done callback and invokes it synchronously', function() {
+    var process = runTest('suite_test_invoking_done_synchronously', 'should succeed');
+    return when.all([
+      waitForProcessToExit(process),
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /running_test/,
+        /still_running_test/,
+        /running_after_hook/
+      ])
+    ]);
+  });
+
   it('should fail tests invoke the done with an error', function() {
     var process = runTest('suite_test_invoking_done_with_error', 'should fail');
     return when.all([
