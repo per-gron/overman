@@ -104,6 +104,17 @@ describe('Test runner', function() {
     ]);
   });
 
+  it('should run all after hooks, even if they fail', function() {
+    var process = runTest('suite_failing_after_hooks_and_test', 'should succeed');
+    return when.all([
+      waitForProcessToFail(process),
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /running_after_hook_1/,
+        /running_after_hook_2/
+      ])
+    ]);
+  });
+
   it('should run ancestor suite before hooks before children suite before hooks', function() {
     var process = runTest('suite_before_hooks_in_subsuite', 'Suite', 'should succeed');
     return when.all([
@@ -173,6 +184,18 @@ describe('Test runner', function() {
 
   it('should run tests that take a done callback', function() {
     var process = runTest('suite_test_invoking_done', 'should succeed');
+    return when.all([
+      waitForProcessToExit(process),
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /running_test/,
+        /still_running_test/,
+        /running_after_hook/
+      ])
+    ]);
+  });
+
+  it('should run tests that take a done callback and invokes it synchronously', function() {
+    var process = runTest('suite_test_invoking_done_synchronously', 'should succeed');
     return when.all([
       waitForProcessToExit(process),
       stream.waitForStreamToEmitLines(process.stdout, [
