@@ -77,7 +77,7 @@ describe('TimeoutTimer', function() {
 
   it('should set a timeout with the proper time', function(done) {
     new TimeoutTimer(100, {
-      getTime: function() { return 12345; },
+      clock: function() { return new Date(12345); },
       setTimeout: function(callback, time) {
         expect(time).to.be.equal(100);
         done();
@@ -90,7 +90,7 @@ describe('TimeoutTimer', function() {
     var clock = makeFakeClock();
 
     var timer = new TimeoutTimer(123, {
-      getTime: clock,
+      clock: clock,
       setTimeout: function(callback, time) {
         if (!gotInitialTimeoutCall) {
           gotInitialTimeoutCall = true;
@@ -109,7 +109,7 @@ describe('TimeoutTimer', function() {
 
   it('should refuse to updateTimeout on an elapsed timer', function() {
     var timer = new TimeoutTimer(80, {
-      getTime: function() { return 321; },
+      clock: function() { return new Date(321); },
       setTimeout: function(callback) {
         process.nextTick(function() {
           callback();
@@ -161,10 +161,10 @@ describe('TimeoutTimer', function() {
   });
 
   it('should use wall time if no options are specified', function(done) {
-    var startTime = (new Date()).getTime();
+    var startTime = new Date();
     var timer = new TimeoutTimer(50);
     timer.on('timeout', function() {
-      expect((new Date()).getTime() - startTime, 'timer should wait for the correct amount of time').to.be.within(30, 70);
+      expect(new Date() - startTime, 'timer should wait for the correct amount of time').to.be.within(30, 70);
       done();
     });
   });
