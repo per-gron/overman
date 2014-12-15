@@ -118,7 +118,7 @@ describe('TeamCity reporter', function() {
         var path = { file: 'file', path: ['suite', 'test'] };
         reporter.registerTests([path]);
         reporter.gotMessage(path, { type: 'start' });
-        reporter.gotMessage(path, { type: 'finish', result: 'success', time: 0 });
+        reporter.gotMessage(path, { type: 'finish', result: 'success', duration: 0 });
       }, [
         /testSuiteStarted/,
         /testStarted/,
@@ -132,7 +132,7 @@ describe('TeamCity reporter', function() {
         var path = { file: 'file', path: ['test'] };
         reporter.registerTests([path]);
         reporter.gotMessage(path, { type: 'start' });
-        reporter.gotMessage(path, { type: 'finish', result: 'success', time: 0 });
+        reporter.gotMessage(path, { type: 'finish', result: 'success', duration: 0 });
       }, [
         /testStarted/,
         /testFinished/
@@ -179,7 +179,7 @@ describe('TeamCity reporter', function() {
           type: 'error',
           value: 'One'
         });
-        reporter.gotMessage(path1, { type: 'finish', result: 'failure', time: 0 });
+        reporter.gotMessage(path1, { type: 'finish', result: 'failure', duration: 0 });
         reporter.gotMessage(path2, { type: 'start' });
         reporter.gotMessage(path2, {
           type: 'error',
@@ -232,7 +232,7 @@ describe('TeamCity reporter', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
-        reporter.gotMessage(path, { type: 'finish', result: 'timeout', time: 0 });
+        reporter.gotMessage(path, { type: 'finish', result: 'timeout' });
       }, [
         /testStarted/,
         /##teamcity\[testFailed name='test1' message='Test timed out' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
@@ -245,7 +245,7 @@ describe('TeamCity reporter', function() {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
         reporter.gotMessage(path, { type: 'error', value: 'Error' });
-        reporter.gotMessage(path, { type: 'finish', result: 'timeout', time: 0 });
+        reporter.gotMessage(path, { type: 'finish', result: 'timeout', duration: 0 });
       }, [
         /testStarted/,
         /testFailed/,

@@ -60,7 +60,7 @@ describe('Timer reporter', function() {
     it('should add time to finish messages', function(done) {
       messages.on('message', function(path, message) {
         if (message.type === 'finish') {
-          expect(message).property('time').to.be.equal(100);
+          expect(message).property('duration').to.be.equal(100);
           done();
         }
       });
@@ -78,7 +78,7 @@ describe('Timer reporter', function() {
       var timer = new Timer(new OnMessage(messages.emit.bind(messages, 'message')), 0);
       messages.on('message', function(path, message) {
         if (message.type === 'finish') {
-          expect(message).property('time').to.be.within(90, 150);
+          expect(message).property('duration').to.be.within(90, 150);
           done();
         }
       });
