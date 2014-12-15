@@ -131,6 +131,42 @@ describe('Reporter API', function() {
     return when.all([testSuitePromise, deferred.promise]);
   });
 
+  it('should invoke registerTests with suite runner options', function() {
+    var deferred = when.defer();
+
+    var options = {
+      timeout: 1234,  // Timeout needs to be adequately long
+      listingTimeout: 234,
+      slowThreshold: 345,
+      graceTime: 456,
+      attempts: 567
+    };
+
+    var testSuitePromise = runTestSuite('suite_single_successful_test', {
+      registerTests: function(tests, options) {
+        expect(options).to.be.deep.equal(options);
+        deferred.resolve();
+      }
+    }, options);
+    return when.all([testSuitePromise, deferred.promise]);
+  });
+
+  it('should invoke registerTests with default suite runner options', function() {
+    var deferred = when.defer();
+
+    var testSuitePromise = runTestSuite('suite_single_successful_test', {
+      registerTests: function(tests, options) {
+        expect(options).property('timeout').to.be.a('number');
+        expect(options).property('listingTimeout').to.be.a('number');
+        expect(options).property('slowThreshold').to.be.a('number');
+        expect(options).property('graceTime').to.be.a('number');
+        expect(options).property('attempts').to.be.a('number');
+        deferred.resolve();
+      }
+    });
+    return when.all([testSuitePromise, deferred.promise]);
+  });
+
   it('should emit start message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       expect(message).property('type').to.be.equal('start');
