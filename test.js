@@ -35,7 +35,7 @@ var suitePromise = suiterunner({
     interface: './lib/interface/bdd_mocha',
     reporters: [
       new PipeReporter(process),
-      new Timer(new SuiteMarker(new SpecProgress(process.stdout)), 1000),
+      new Timer(new SuiteMarker(new SpecProgress(process.stdout))),
       new Summary(process.stdout),
       new ErrorDetailReporter(process.stdout)
     ],

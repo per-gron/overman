@@ -31,13 +31,8 @@ describe('Timer reporter', function() {
     clock = makeFakeClock();
     messages = new EventEmitter();
     slowThreshold = 1000;
-    timer = new Timer(new OnMessage(messages.emit.bind(messages, 'message')), slowThreshold, clock);
-  });
-
-  it('should require the default slow threshold parameter', function() {
-    expect(function() {
-      new Timer({});
-    }).to.throw(/slow threshold/);
+    timer = new Timer(new OnMessage(messages.emit.bind(messages, 'message')), clock);
+    timer.registerTests([], { slowThreshold: slowThreshold });
   });
 
   describe('Forwarding', function() {
@@ -50,7 +45,7 @@ describe('Timer reporter', function() {
           done();
         };
 
-        var timer = new Timer(reporter, 0);
+        var timer = new Timer(reporter);
         timer[message]('arg1', 'arg2');
       });
     });
@@ -75,7 +70,7 @@ describe('Timer reporter', function() {
     });
 
     it('should use wall clock by default', function(done) {
-      var timer = new Timer(new OnMessage(messages.emit.bind(messages, 'message')), 0);
+      var timer = new Timer(new OnMessage(messages.emit.bind(messages, 'message')));
       messages.on('message', function(path, message) {
         if (message.type === 'finish') {
           expect(message).property('duration').to.be.within(90, 150);
