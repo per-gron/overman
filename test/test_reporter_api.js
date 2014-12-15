@@ -168,6 +168,31 @@ describe('Reporter API', function() {
     return when.all([testSuitePromise, deferred.promise]);
   });
 
+  it('should invoke registerTests with wall time by default', function() {
+    var deferred = when.defer();
+
+    var testSuitePromise = runTestSuite('suite_single_successful_test', {
+      registerTests: function(tests, options, time) {
+        expect(time.getTime() - (new Date()).getTime()).to.be.within(-150, 150);
+        deferred.resolve();
+      }
+    });
+    return when.all([testSuitePromise, deferred.promise]);
+  });
+
+  it('should invoke registerTests with current time', function() {
+    var clock = makeFakeClock();
+    var deferred = when.defer();
+
+    var testSuitePromise = runTestSuite('suite_single_successful_test', {
+      registerTests: function(tests, options, time) {
+        expect(time).to.be.deep.equal(clock());
+        deferred.resolve();
+      }
+    }, { clock: clock });
+    return when.all([testSuitePromise, deferred.promise]);
+  });
+
   it('should emit start message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       expect(message).property('type').to.be.equal('start');
