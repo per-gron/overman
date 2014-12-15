@@ -21,6 +21,7 @@ var ErrorDetailReporter = require('./lib/reporter/error_detail');
 var PipeReporter = require('./lib/reporter/pipe');
 var SpecProgress = require('./lib/reporter/spec_progress');
 var SuiteMarker = require('./lib/reporter/suite_marker');
+var Timer = require('./lib/reporter/timer');
 var Summary = require('./lib/reporter/summary');
 var TestFailureError = require('./lib/test_failure_error');
 var errorMessageUtil = require('./lib/error_message_util');
@@ -34,7 +35,7 @@ var suitePromise = suiterunner({
     interface: './lib/interface/bdd_mocha',
     reporters: [
       new PipeReporter(process),
-      new SuiteMarker(new SpecProgress(process.stdout)),
+      new Timer(new SuiteMarker(new SpecProgress(process.stdout)), 1000),
       new Summary(process.stdout),
       new ErrorDetailReporter(process.stdout)
     ],
