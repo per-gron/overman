@@ -29,6 +29,7 @@ var stream = require('stream');
 var when = require('when');
 var OnMessage = require('./util/on_message');
 var shouldFail = require('./util/should_fail');
+var makeFakeClock = require('./util/fake_clock');
 var TestFailureError = require('../lib/test_failure_error');
 var suiteRunner = require('../lib/suite_runner');
 
@@ -445,6 +446,25 @@ describe('Reporter API', function() {
       shouldFail(suitePromise, function(error) {
         return error instanceof TestFailureError;
       }),
+      deferred.promise
+    ]);
+  });
+
+  it('should emit done messages with the current time as parameter', function() {
+    var deferred = when.defer();
+    var clock = makeFakeClock();
+    var suitePromise = runTestSuite('suite_single_successful_test', {
+      gotMessage: function(testPath, message) {
+        clock.step(1);  // Step the clock just to be sure that we don't get a stale timestamp
+      },
+      done: function(time) {
+        expect(time).to.be.deep.equal(clock());
+        deferred.resolve();
+      }
+    }, { clock: clock });
+
+    return when.all([
+      suitePromise,
       deferred.promise
     ]);
   });
