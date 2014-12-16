@@ -193,6 +193,15 @@ describe('Reporter API', function() {
     return when.all([testSuitePromise, deferred.promise]);
   });
 
+  it('should emit messages with current time', function() {
+    var clock = makeFakeClock();
+
+    return ensureAllMessages('suite_various_tests', [function(testPath, message, time) {
+      expect(time).to.be.deep.equal(clock());
+      clock.step(1);
+    }], { clock: clock });
+  });
+
   it('should emit start message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       expect(message).property('type').to.be.equal('start');
