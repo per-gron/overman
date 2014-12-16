@@ -479,14 +479,14 @@ describe('Reporter API', function() {
     var deferred = when.defer();
     var clock = makeFakeClock();
     var suitePromise = runTestSuite('suite_single_successful_test', {
-      gotMessage: function(testPath, message) {
+      gotMessage: function() {
         clock.step(1);  // Step the clock just to be sure that we don't get a stale timestamp
       },
       done: function(time) {
         expect(time).to.be.deep.equal(clock());
         deferred.resolve();
       }
-    }, { clock: clock });
+    }, { clock: clock });
 
     return when.all([
       suitePromise,
