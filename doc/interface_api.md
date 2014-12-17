@@ -1,8 +1,9 @@
 # The Interface API
 
 By default tests written for Overman are in a [BDD style that mimicks Mocha's
-default interface](bdd_interface.md). It is possible to configure the syntax for
-Overman tests: This is done with the Interface API, described in this document.
+default interface](bdd_interface.md). However, if you want to run tests written
+with a different syntax, this can be done using the Interface API, described in
+this document.
 
 An Overman Interface is a node.js module that exports a function. This function
 is invoked whenever Overman needs to list the tests of a test suite, both for
