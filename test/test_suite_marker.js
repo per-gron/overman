@@ -103,6 +103,22 @@ describe('SuiteMarker reporter', function() {
       ]);
     });
 
+    it('should emit suiteStart message with time parameter', function(done) {
+      var path = { file: 'file', path: ['test'] };
+      var suitePath = { file: 'file', path: [] };
+      var time = new Date();
+
+      var suiteMarker = new SuiteMarker(new OnMessage(function(testPath, message, recievedTime) {
+        if (message.type === 'suiteStart') {
+          expect(recievedTime).to.be.deep.equal(time);
+          done();
+        }
+      }));
+
+      suiteMarker.registerTests([path]);
+      suiteMarker.gotMessage(path, { type: 'start' }, time);
+    });
+
     it('should emit suiteStart message only for the first test in a suite', function() {
       var path1 = { file: 'file', path: ['test1'] };
       var path2 = { file: 'file', path: ['test2'] };
@@ -186,6 +202,23 @@ describe('SuiteMarker reporter', function() {
           ]
         }
       ]);
+    });
+
+    it('should emit suiteFinish message with time parameter', function(done) {
+      var path = { file: 'file', path: ['test'] };
+      var suitePath = { file: 'file', path: [] };
+      var time = new Date();
+
+      var suiteMarker = new SuiteMarker(new OnMessage(function(testPath, message, recievedTime) {
+        if (message.type === 'suiteFinish') {
+          expect(recievedTime).to.be.deep.equal(time);
+          done();
+        }
+      }));
+
+      suiteMarker.registerTests([path]);
+      suiteMarker.gotMessage(path, { type: 'start' });
+      suiteMarker.gotMessage(path, { type: 'finish' }, time);
     });
 
     it('should emit suiteFinish message when all tests in the suite are finished', function() {
