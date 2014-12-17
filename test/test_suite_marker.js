@@ -24,15 +24,17 @@ describe('SuiteMarker reporter', function() {
   describe('Forwarding', function() {
     it('should forward registerTests calls', function(done) {
       var path = { file: 'file', path: ['test'] };
+      var time = new Date();
 
       var reporter = {};
-      reporter.registerTests = function(arg) {
+      reporter.registerTests = function(arg, recievedTime) {
         expect(arg).to.be.deep.equal([path]);
+        expect(recievedTime).to.be.deep.equal(time);
         done();
       };
 
       var suiteMarker = new SuiteMarker(reporter);
-      suiteMarker.registerTests([path]);
+      suiteMarker.registerTests([path], time);
     });
 
     ['registrationFailed', 'done', 'gotMessage'].forEach(function(message) {
