@@ -223,30 +223,6 @@ before hook has failed. It means that the test runner is about to execute the
 after hooks. This message is emitted even when there are not after hooks. This
 message is *not* emitted when the test timed out before this stage.
 
-### error
-
-```javascript
-{
-  "type": "error",
-  "value": [string with error message and trace],
-  "in": ["beforeHook", "test", "afterHook", "uncaught"],
-  ["inName": [name of the hook where the error occured]]
-}
-```
-
-Whenever an error occurs in the test, an `error` message is emitted. Several
-`error` messages can be emitted for each test run, for example if both the test
-itself and an after hook fails.
-
-The `value` field contains the bulk of the information about the error. It
-typically is the `trace` property of the error object.
-
-The `in` field is always present and contains information about where the error
-occured. If an uncaught exception is thrown, `in` is `"uncaught"`.
-
-If the error occurs in a named before or after hook, its name is in the `inName`
-field.
-
 ### finish
 
 ```javascript
@@ -272,6 +248,30 @@ If the `result` is `"success"` or `"failure"`, the `code` and possibly the
 `signal` fields will be present. `code` has the exit code of the test process,
 `signal` has node's string representation of a signal that terminated the
 process, for example `"SIGKILL"`.
+
+### error
+
+```javascript
+{
+  "type": "error",
+  "value": [string with error message and trace],
+  "in": ["beforeHook", "test", "afterHook", "uncaught"],
+  ["inName": [name of the hook where the error occured]]
+}
+```
+
+Whenever an error occurs in the test, an `error` message is emitted. Several
+`error` messages can be emitted for each test run, for example if both the test
+itself and an after hook fails.
+
+The `value` field contains the bulk of the information about the error. It
+typically is the `trace` property of the error object.
+
+The `in` field is always present and contains information about where the error
+occured. If an uncaught exception is thrown, `in` is `"uncaught"`.
+
+If the error occurs in a named before or after hook, its name is in the `inName`
+field.
 
 ### breadcrumb
 
