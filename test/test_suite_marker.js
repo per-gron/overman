@@ -107,7 +107,6 @@ describe('SuiteMarker reporter', function() {
 
     it('should emit suiteStart message with time parameter', function(done) {
       var path = { file: 'file', path: ['test'] };
-      var suitePath = { file: 'file', path: [] };
       var time = new Date();
 
       var suiteMarker = new SuiteMarker(new OnMessage(function(testPath, message, recievedTime) {
@@ -208,7 +207,6 @@ describe('SuiteMarker reporter', function() {
 
     it('should emit suiteFinish message with time parameter', function(done) {
       var path = { file: 'file', path: ['test'] };
-      var suitePath = { file: 'file', path: [] };
       var time = new Date();
 
       var suiteMarker = new SuiteMarker(new OnMessage(function(testPath, message, recievedTime) {

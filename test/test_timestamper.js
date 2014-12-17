@@ -18,7 +18,6 @@
 
 var _ = require('lodash');
 var expect = require('chai').expect;
-var when = require('when');
 var Timestamper = require('../lib/reporter/timestamper');
 
 describe('Timestamper reporter', function() {
@@ -27,12 +26,12 @@ describe('Timestamper reporter', function() {
       it('should forward ' + message + ' calls and append time to the arguments', function(done) {
         var reporter = {};
         reporter[message] = function() {
-          expect(_.toArray(arguments)).to.be.deep.equal([1, 2, 3, "clock"]);
+          expect(_.toArray(arguments)).to.be.deep.equal([1, 2, 3, 'clock']);
           done();
         };
 
         function clock() {
-          return "clock";
+          return 'clock';
         }
         (new Timestamper(reporter, clock))[message](1, 2, 3);
       });
