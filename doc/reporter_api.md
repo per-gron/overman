@@ -425,7 +425,7 @@ an interleaved fashion. For some reporters, for example a reporter that counts
 the number of errors or a reporter that merely prints the name of a test when it
 has finished, this interleaving doesn't matter. Other reporters, for example an
 advanced HTML-based reporter, might actively use the extra information that this
-haphazard ordering provides (in particular, it is good because results can be
+interleaved ordering provides (in particular, it is good because results can be
 communicated to the user without any delay).
 
 In other cases, for example a reporter that prints test results in suite order,
@@ -519,7 +519,7 @@ you can get interleaved `suiteStart` and `suiteFinish` messages. For example,
 it is quite likely that a `suiteStart` for an adjacent test suite will be
 emitted before `suiteFinish` is emitted for one that is running.
 
-In some cases, the haphazard ordering is fine, but in many cases you will want
+In some cases, the interleaved ordering is fine, but in many cases you will want
 to use the `Serializer` reporter together with `SuiteMarker` in order to get
 strict ordering guarantees.
 
