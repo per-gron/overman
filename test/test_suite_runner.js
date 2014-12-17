@@ -386,4 +386,15 @@ describe('Suite runner', function() {
       }, { slowThreshold: 1337 });
     });
   });
+
+  describe('Interface parameter', function() {
+    it('should pass interface parameter to interface', function() {
+      return ensureOutputFromTests('suite_single_successful_test', {
+        'interface_param': ['param: "interface_param"']
+      }, {
+        interface: __dirname + '/util/dummy_parameterized_interface',
+        interfaceParameter: 'interface_param',
+      });
+    });
+  });
 });

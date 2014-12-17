@@ -22,17 +22,24 @@ var expect = require('chai').expect;
 var when = require('when');
 var stream = require('./util/stream');
 
-function runTest(suite) {
-  var testPath = _.toArray(arguments).slice(1);
+function runTestWithInterfacePath(suite, interfacePath) {
+  var testPath = _.toArray(arguments).slice(2);
 
   var parameters = JSON.stringify({
     timeout: 1234,
-    slowThreshold: 2345
+    slowThreshold: 2345,
+    interfaceParameter: 'interface_param'
   });
   return childProcess.fork(
     __dirname + '/../lib/bin/run_test',
-    [__dirname + '/../lib/interface/bdd_mocha', parameters, __dirname + '/suite/' + suite].concat(testPath),
+    [interfacePath, parameters, __dirname + '/suite/' + suite].concat(testPath),
     { silent: true });
+}
+
+function runTest(suite) {
+  var interfacePath = __dirname + '/../lib/interface/bdd_mocha';
+  var testPath = _.toArray(arguments).slice(1);
+  return runTestWithInterfacePath.apply(this, [suite, interfacePath].concat(testPath));
 }
 
 function waitForProcessToExit(process) {
@@ -339,6 +346,19 @@ describe('Test runner', function() {
           }
         });
       });
+    });
+  });
+
+  describe('Interface parameter', function() {
+    it('should propagate the interface parameter', function() {
+      var process = runTestWithInterfacePath('suite_single_successful_test', __dirname + '/util/dummy_parameterized_interface', 'interface_param');
+
+      return when.all([
+        waitForProcessToExit(process),
+        stream.waitForStreamToEmitLines(process.stdout, [
+          /param: "interface_param"/
+        ])
+      ]);
     });
   });
 });
