@@ -24,15 +24,17 @@ describe('SuiteMarker reporter', function() {
   describe('Forwarding', function() {
     it('should forward registerTests calls', function(done) {
       var path = { file: 'file', path: ['test'] };
+      var time = new Date();
 
       var reporter = {};
-      reporter.registerTests = function(arg) {
+      reporter.registerTests = function(arg, recievedTime) {
         expect(arg).to.be.deep.equal([path]);
+        expect(recievedTime).to.be.deep.equal(time);
         done();
       };
 
       var suiteMarker = new SuiteMarker(reporter);
-      suiteMarker.registerTests([path]);
+      suiteMarker.registerTests([path], time);
     });
 
     ['registrationFailed', 'done', 'gotMessage'].forEach(function(message) {
@@ -101,6 +103,21 @@ describe('SuiteMarker reporter', function() {
           ]
         }
       ]);
+    });
+
+    it('should emit suiteStart message with time parameter', function(done) {
+      var path = { file: 'file', path: ['test'] };
+      var time = new Date();
+
+      var suiteMarker = new SuiteMarker(new OnMessage(function(testPath, message, recievedTime) {
+        if (message.type === 'suiteStart') {
+          expect(recievedTime).to.be.deep.equal(time);
+          done();
+        }
+      }));
+
+      suiteMarker.registerTests([path]);
+      suiteMarker.gotMessage(path, { type: 'start' }, time);
     });
 
     it('should emit suiteStart message only for the first test in a suite', function() {
@@ -186,6 +203,22 @@ describe('SuiteMarker reporter', function() {
           ]
         }
       ]);
+    });
+
+    it('should emit suiteFinish message with time parameter', function(done) {
+      var path = { file: 'file', path: ['test'] };
+      var time = new Date();
+
+      var suiteMarker = new SuiteMarker(new OnMessage(function(testPath, message, recievedTime) {
+        if (message.type === 'suiteFinish') {
+          expect(recievedTime).to.be.deep.equal(time);
+          done();
+        }
+      }));
+
+      suiteMarker.registerTests([path]);
+      suiteMarker.gotMessage(path, { type: 'start' });
+      suiteMarker.gotMessage(path, { type: 'finish' }, time);
     });
 
     it('should emit suiteFinish message when all tests in the suite are finished', function() {

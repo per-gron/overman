@@ -22,8 +22,8 @@ function OnMessage(onMessage) {
   this._onMessage = onMessage;
 }
 
-OnMessage.prototype.gotMessage = function(testPath, message) {
-  this._onMessage(testPath, message);
+OnMessage.prototype.gotMessage = function() {
+  this._onMessage.apply(this, arguments);
 };
 
 module.exports = OnMessage;
