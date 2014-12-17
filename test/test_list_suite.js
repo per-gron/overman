@@ -43,6 +43,11 @@ describe('List suite', function() {
       expect(error).property('stack').to.contain('suite_name');
     });
 
+    it('should elide error output when not present', function() {
+      var error = new listSuite.ListTestError('suite_name');
+      expect(error).property('stack').to.be.equal('suite_name');
+    });
+
     it('should have a stack with the error output', function() {
       var error = new listSuite.ListTestError('suite_name', 'error\noutput');
       expect(error).property('stack').to.contain('error\noutput');
