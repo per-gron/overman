@@ -24,7 +24,7 @@ var listSuite = require('../lib/list_suite');
 var shouldFail = require('./util/should_fail');
 
 function list(suite, timeout, childProcess) {
-  return listSuite.listTestsOfFile(timeout || 2000, __dirname + '/../lib/interface/bdd_mocha', suite, childProcess);
+  return listSuite.listTestsOfFile(timeout || 2000, __dirname + '/../lib/interface/bdd_mocha', 'param', suite, childProcess);
 }
 
 describe('List suite', function() {
@@ -109,6 +109,42 @@ describe('List suite', function() {
         }),
         killDeferred.promise
       ]);
+    });
+
+    it('should provide the test interface parameter to the list_suite process', function() {
+      var paramDeferred = when.defer();
+
+      function fork(path, parameters) {
+        expect(parameters).deep.property('[1]').to.be.equal('param');
+
+        // Trick the listTestsOfFile function that the process closes
+        paramDeferred.resolve();
+        var out = through();
+        return {
+          stdout: out,
+          stderr: through(),
+          on: function(event, fn) {
+            expect(event).to.be.equal('exit');
+            fn(0);
+            out.end();
+          },
+          kill: function() {}
+        };
+      }
+
+      return when.all([
+        list('dummy_suite', 100, { fork: fork }),
+        paramDeferred.promise
+      ]);
+    });
+
+    it('should provide the test interface parameter to the interface', function() {
+      return listSuite.listTestsOfFile(1000, __dirname + '/util/dummy_parameterized_interface', 'test_param', 'suite')
+        .then(function(result) {
+          expect(result).to.be.deep.equal([
+            { path: { file: 'suite', path: ['test_param'] } }
+          ]);
+        });
     });
   });
 });

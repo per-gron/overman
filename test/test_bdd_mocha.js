@@ -22,7 +22,7 @@ var bddMocha = require('../lib/interface/bdd_mocha');
 var suiteRunner = require('../lib/suite_runner');
 
 function parseSuite(name, runtimeContext) {
-  return bddMocha(__dirname + '/suite/' + name, runtimeContext);
+  return bddMocha(undefined, __dirname + '/suite/' + name, runtimeContext);
 }
 
 function getKeypath(object, keypath) {
