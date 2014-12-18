@@ -24,7 +24,7 @@ var listSuite = require('../lib/list_suite');
 var shouldFail = require('./util/should_fail');
 
 function list(suite, timeout, childProcess) {
-  return listSuite.listTestsOfFile(timeout || 2000, __dirname + '/../lib/interface/bdd_mocha', 'param', suite, childProcess);
+  return listSuite.listTestsOfFile(timeout || 2000, __dirname + '/../lib/interfaces/bdd_mocha', 'param', suite, childProcess);
 }
 
 describe('List suite', function() {

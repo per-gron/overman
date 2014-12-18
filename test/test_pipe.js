@@ -25,7 +25,6 @@ var streamUtil = require('./util/stream');
 function runSuite(suite, reporter) {
   return suiteRunner({
       files: [__dirname + '/suite/' + suite],
-      interface: './lib/interface/bdd_mocha',
       reporters: [reporter]
     });
 }

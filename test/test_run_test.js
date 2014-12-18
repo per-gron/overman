@@ -37,7 +37,7 @@ function runTestWithInterfacePath(suite, interfacePath) {
 }
 
 function runTest(suite) {
-  var interfacePath = __dirname + '/../lib/interface/bdd_mocha';
+  var interfacePath = __dirname + '/../lib/interfaces/bdd_mocha';
   var testPath = _.toArray(arguments).slice(1);
   return runTestWithInterfacePath.apply(this, [suite, interfacePath].concat(testPath));
 }
