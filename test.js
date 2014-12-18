@@ -25,13 +25,7 @@ var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
   .map(function(filename) { return path.join('test', filename) });
 
-var suitePromise = suiterunner({
-    suites: suiteFiles,
-    reporters: [new Spec(process)],
-    parallelism: 8,
-    timeout: 10000,
-    slowThreshold: 1000
-  });
+var suitePromise = suiterunner({ files: suiteFiles });
 
 process.on('SIGINT', function() {
   suitePromise.cancel();

@@ -342,7 +342,7 @@ describe('BDD interface (Mocha flavor)', function() {
 
   it('should declare context global', function() {
     return suiteRunner({
-      suites: [__dirname + '/suite/suite_access_context'],
+      files: [__dirname + '/suite/suite_access_context'],
       interface: __dirname + '/../lib/interface/bdd_mocha',
       timeout: 500,
       reporters: []

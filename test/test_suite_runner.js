@@ -53,7 +53,7 @@ function listNames(names) {
 
 function runTestSuite(suite, reporters, options) {
   return suiteRunner(_.extend({
-      suites: [__dirname + '/suite/' + suite],
+      files: [__dirname + '/suite/' + suite],
       timeout: 500,
       reporters: reporters || []
     }, options));
