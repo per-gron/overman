@@ -54,7 +54,6 @@ function listNames(names) {
 function runTestSuite(suite, reporters, options) {
   return suiteRunner(_.extend({
       suites: [__dirname + '/suite/' + suite],
-      interface: __dirname + '/../lib/interface/bdd_mocha',
       timeout: 500,
       reporters: reporters || []
     }, options));
