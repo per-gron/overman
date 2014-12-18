@@ -177,9 +177,18 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_single_test_infinite_loop'));
   });
 
-  it('should run tests sequentially by default', function() {
+  it('should run tests in parallel by default', function() {
     var counter = new ParallelismCounter();
     return runTestSuite('suite_various_tests', [counter])
+      .then(function() {}, function() {}) // Discard test result
+      .then(function() {
+        expect(counter).to.have.property('maxParallelism').that.is.gt(3);
+      });
+  });
+
+  it('should run tests sequentially', function() {
+    var counter = new ParallelismCounter();
+    return runTestSuite('suite_various_tests', [counter], { parallelism: 1 })
       .then(function() {}, function() {}) // Discard test result
       .then(function() {
         expect(counter).to.have.property('maxParallelism').that.is.equal(1);
