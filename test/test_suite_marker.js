@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var SuiteMarker = require('../lib/reporter/suite_marker');
+var SuiteMarker = require('../lib/reporters/suite_marker');
 var OnMessage = require('./util/on_message');
 
 describe('SuiteMarker reporter', function() {

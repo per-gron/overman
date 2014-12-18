@@ -17,7 +17,7 @@
 'use strict';
 
 var streamUtil = require('./util/stream');
-var ErrorDetail = require('../lib/reporter/error_detail');
+var ErrorDetail = require('../lib/reporters/error_detail');
 var listSuite = require('../lib/list_suite');
 
 function doWithReporterAndCheck(callback, expectedLines) {

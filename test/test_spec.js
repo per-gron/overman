@@ -17,7 +17,7 @@
 'use strict';
 
 var through = require('through');
-var Spec = require('../lib/reporter/spec');
+var Spec = require('../lib/reporters/spec');
 var streamUtil = require('./util/stream');
 
 function simulateOneTest(spec) {

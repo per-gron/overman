@@ -18,7 +18,7 @@
 
 var through = require('through');
 var when = require('when');
-var Pipe = require('../lib/reporter/pipe');
+var Pipe = require('../lib/reporters/pipe');
 var suiteRunner = require('../lib/suite_runner');
 var streamUtil = require('./util/stream');
 

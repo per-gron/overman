@@ -18,7 +18,7 @@
 
 var through = require('through');
 var chalk = require('chalk');
-var Summary = require('../lib/reporter/summary');
+var Summary = require('../lib/reporters/summary');
 var makeFakeClock = require('./util/fake_clock');
 var streamUtil = require('./util/stream');
 

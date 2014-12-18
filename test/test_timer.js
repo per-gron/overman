@@ -20,7 +20,7 @@ var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var makeFakeClock = require('./util/fake_clock');
 var OnMessage = require('./util/on_message');
-var Timer = require('../lib/reporter/timer');
+var Timer = require('../lib/reporters/timer');
 
 describe('Timer reporter', function() {
   var clock;

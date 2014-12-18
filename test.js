@@ -17,7 +17,7 @@
 var fs = require('fs');
 var path = require('path');
 var suiterunner = require('./lib/suite_runner');
-var Spec = require('./lib/reporter/spec');
+var Spec = require('./lib/reporters/spec');
 var TestFailureError = require('./lib/test_failure_error');
 var errorMessageUtil = require('./lib/error_message_util');
 

@@ -17,7 +17,7 @@
 'use strict';
 
 var through = require('through');
-var Teamcity = require('../lib/reporter/teamcity');
+var Teamcity = require('../lib/reporters/teamcity');
 var streamUtil = require('./util/stream');
 
 function performActionsAndCheckOutput(actions, output) {
