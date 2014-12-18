@@ -32,7 +32,6 @@ var suiteFiles = fs.readdirSync('test')
 
 var suitePromise = suiterunner({
     suites: suiteFiles,
-    interface: './lib/interface/bdd_mocha',
     reporters: [
       new PipeReporter(process),
       new Timer(new SuiteMarker(new SpecProgress(process.stdout))),
