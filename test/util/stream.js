@@ -50,6 +50,35 @@ function waitForStreamToEmitLines(stream, linesToWatchFor) {
 }
 exports.waitForStreamToEmitLines = waitForStreamToEmitLines;
 
+/**
+ * Wait for a single line (ignoring others)
+ */
+function waitForStreamToEmitLine(stream, lineToWatchFor) {
+  return when.promise(function(resolve, reject) {
+    var found = false;
+    var lines = readline.createInterface({ input: stream, output: stream });
+
+    lines.on('line', function(line) {
+      if (found) {
+        return;
+      }
+
+      if (typeof lineToWatchFor === 'string' ? line === lineToWatchFor : line.match(lineToWatchFor)) {
+        found = true;
+      }
+    });
+
+    lines.on('close', function() {
+      if (found) {
+        resolve();
+      } else {
+        reject(new Error('Encountered end of output while still waiting for ' + lineToWatchFor));
+      }
+    });
+  });
+}
+exports.waitForStreamToEmitLine = waitForStreamToEmitLine;
+
 function stripAnsiStream() {
   return through(function(data) {
     this.emit('data', stripAnsi(data));

@@ -17,12 +17,7 @@
 var fs = require('fs');
 var path = require('path');
 var suiterunner = require('./lib/suite_runner');
-var ErrorDetailReporter = require('./lib/reporter/error_detail');
-var PipeReporter = require('./lib/reporter/pipe');
-var SpecProgress = require('./lib/reporter/spec_progress');
-var SuiteMarker = require('./lib/reporter/suite_marker');
-var Timer = require('./lib/reporter/timer');
-var Summary = require('./lib/reporter/summary');
+var Spec = require('./lib/reporter/spec');
 var TestFailureError = require('./lib/test_failure_error');
 var errorMessageUtil = require('./lib/error_message_util');
 
@@ -32,13 +27,7 @@ var suiteFiles = fs.readdirSync('test')
 
 var suitePromise = suiterunner({
     suites: suiteFiles,
-    interface: './lib/interface/bdd_mocha',
-    reporters: [
-      new PipeReporter(process),
-      new Timer(new SuiteMarker(new SpecProgress(process.stdout))),
-      new Summary(process.stdout),
-      new ErrorDetailReporter(process.stdout)
-    ],
+    reporters: [new Spec(process)],
     parallelism: 8,
     timeout: 10000,
     slowThreshold: 1000
