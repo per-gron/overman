@@ -112,6 +112,22 @@ describe('Error detail reporter', function() {
     ]);
   });
 
+  it('should report timeouts after test errors', function() {
+    return doWithReporterAndCheck(function(reporter) {
+      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
+      reporter.done();
+    }, [
+      /test1:$/,
+      '     Error: X',
+      '       Trace',
+      '',
+      '     In before hook: Timed out',
+      ''
+    ]);
+  });
+
   it('should report the last breadcrumb for tests that time out', function() {
     return doWithReporterAndCheck(function(reporter) {
       reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
