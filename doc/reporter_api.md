@@ -249,6 +249,18 @@ If the `result` is `"success"` or `"failure"`, the `code` and possibly the
 `signal` has node's string representation of a signal that terminated the
 process, for example `"SIGKILL"`.
 
+### retry
+
+When Overman is configured to attempt to run a test more than once if it fails
+at first, and the test fails, a `retry` message is emitted instead of a `finish`
+message when the test fails and it will be attempted again. The format of
+`retry` messages is identical to that of `finish` messages, except that the
+result field of a `retry` message can never be `"success"`.
+
+No new `start` message is emitted after a `retry` message, it is implied that
+the test has started. Other than that, the new test run will emit messages as if
+it was the first one.
+
 ### error
 
 ```javascript
@@ -312,6 +324,19 @@ above and strip away the doc comments and remove the callbacks you don't care
 about and get going.
 
 Here are some things that are good to think about when writing reporters:
+
+### The `retry` message
+
+Overman supports retrying tests if they fail at first. This feature can be very
+useful as a tool deal with unstable tests and still get useful information out
+of them. It also makes writing reporters more complicated.
+
+Some reporters don't have to care about the potential retries at all, but some
+will have to do something about it. The most common case where special handling
+of retries is necessary is when a reporter keeps track of things that happened
+during a test run to be able to report it later, for example errors. Such a
+reporter must make sure to handle `retry` messages correctly, so that it doesn't
+report errors from previous test runs as if they happened during the last one.
 
 ### Use the built-in reporter helpers
 
