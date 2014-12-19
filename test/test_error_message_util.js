@@ -71,23 +71,23 @@ describe('Error message utilities', function() {
     });
 
     it('should include error header', function() {
-      var pretty = errorMessageUtil.prettyError({ value: 'The Error' });
+      var pretty = errorMessageUtil.prettyError({ stack: 'The Error' });
       expect(stripAnsi(pretty)).to.be.equal('The Error\n');
     });
 
     it('should color error header', function() {
-      var pretty = errorMessageUtil.prettyError({ value: '  The Error  ' });
+      var pretty = errorMessageUtil.prettyError({ stack: '  The Error  ' });
       expect(pretty).to.match(/^\u001b\[31m  The Error  \u001b\[39m/);
     });
 
     it('should color error trace', function() {
-      var pretty = errorMessageUtil.prettyError({ value: 'The Error\nabc\ndef' });
+      var pretty = errorMessageUtil.prettyError({ stack: 'The Error\nabc\ndef' });
       expect(pretty).to.include('\n\u001b[90mabc\u001b[39m\n');
       expect(pretty).to.include('\n\u001b[90mdef\u001b[39m\n');
     });
 
     it('should de-indent deep error indentation', function() {
-      var pretty = stripAnsi(errorMessageUtil.prettyError({ value: 'The Error\n    abc\n    def' }));
+      var pretty = stripAnsi(errorMessageUtil.prettyError({ stack: 'The Error\n    abc\n    def' }));
       expect(pretty).to.include('\n  abc\n');
       expect(pretty).to.include('\n  def\n');
     });
@@ -181,7 +181,7 @@ describe('Error message utilities', function() {
 
     it('should return error message for a test', function() {
       var path = { test: 'path' };
-      var errorMessage = { type: 'error', value: 'Hey!'};
+      var errorMessage = { type: 'error', stack: 'Hey!'};
 
       tracker.gotMessage(path, errorMessage);
       expect(tracker.getErrors(path)).to.be.deep.equal([errorMessage]);
@@ -189,8 +189,8 @@ describe('Error message utilities', function() {
 
     it('should return multiple error messages for a test', function() {
       var path = { test: 'path' };
-      var errorMessage1 = { type: 'error', value: 'Hey! 1'};
-      var errorMessage2 = { type: 'error', value: 'Hey! 2'};
+      var errorMessage1 = { type: 'error', stack: 'Hey! 1'};
+      var errorMessage2 = { type: 'error', stack: 'Hey! 2'};
 
       tracker.gotMessage(path, errorMessage1);
       tracker.gotMessage(path, errorMessage2);
@@ -200,8 +200,8 @@ describe('Error message utilities', function() {
     it('should return separate messages for separate tests', function() {
       var path1 = { test: 'path1' };
       var path2 = { test: 'path2' };
-      var errorMessage1 = { type: 'error', value: 'Hey! 1'};
-      var errorMessage2 = { type: 'error', value: 'Hey! 2'};
+      var errorMessage1 = { type: 'error', stack: 'Hey! 1'};
+      var errorMessage2 = { type: 'error', stack: 'Hey! 2'};
 
       tracker.gotMessage(path1, errorMessage1);
       tracker.gotMessage(path2, errorMessage2);
@@ -210,7 +210,7 @@ describe('Error message utilities', function() {
 
     it('should reset the error on retry', function() {
       var path = { test: 'path' };
-      var errorMessage = { type: 'error', value: 'Hey!' };
+      var errorMessage = { type: 'error', stack: 'Hey!' };
 
       tracker.gotMessage(path, errorMessage);
       tracker.gotMessage(path, { type: 'retry' });

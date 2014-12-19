@@ -254,7 +254,7 @@ process, for example `"SIGKILL"`.
 ```javascript
 {
   "type": "error",
-  "value": [string with error message and trace],
+  "stack": [string with error message and trace],
   "in": ["beforeHook", "test", "afterHook", "uncaught"],
   ["inName": [name of the hook where the error occured]]
 }
@@ -264,7 +264,7 @@ Whenever an error occurs in the test, an `error` message is emitted. Several
 `error` messages can be emitted for each test run, for example if both the test
 itself and an after hook fails.
 
-The `value` field contains the bulk of the information about the error. It
+The `stack` field contains the bulk of the information about the error. It
 typically is the `trace` property of the error object.
 
 The `in` field is always present and contains information about where the error

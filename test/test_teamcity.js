@@ -146,7 +146,7 @@ describe('TeamCity reporter', function() {
         var path = { file: 'file', path: ['test'] };
         reporter.gotMessage(path, {
           type: 'error',
-          value: 'Line\nLine'
+          stack: 'Line\nLine'
         });
       }, [
         /##teamcity\[testFailed name='test' message='Line' details='Line\|nLine' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
@@ -158,11 +158,11 @@ describe('TeamCity reporter', function() {
         var path = { file: 'file', path: ['test'] };
         reporter.gotMessage(path, {
           type: 'error',
-          value: 'One'
+          stack: 'One'
         });
         reporter.gotMessage(path, {
           type: 'error',
-          value: 'Two'
+          stack: 'Two'
         });
       }, [
         /##teamcity\[testFailed name='test' message='One' details='One' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
@@ -177,13 +177,13 @@ describe('TeamCity reporter', function() {
         reporter.gotMessage(path1, { type: 'start' });
         reporter.gotMessage(path1, {
           type: 'error',
-          value: 'One'
+          stack: 'One'
         });
         reporter.gotMessage(path1, { type: 'finish', result: 'failure', duration: 0 });
         reporter.gotMessage(path2, { type: 'start' });
         reporter.gotMessage(path2, {
           type: 'error',
-          value: 'Two'
+          stack: 'Two'
         });
       }, [
         /testStarted/,
@@ -199,7 +199,7 @@ describe('TeamCity reporter', function() {
         var path = { file: 'file', path: ['test'] };
         reporter.gotMessage(path, {
           type: 'error',
-          value: 'Line\nLine',
+          stack: 'Line\nLine',
           expected: 'expected',
           actual: 'actual'
         });
@@ -244,7 +244,7 @@ describe('TeamCity reporter', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
-        reporter.gotMessage(path, { type: 'error', value: 'Error' });
+        reporter.gotMessage(path, { type: 'error', stack: 'Error' });
         reporter.gotMessage(path, { type: 'finish', result: 'timeout', duration: 0 });
       }, [
         /testStarted/,
@@ -269,7 +269,7 @@ describe('TeamCity reporter', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
-        reporter.gotMessage(path, { type: 'error', value: 'Error' });
+        reporter.gotMessage(path, { type: 'error', stack: 'Error' });
         reporter.gotMessage(path, { type: 'finish', result: 'aborted' });
       }, [
         /testStarted/,

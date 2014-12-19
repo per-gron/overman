@@ -36,9 +36,7 @@ suitePromise.done(function() {}, function(err) {
     // Test failures will already have been reported by reporters, so there
     // is no need for us to report them here.
     console.error('Internal error in Overman or a reporter:');
-    console.error(errorMessageUtil.indent(errorMessageUtil.prettyError({
-      value: err.stack
-    }), 2));
+    console.error(errorMessageUtil.indent(errorMessageUtil.prettyError(err), 2));
   }
   process.exit(1);
 });

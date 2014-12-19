@@ -93,7 +93,7 @@ describe('Spec reporter', function() {
       spec.gotMessage(path, {
         type: 'error',
         in: 'uncaught',
-        value: 'an_error'
+        stack: 'an_error'
       });
       spec.gotMessage(path, {
         type: 'finish',

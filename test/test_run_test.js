@@ -230,7 +230,7 @@ describe('Test runner', function() {
       waitForProcessToFail(process),
       when.promise(function(resolve) {
         process.on('message', function(message) {
-          if (message.type === 'error' && message.value.match(/done callback invoked more than once/)) {
+          if (message.type === 'error' && message.stack.match(/done callback invoked more than once/)) {
             resolve();
           }
         });
@@ -244,7 +244,7 @@ describe('Test runner', function() {
       waitForProcessToFail(process),
       when.promise(function(resolve) {
         process.on('message', function(message) {
-          if (message.type === 'error' && message.value.match(/Uncaught/)) {
+          if (message.type === 'error' && message.stack.match(/Uncaught/)) {
             resolve();
           }
         });
