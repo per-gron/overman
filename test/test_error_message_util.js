@@ -103,6 +103,26 @@ describe('Error message utilities', function() {
     });
   });
 
+  describe('prettyBreadcrumb', function() {
+    var breadcrumb = {
+      message: 'msg',
+      trace: 'a\nb'
+    };
+
+    it('should provide the right information', function() {
+      expect(stripAnsi(errorMessageUtil.prettyBreadcrumb(breadcrumb, 'In'))).to.be.equal('In: msg\na\nb\n');
+    });
+
+    it('should work without the place information', function() {
+      expect(stripAnsi(errorMessageUtil.prettyBreadcrumb(breadcrumb))).to.be.equal('msg\na\nb\n');
+    });
+
+    it('should be colored properly', function() {
+      expect(errorMessageUtil.prettyBreadcrumb(breadcrumb, 'In')).to.be.equal(
+        '\u001b[36mIn: \u001b[39mmsg\n\u001b[90ma\u001b[39m\n\u001b[90mb\u001b[39m\n');
+    });
+  });
+
   describe('indent', function() {
     it('should leave strings when not given indent parameter', function() {
       expect(errorMessageUtil.indent('a\nb')).to.be.equal('a\nb');
@@ -122,99 +142,6 @@ describe('Error message utilities', function() {
 
     it('should not indent lines with only whitespace', function() {
       expect(errorMessageUtil.indent('abc\n \t\ndef', 2)).to.be.equal('  abc\n \t\n  def');
-    });
-  });
-
-  describe('PhaseTracker', function() {
-    var tracker;
-    beforeEach(function() {
-      tracker = new errorMessageUtil.PhaseTracker();
-    });
-
-    it('should return undefined for tests that haven\'t done anything yet', function() {
-      expect(tracker.getLastPhase({})).to.be.undefined;
-    });
-
-    it('should report the before hook phase', function() {
-      tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook' });
-      expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'beforeHook', inName: 'The hook' });
-    });
-
-    it('should report the test phase', function() {
-      tracker.gotMessage({ test: 'path' }, { type: 'startedTest' });
-      expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'test' });
-    });
-
-    it('should report the after hook phase', function() {
-      tracker.gotMessage({ test: 'path' }, { type: 'startedAfterHook', name: 'The hook' });
-      expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'afterHook', inName: 'The hook' });
-    });
-
-    it('should report the last phase when several are received for one test', function() {
-      tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
-      tracker.gotMessage({ test: 'path' }, { type: 'startedAfterHook', name: 'The hook 2' });
-      expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'afterHook', inName: 'The hook 2' });
-    });
-
-    it('should separate phases of different tests', function() {
-      tracker.gotMessage({ test: 'path1' }, { type: 'startedBeforeHook', name: 'The hook 1' });
-      tracker.gotMessage({ test: 'path2' }, { type: 'startedAfterHook', name: 'The hook 2' });
-      expect(tracker.getLastPhase({ test: 'path1' })).to.be.deep.equal({ in: 'beforeHook', inName: 'The hook 1' });
-    });
-
-    it('should reset the phase on retry', function() {
-      tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
-      tracker.gotMessage({ test: 'path' }, { type: 'retry' });
-      expect(tracker.getLastPhase({ test: 'path' })).to.not.exist;
-    });
-  });
-
-  describe('ErrorTracker', function() {
-    var tracker;
-    beforeEach(function() {
-      tracker = new errorMessageUtil.ErrorTracker();
-    });
-
-    it('should return empty array of failues for tests that haven\'t failed', function() {
-      expect(tracker.getErrors({ test: 'path' })).to.be.deep.equal([]);
-    });
-
-    it('should return error message for a test', function() {
-      var path = { test: 'path' };
-      var errorMessage = { type: 'error', stack: 'Hey!'};
-
-      tracker.gotMessage(path, errorMessage);
-      expect(tracker.getErrors(path)).to.be.deep.equal([errorMessage]);
-    });
-
-    it('should return multiple error messages for a test', function() {
-      var path = { test: 'path' };
-      var errorMessage1 = { type: 'error', stack: 'Hey! 1'};
-      var errorMessage2 = { type: 'error', stack: 'Hey! 2'};
-
-      tracker.gotMessage(path, errorMessage1);
-      tracker.gotMessage(path, errorMessage2);
-      expect(tracker.getErrors(path)).to.be.deep.equal([errorMessage1, errorMessage2]);
-    });
-
-    it('should return separate messages for separate tests', function() {
-      var path1 = { test: 'path1' };
-      var path2 = { test: 'path2' };
-      var errorMessage1 = { type: 'error', stack: 'Hey! 1'};
-      var errorMessage2 = { type: 'error', stack: 'Hey! 2'};
-
-      tracker.gotMessage(path1, errorMessage1);
-      tracker.gotMessage(path2, errorMessage2);
-      expect(tracker.getErrors(path1)).to.be.deep.equal([errorMessage1]);
-    });
-
-    it('should reset the error on retry', function() {
-      var path = { test: 'path' };
-      var errorMessage = { type: 'error', stack: 'Hey!' };
-
-      tracker.gotMessage(path, errorMessage);
-      tracker.gotMessage(path, { type: 'retry' });
-      expect(tracker.getErrors(path)).to.be.empty;
     });
   });
 });

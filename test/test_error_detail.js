@@ -112,6 +112,22 @@ describe('Error detail reporter', function() {
     ]);
   });
 
+  it('should report the last breadcrumb for tests that time out', function() {
+    return doWithReporterAndCheck(function(reporter) {
+      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'other_breadcrumb_msg', trace: 'trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
+      reporter.done();
+    }, [
+      /test1:$/,
+      '     In before hook: Timed out',
+      '     Last breadcrumb: breadcrumb_msg',
+      '     trace',
+      ''
+    ]);
+  });
+
   it('should not treat successful tests as failures', function() {
     return doWithReporterAndCheck(function(reporter) {
       reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'success' });

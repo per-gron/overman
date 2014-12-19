@@ -562,3 +562,17 @@ to `finish` messages. It adds three extra fields:
 
 The time that is measured by `Timer` is the time that the test itself took to
 run; before and after hooks are not counted.
+
+### MessageTracker
+
+```javascript
+var overman = require('overman');
+var tracker = new overman.MessageTracker('error');
+// Run tests
+var messages = tracker.getMessages();
+```
+
+It is sometimes useful to store away all tests of a particular type, for example
+all `error` or `breadcrumb` messages. `MessageTracker` is a simple reporter that
+does that for you. It also has logic for resetting its messages when it
+encounters a `retry` message.
