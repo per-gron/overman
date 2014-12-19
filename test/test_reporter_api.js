@@ -39,8 +39,7 @@ function pathForSuite(suite) {
 
 function runTestSuite(suite, reporter, options) {
   return suiteRunner(_.extend({
-      suites: [pathForSuite(suite)],
-      interface: __dirname + '/../lib/interface/bdd_mocha',
+      files: [pathForSuite(suite)],
       timeout: 500,
       reporters: reporter ? [reporter] : []
     }, options));

@@ -17,7 +17,7 @@
 'use strict';
 
 var through = require('through');
-var Spec = require('../lib/reporter/spec');
+var Spec = require('../lib/reporters/spec');
 var streamUtil = require('./util/stream');
 
 function simulateOneTest(spec) {
@@ -93,7 +93,7 @@ describe('Spec reporter', function() {
       spec.gotMessage(path, {
         type: 'error',
         in: 'uncaught',
-        value: 'an_error'
+        stack: 'an_error'
       });
       spec.gotMessage(path, {
         type: 'finish',

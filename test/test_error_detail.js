@@ -17,7 +17,7 @@
 'use strict';
 
 var streamUtil = require('./util/stream');
-var ErrorDetail = require('../lib/reporter/error_detail');
+var ErrorDetail = require('../lib/reporters/error_detail');
 var listSuite = require('../lib/list_suite');
 
 function doWithReporterAndCheck(callback, expectedLines) {
@@ -60,8 +60,8 @@ describe('Error detail reporter', function() {
 
   it('should number test failures', function() {
     return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', value: 'An error' });
-      reporter.gotMessage({ path: ['test2'] }, { type: 'error', value: 'An error' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'An error' });
+      reporter.gotMessage({ path: ['test2'] }, { type: 'error', stack: 'An error' });
       reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
       reporter.gotMessage({ path: ['test2'] }, { type: 'finish', result: 'failure' });
       reporter.done();
@@ -77,7 +77,7 @@ describe('Error detail reporter', function() {
 
   it('should report suite as well as test names', function() {
     return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['suite', 'test1'] }, { type: 'error', value: 'An error' });
+      reporter.gotMessage({ path: ['suite', 'test1'] }, { type: 'error', stack: 'An error' });
       reporter.gotMessage({ path: ['suite', 'test1'] }, { type: 'finish', result: 'failure' });
       reporter.done();
     }, [
@@ -89,7 +89,7 @@ describe('Error detail reporter', function() {
 
   it('should report test errors', function() {
     return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', value: 'Error: X\n    Trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
       reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
       reporter.done();
     }, [
@@ -135,8 +135,8 @@ describe('Error detail reporter', function() {
 
   it('should report all errors that a test emitted', function() {
     return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', value: 'Error: X\n    Trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', value: 'Error: Y\n    Trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: Y\n    Trace' });
       reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
       reporter.done();
     }, [

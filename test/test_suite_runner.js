@@ -53,7 +53,7 @@ function listNames(names) {
 
 function runTestSuite(suite, reporters, options) {
   return suiteRunner(_.extend({
-      suites: [__dirname + '/suite/' + suite],
+      files: [__dirname + '/suite/' + suite],
       timeout: 500,
       reporters: reporters || []
     }, options));
@@ -177,9 +177,18 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_single_test_infinite_loop'));
   });
 
-  it('should run tests sequentially by default', function() {
+  it('should run tests in parallel by default', function() {
     var counter = new ParallelismCounter();
     return runTestSuite('suite_various_tests', [counter])
+      .then(function() {}, function() {}) // Discard test result
+      .then(function() {
+        expect(counter).to.have.property('maxParallelism').that.is.gt(3);
+      });
+  });
+
+  it('should run tests sequentially', function() {
+    var counter = new ParallelismCounter();
+    return runTestSuite('suite_various_tests', [counter], { parallelism: 1 })
       .then(function() {}, function() {}) // Discard test result
       .then(function() {
         expect(counter).to.have.property('maxParallelism').that.is.equal(1);
@@ -211,6 +220,40 @@ describe('Suite runner', function() {
       'should work': [ /should_work/ ],
       'should really work': [ /should_really_work/ ]
     }, { match: 'work' });
+  });
+
+  it('should print internal error information to the internalErrorOutput stream', function() {
+    var out = streamUtil.stripAnsiStream();
+
+    var streamOutput = streamUtil.waitForStreamToEmitLines(out, [
+      /Internal error in Overman or a reporter:/,
+      /Test/,
+      /stack/,
+      /.*/
+    ]);
+
+    var error = new Error('Test');
+    error.stack = 'Test\nstack';
+
+    var suitePromise = suiteRunner({
+      files: [],
+      reporters: [{
+        registerTests: function() {
+          throw error;
+        }
+      }],
+      internalErrorOutput: out
+    });
+
+    return when.all([
+      streamOutput,
+      shouldFail(suitePromise, function(raisedError) {
+          return raisedError === error;
+        })
+        .finally(function() {
+          out.end();
+        })
+    ]);
   });
 
   describe('Timeouts', function() {

@@ -14,37 +14,22 @@
  * limitations under the License.
  */
 
+'use strict';
+
 var fs = require('fs');
 var path = require('path');
-var suiterunner = require('./lib/suite_runner');
-var Spec = require('./lib/reporter/spec');
-var TestFailureError = require('./lib/test_failure_error');
-var errorMessageUtil = require('./lib/error_message_util');
+var overman = require('./lib/overman');
 
 var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
   .map(function(filename) { return path.join('test', filename) });
 
-var suitePromise = suiterunner({
-    suites: suiteFiles,
-    reporters: [new Spec(process)],
-    parallelism: 8,
-    timeout: 10000,
-    slowThreshold: 1000
-  });
+var suitePromise = overman({ files: suiteFiles });
 
 process.on('SIGINT', function() {
   suitePromise.cancel();
 });
 
 suitePromise.done(function() {}, function(err) {
-  if (!(err instanceof TestFailureError)) {
-    // Test failures will already have been reported by reporters, so there
-    // is no need for us to report them here.
-    console.error('Internal error in Overman or a reporter:');
-    console.error(errorMessageUtil.indent(errorMessageUtil.prettyError({
-      value: err.stack
-    }), 2));
-  }
   process.exit(1);
 });
