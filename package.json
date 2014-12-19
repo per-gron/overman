@@ -5,7 +5,7 @@
   "main": "lib/overman.js",
   "scripts": {
     "lint": "jshint --verbose -c .jshintrc test lib",
-    "test": "npm run lint && mocha"
+    "test": "npm run lint && mocha --timeout 5000 --slow 1000"
   },
   "repository": {
     "type": "git",
