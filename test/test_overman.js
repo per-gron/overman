@@ -19,6 +19,7 @@
 var expect = require('chai').expect;
 var overman = require('../lib/overman');
 var reporters = require('../lib/reporters');
+var TestFailureError = require('../lib/test_failure_error');
 
 describe('Overman public module', function() {
   it('should invoke the suite runner when called', function(done) {
@@ -37,5 +38,9 @@ describe('Overman public module', function() {
 
   it('should export reporters', function() {
     expect(overman.reporters).to.be.equal(reporters);
+  });
+
+  it('should export TestFailureError', function() {
+    expect(overman.TestFailureError).to.be.equal(TestFailureError);
   });
 });
