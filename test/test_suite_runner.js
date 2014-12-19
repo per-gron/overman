@@ -20,6 +20,7 @@ var _ = require('lodash');
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var stream = require('stream');
+var through = require('through');
 var when = require('when');
 var OnMessage = require('./util/on_message');
 var streamUtil = require('./util/stream');
@@ -55,7 +56,8 @@ function runTestSuite(suite, reporters, options) {
   return suiteRunner(_.extend({
       files: [__dirname + '/suite/' + suite],
       timeout: 500,
-      reporters: reporters || []
+      reporters: reporters || [],
+      internalErrorOutput: through(),
     }, options));
 }
 
