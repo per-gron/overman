@@ -103,6 +103,26 @@ describe('Error message utilities', function() {
     });
   });
 
+  describe('prettyBreadcrumb', function() {
+    var breadcrumb = {
+      message: 'msg',
+      trace: 'a\nb'
+    };
+
+    it('should provide the right information', function() {
+      expect(stripAnsi(errorMessageUtil.prettyBreadcrumb(breadcrumb, 'In'))).to.be.equal('In: msg\na\nb\n');
+    });
+
+    it('should work without the place information', function() {
+      expect(stripAnsi(errorMessageUtil.prettyBreadcrumb(breadcrumb))).to.be.equal('msg\na\nb\n');
+    });
+
+    it('should be colored properly', function() {
+      expect(errorMessageUtil.prettyBreadcrumb(breadcrumb, 'In')).to.be.equal(
+        '\u001b[36mIn: \u001b[39mmsg\n\u001b[90ma\u001b[39m\n\u001b[90mb\u001b[39m\n');
+    });
+  });
+
   describe('indent', function() {
     it('should leave strings when not given indent parameter', function() {
       expect(errorMessageUtil.indent('a\nb')).to.be.equal('a\nb');
