@@ -17,34 +17,34 @@
 'use strict';
 
 var expect = require('chai').expect;
-var ErrorTracker = require('../lib/reporters/error_tracker');
+var MessageTracker = require('../lib/reporters/message_tracker');
 
-describe('ErrorTracker', function() {
+describe('MessageTracker', function() {
   var tracker;
   beforeEach(function() {
-    tracker = new ErrorTracker();
+    tracker = new MessageTracker('error');
   });
 
   it('should return empty array of failues for tests that haven\'t failed', function() {
-    expect(tracker.getErrors({ test: 'path' })).to.be.deep.equal([]);
+    expect(tracker.getMessages({ test: 'path' })).to.be.deep.equal([]);
   });
 
-  it('should return error message for a test', function() {
+  it('should return message for a test', function() {
     var path = { test: 'path' };
     var errorMessage = { type: 'error', stack: 'Hey!'};
 
     tracker.gotMessage(path, errorMessage);
-    expect(tracker.getErrors(path)).to.be.deep.equal([errorMessage]);
+    expect(tracker.getMessages(path)).to.be.deep.equal([errorMessage]);
   });
 
-  it('should return multiple error messages for a test', function() {
+  it('should return multiple messages for a test', function() {
     var path = { test: 'path' };
     var errorMessage1 = { type: 'error', stack: 'Hey! 1'};
     var errorMessage2 = { type: 'error', stack: 'Hey! 2'};
 
     tracker.gotMessage(path, errorMessage1);
     tracker.gotMessage(path, errorMessage2);
-    expect(tracker.getErrors(path)).to.be.deep.equal([errorMessage1, errorMessage2]);
+    expect(tracker.getMessages(path)).to.be.deep.equal([errorMessage1, errorMessage2]);
   });
 
   it('should return separate messages for separate tests', function() {
@@ -55,15 +55,15 @@ describe('ErrorTracker', function() {
 
     tracker.gotMessage(path1, errorMessage1);
     tracker.gotMessage(path2, errorMessage2);
-    expect(tracker.getErrors(path1)).to.be.deep.equal([errorMessage1]);
+    expect(tracker.getMessages(path1)).to.be.deep.equal([errorMessage1]);
   });
 
-  it('should reset the error on retry', function() {
+  it('should reset the messages on retry', function() {
     var path = { test: 'path' };
     var errorMessage = { type: 'error', stack: 'Hey!' };
 
     tracker.gotMessage(path, errorMessage);
     tracker.gotMessage(path, { type: 'retry' });
-    expect(tracker.getErrors(path)).to.be.empty;
+    expect(tracker.getMessages(path)).to.be.empty;
   });
 });
