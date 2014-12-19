@@ -19,7 +19,6 @@
 var fs = require('fs');
 var path = require('path');
 var overman = require('./lib/overman');
-var TestFailureError = require('./lib/test_failure_error');
 var errorMessageUtil = require('./lib/error_message_util');
 
 var suiteFiles = fs.readdirSync('test')
@@ -33,7 +32,7 @@ process.on('SIGINT', function() {
 });
 
 suitePromise.done(function() {}, function(err) {
-  if (!(err instanceof TestFailureError)) {
+  if (!(err instanceof overman.TestFailureError)) {
     // Test failures will already have been reported by reporters, so there
     // is no need for us to report them here.
     console.error('Internal error in Overman or a reporter:');
