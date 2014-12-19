@@ -222,6 +222,40 @@ describe('Suite runner', function() {
     }, { match: 'work' });
   });
 
+  it('should print internal error information to the internalErrorOutput stream', function() {
+    var out = streamUtil.stripAnsiStream();
+
+    var streamOutput = streamUtil.waitForStreamToEmitLines(out, [
+      /Internal error in Overman or a reporter:/,
+      /Test/,
+      /stack/,
+      /.*/
+    ]);
+
+    var error = new Error('Test');
+    error.stack = 'Test\nstack';
+
+    var suitePromise = suiteRunner({
+      files: [],
+      reporters: [{
+        registerTests: function() {
+          throw error;
+        }
+      }],
+      internalErrorOutput: out
+    });
+
+    return when.all([
+      streamOutput,
+      shouldFail(suitePromise, function(raisedError) {
+          return raisedError === error;
+        })
+        .finally(function() {
+          out.end();
+        })
+    ]);
+  });
+
   describe('Timeouts', function() {
     it('should pass timeout to test', function() {
       return ensureOutputFromTests('suite_timeout_print', {
