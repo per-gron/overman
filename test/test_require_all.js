@@ -29,7 +29,7 @@ it('should require all files', function(done) {
       .filter(function(file) {
         // The scripts can't just be required. They are tested though so it
         // doesn't hurt much.
-        return !file.match(/\/bin\/(list_suite|run_test)\.js/);
+        return !file.match(/[\/\\]bin[\/\\](list_suite|run_test)\.js/);
       })
       .forEach(function(file) {
         require(file);
