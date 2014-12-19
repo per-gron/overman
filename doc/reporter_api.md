@@ -351,7 +351,8 @@ but are rather designed to help other reporters to do their work.
 ### Combined
 
 ```javascript
-new Combined([reporter1, reporter2, reporter3]);
+var overman = require('overman');
+new overman.reporters.Combined([reporter1, reporter2, reporter3]);
 ```
 
 It is often useful to run more than one reporter in parallel. For example, one
@@ -367,7 +368,8 @@ to the reporters in the order they are given.
 ### Summary
 
 ```javascript
-new Summary(process.stdout);
+var overman = require('overman');
+new overman.reporters.Summary(process.stdout);
 ```
 
 `Summary` prints out a basic summary that counts how many tests that passed,
@@ -379,7 +381,8 @@ usually first).
 ### ErrorDetail
 
 ```javascript
-new ErrorDetail(process.stdout);
+var overman = require('overman');
+new overman.reporters.ErrorDetail(process.stdout);
 ```
 
 In many cases, a console based reporter doesn't care about how to format the
@@ -395,7 +398,8 @@ first).
 ### ErrorDetector
 
 ```javascript
-var detector = new ErrorDetector();
+var overman = require('overman');
+var detector = new overman.reporters.ErrorDetector();
 // ...
 console.log(detector.didFail());
 ```
@@ -407,7 +411,8 @@ method returns `true`.
 ### Pipe
 
 ```javascript
-new Pipe({ stdout: process.stdout, stderr: process.stderr });
+var overman = require('overman');
+new overman.reporters.Pipe({ stdout: process.stdout, stderr: process.stderr });
 ```
 
 By default, Overman swallows all test output. It is often useful to actually
@@ -417,7 +422,8 @@ streams to those streams.
 ### Serializer
 
 ```javascript
-new Serializer(innerReporter);
+var overman = require('overman');
+new overman.reporters.Serializer(innerReporter);
 ```
 
 Because of the parallel nature of Overman, messages for tests may be emitted in
@@ -449,7 +455,8 @@ In my experience, `Serializer` is often used together with `SuiteMarker`.
 ### SuiteMarker
 
 ```javascript
-new SuiteMarker(innerReporter);
+var overman = require('overman');
+new overman.reporters.SuiteMarker(innerReporter);
 ```
 
 The raw reporter API doesn't provide explicit information about when suites are
@@ -528,14 +535,16 @@ When used together with `Serializer`, `SuiteMarker` must be within the
 for all messages, but the extra `SuiteMarker` messages don't have that.
 
 ```javascript
+var overman = require('overman');
 // Do this, not the other way around:
-new Serializer(new SuiteMarker(innerReporter));
+new overman.reportersSerializer(new overman.reporters.SuiteMarker(innerReporter));
 ```
 
 ### Timer
 
 ```javascript
-new Timer(innerReporter);
+var overman = require('overman');
+new overman.reporters.Timer(innerReporter);
 ```
 
 When writing reporters, it is often useful to report how quick a test was to
