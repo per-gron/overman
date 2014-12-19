@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+'use strict';
+
 var fs = require('fs');
 var path = require('path');
-var suiterunner = require('./lib/suite_runner');
-var Spec = require('./lib/reporters/spec');
+var overman = require('./lib/overman');
 var TestFailureError = require('./lib/test_failure_error');
 var errorMessageUtil = require('./lib/error_message_util');
 
@@ -25,7 +26,7 @@ var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
   .map(function(filename) { return path.join('test', filename) });
 
-var suitePromise = suiterunner({ files: suiteFiles });
+var suitePromise = overman({ files: suiteFiles });
 
 process.on('SIGINT', function() {
   suitePromise.cancel();
