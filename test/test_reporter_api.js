@@ -93,25 +93,36 @@ function ensureMessages(suite, predicates, options) {
   });
 }
 
-function ensureAllMessages(suite, predicate) {
+function ensureAllMessages(suite, predicate, options) {
   return when.promise(function(resolve, reject) {
     var done = false;
 
     var reporter = new OnMessage(function(testPath, message) {
-      if (!done && !predicate(testPath, message)) {
+      if (!done && !predicate.apply(predicate, arguments)) {
         done = true;
         reject(new Error('Encountered unexpected message from skipped test: ' + message.type));
       }
     });
 
-    function finish() {
+    function finish(error) {
       if (!done) {
         done = true;
-        resolve();
+
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
       }
     }
 
-    runTestSuite(suite, reporter).done(finish, finish);
+    var suitePromise = runTestSuite(suite, reporter, options);
+
+    if ((options || {}).shouldFail) {
+      suitePromise = shouldFail(suitePromise);
+    }
+
+    suitePromise.done(finish, finish);
   });
 }
 
@@ -195,10 +206,11 @@ describe('Reporter API', function() {
   it('should emit messages with current time', function() {
     var clock = makeFakeClock();
 
-    return ensureAllMessages('suite_various_tests', [function(testPath, message, time) {
+    return ensureAllMessages('suite_various_tests', function(testPath, message, time) {
       expect(time).to.be.deep.equal(clock());
       clock.step(1);
-    }], { clock: clock });
+      return true;
+    }, { clock: clock, shouldFail: true });
   });
 
   it('should emit start message', function() {
@@ -257,7 +269,7 @@ describe('Reporter API', function() {
   it('should not emit finishedAfterHooks message when after hook never finishes', function() {
     return ensureAllMessages('suite_after_hook_that_never_finishes', function(testPath, message) {
       return message.type !== 'finishedAfterHooks';
-    });
+    }, { shouldFail: true });
   });
 
   it('should emit finish message for successful test', function() {
