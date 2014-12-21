@@ -3,7 +3,7 @@ init:
 
 environment:
   matrix:
-    - nodejs_version: "0.10"
+    # - nodejs_version: "0.10" # Don't run build on 0.10. It takes extra time and error messages are really bad for some reason
     - nodejs_version: "0.11"
 
 install:
