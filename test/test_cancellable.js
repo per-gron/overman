@@ -61,6 +61,7 @@ describe('Cancellable reporter', function() {
           }
         }
       });
+      cancellable.registerTests(['test1', 'test2']);
       cancellable.gotMessage('test1', { type: 'start' });
       cancellable.cancel();
       cancellable.done();
@@ -79,11 +80,21 @@ describe('Cancellable reporter', function() {
           }
         }
       });
+      cancellable.registerTests(['test1', 'test2']);
       cancellable.gotMessage('test1', { type: 'start' });
       cancellable.gotMessage('test2', { type: 'start' });
       cancellable.gotMessage('test1', { type: 'finish' });
       cancellable.cancel();
       cancellable.done();
+    });
+
+    it('should not invoke done unless registerTests has been called', function() {
+      var cancellable = new Cancellable({
+        done: function() {
+          throw new Error('should not be called');
+        }
+      });
+      cancellable.cancel();
     });
   });
 });
