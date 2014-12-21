@@ -344,6 +344,7 @@ describe('Reporter API', function() {
       'stdio',
       'startedBeforeHooks',
       'startedTest',
+      'breadcrumb',
       'error',
       'startedAfterHooks',
       'finishedAfterHooks',
@@ -351,6 +352,7 @@ describe('Reporter API', function() {
       'stdio',
       'startedBeforeHooks',
       'startedTest',
+      'breadcrumb',
       'error',
       'startedAfterHooks',
       'finishedAfterHooks',
@@ -521,19 +523,55 @@ describe('Reporter API', function() {
     });
   });
 
-  it('should emit breadcrumb messages when the test leaves a breadcrumb', function() {
-    ensureMessages('suite_leave_breadcrumb', [function(testPath, message) {
-      expect(message).property('type').to.be.equal('breadcrumb');
-      expect(message).property('message').to.be.equal('A breadcrumb');
-      expect(message).property('trace').to.be.contain('suite_leave_breadcrumb.js:');
-    }]);
+  describe('breadcrumb handling', function() {
+    it('should emit breadcrumb messages when the test leaves a breadcrumb', function() {
+      return ensureMessages('suite_leave_breadcrumb', [function(testPath, message) {
+        expect(message).property('type').to.be.equal('breadcrumb');
+        expect(message).property('message').to.be.equal('A breadcrumb');
+        expect(message).property('trace').to.be.contain('suite_leave_breadcrumb.js:');
+      }]);
+    });
+
+    it('should emit breadcrumb message before the test is run', function() {
+      return ensureMessages('suite_single_successful_test', [function(testPath, message) {
+        expect(message).to.be.deep.equal({
+          type: 'breadcrumb',
+          message: 'Starting test',
+          systemGenerated: true
+        });
+      }]);
+    });
+
+    ['before', 'after'].forEach(function(type) {
+      it('should emit breadcrumb message before ' + type + ' hooks are run', function() {
+        return ensureMessages('suite_' + type + '_hook_and_test', [function(testPath, message) {
+          expect(message).to.be.deep.equal({
+            type: 'breadcrumb',
+            message: 'Starting ' + type + ' hook',
+            systemGenerated: true
+          });
+        }]);
+      });
+
+      it('should emit breadcrumb message before named ' + type + ' hooks are run', function() {
+        return ensureMessages('suite_test_with_named_' + type + '_hook', [function(testPath, message) {
+          expect(message).to.be.deep.equal({
+            type: 'breadcrumb',
+            message: 'Starting ' + type + ' hook "' + type + 'HookName"',
+            systemGenerated: true
+          });
+        }]);
+      });
+    });
   });
 
-  it('should emit debugInfo messages when the test emits debug info', function() {
-    ensureMessages('suite_emit_debug_info', [function(testPath, message) {
-      expect(message).property('type').to.be.equal('debugInfo');
-      expect(message).property('name').to.be.equal('name');
-      expect(message).property('value').to.be.deep.equal({ the: 'value' });
-    }]);
+  describe('debugInfo handling', function() {
+    it('should emit debugInfo messages when the test emits debug info', function() {
+      return ensureMessages('suite_emit_debug_info', [function(testPath, message) {
+        expect(message).property('type').to.be.equal('debugInfo');
+        expect(message).property('name').to.be.equal('name');
+        expect(message).property('value').to.be.deep.equal({ the: 'value' });
+      }]);
+    });
   });
 });

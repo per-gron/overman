@@ -138,9 +138,44 @@ describe('Error detail reporter', function() {
     }, [
       /test1:$/,
       '     In before hook: Timed out',
+      '',
       '     Last breadcrumb: breadcrumb_msg',
       '     trace',
       ''
+    ]);
+  });
+
+  it('should report the last breadcrumb for tests that fail with an uncaught exception', function() {
+    return doWithReporterAndCheck(function(reporter) {
+      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'other_breadcrumb_msg', trace: 'trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'error', in: 'uncaught', stack: 'Message\nstack' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
+      reporter.done();
+    }, [
+      /test1:$/,
+      '     Uncaught error: Message',
+      '     stack',
+      '',
+      '     Last breadcrumb: breadcrumb_msg',
+      '     trace',
+      ''
+    ]);
+  });
+
+  it('should not report breadcrumb for tests that fail with an normal error', function() {
+    return doWithReporterAndCheck(function(reporter) {
+      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'error', in: 'test', stack: 'Message\nstack' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
+      reporter.done();
+    }, [
+      /test1:$/,
+      '     In test: Message',
+      '     stack',
+      '',
     ]);
   });
 
