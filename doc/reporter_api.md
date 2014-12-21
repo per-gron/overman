@@ -291,13 +291,18 @@ field.
 {
   "type": "breadcrumb",
   "message": [A string with a message],
-  "trace": [A string with a stack trace for the breadcrumb]
+  "trace": [A string with a stack trace for the breadcrumb],
+  ["systemGenerated": [boolean]]
 }
 ```
 
 Emitted whenever the test emits a breadcrumb. The purpose of `breadcrumb`
 messages is to ease debugging, in particular test failures that show up as
 timeouts.
+
+Overman itself generates breadcrumbs for each main phase of the test: One for
+every hook and one for the test. These breadcrumb messages are marked with
+`systemGenerated` set to `true`.
 
 ### debugInfo
 
