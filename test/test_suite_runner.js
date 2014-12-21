@@ -96,7 +96,7 @@ function ensureOutputFromTests(suite, tests, options) {
 
   var suitePromise = runTestSuite(suite, reporters, options)
     .catch(function(error) {
-      if (!options.allowTestsToFail) {
+      if (!(options || {}).allowTestsToFail) {
         throw error;
       }
     })
