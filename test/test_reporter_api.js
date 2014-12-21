@@ -521,19 +521,23 @@ describe('Reporter API', function() {
     });
   });
 
-  it('should emit breadcrumb messages when the test leaves a breadcrumb', function() {
-    ensureMessages('suite_leave_breadcrumb', [function(testPath, message) {
-      expect(message).property('type').to.be.equal('breadcrumb');
-      expect(message).property('message').to.be.equal('A breadcrumb');
-      expect(message).property('trace').to.be.contain('suite_leave_breadcrumb.js:');
-    }]);
+  describe('breadcrumb handling', function() {
+    it('should emit breadcrumb messages when the test leaves a breadcrumb', function() {
+      ensureMessages('suite_leave_breadcrumb', [function(testPath, message) {
+        expect(message).property('type').to.be.equal('breadcrumb');
+        expect(message).property('message').to.be.equal('A breadcrumb');
+        expect(message).property('trace').to.be.contain('suite_leave_breadcrumb.js:');
+      }]);
+    });
   });
 
-  it('should emit debugInfo messages when the test emits debug info', function() {
-    ensureMessages('suite_emit_debug_info', [function(testPath, message) {
-      expect(message).property('type').to.be.equal('debugInfo');
-      expect(message).property('name').to.be.equal('name');
-      expect(message).property('value').to.be.deep.equal({ the: 'value' });
-    }]);
+  describe('debugInfo handling', function() {
+    it('should emit debugInfo messages when the test emits debug info', function() {
+      ensureMessages('suite_emit_debug_info', [function(testPath, message) {
+        expect(message).property('type').to.be.equal('debugInfo');
+        expect(message).property('name').to.be.equal('name');
+        expect(message).property('value').to.be.deep.equal({ the: 'value' });
+      }]);
+    });
   });
 });
