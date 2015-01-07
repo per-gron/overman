@@ -322,6 +322,15 @@ it('should set its timeout', function() {
 });
 ```
 
+Timeouts for tests can also be overriden on the suite level:
+
+```javascript
+describe('A suite', function() {
+  this.timeout(10000);  // Set the timeout for all tests in this suite
+  console.log(this.timeout());  // Returns null if the timeout is not overridden
+});
+```
+
 ### Accessing the slow threshold
 
 Some Overman reporters, for example the spec reporter, will mark tests that are
@@ -341,6 +350,8 @@ it('should set its slow threshold', function() {
   this.slow(1000);  
 });
 ```
+
+Like timeouts, the slow threshold can be set on the suite level as well.
 
 ### Leaving breadcrumbs
 
