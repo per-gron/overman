@@ -66,6 +66,8 @@ The format is this:
   ["name": [String]],
   ["only": [boolean]],
   ["skipped": [boolean]],
+  ["timeout": [number]],
+  ["slow": [number]],
   ["before": [Array of { "run": [Function], ["name": [String]] }]],
   ["after": [Array of { "run": [Function], ["name": [String]] }]]
 }
@@ -78,6 +80,14 @@ When `only` is true, only that test or suite and other tests and suites marked
 as only are run.
 
 When `skipped` is true, that test or suite will be skipped.
+
+When `timeout` is present, all tests in the suite should be run with that as the
+timeout, rather than the global timeout (unless it is overridden again in a
+subsuite or the test itself).
+
+When `slow` is present, all tests in the suite should be run with that as the
+slowness threshold, rather than the global slowness threshold (unless it is
+overridden again in a subsuite or the test itself).
 
 The functions specified in the `before` and `after` properties are considered
 before and after hooks. Hooks can optionally have names. The hook functions may
