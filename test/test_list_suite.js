@@ -89,7 +89,7 @@ describe('List suite', function() {
           expect(result).to.be.deep.equal([{
             'path': {
               'file': suite,
-              'path': ['A suite', 'should have the timeout set']
+              'path': ['A suite', 'should print its timeout']
             },
             'timeout': 1234
           }]);

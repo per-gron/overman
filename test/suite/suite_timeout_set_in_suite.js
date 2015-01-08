@@ -20,7 +20,7 @@ var expect = require('chai').expect;
 
 describe('A suite', function() {
   this.timeout(1234);
-  it('should have the timeout set', function() {
-    expect(this.timeout()).to.be.equal(1234);
+  it('should print its timeout', function() {
+    console.log(this.timeout());
   });
 });

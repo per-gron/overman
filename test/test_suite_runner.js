@@ -276,6 +276,12 @@ describe('Suite runner', function() {
       ]);
     });
 
+    it('should respect per test timeout overrides', function() {
+      return ensureOutputFromTests('suite_timeout_set_in_suite', {
+        'should print its timeout': [1234]
+      });
+    });
+
     it('should respect listingTimeout', function() {
       return shouldFail(runTestSuite('suite_single_successful_test', [], {
         listingTimeout: 1
