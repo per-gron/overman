@@ -102,6 +102,8 @@ The format of a test descriptor object is similar:
   "name": [String],
   ["only": [boolean]],
   ["skipped": [boolean]],
+  ["timeout": [number]],
+  ["slow": [number]],
   ["run": [Function]]
 }
 ```
@@ -109,8 +111,8 @@ The format of a test descriptor object is similar:
 The `name` field is always required for tests. It is an error to have two tests
 in the same suite that have the same name.
 
-The `only` and `skipped` properties have the same semantics as they have for
-suites.
+The `only`, `skipped`, `timeout` and `slow` properties have the same semantics
+as they have for suites.
 
 The `run` function is required if the test is not skipped. Like the hook
 functions, it may be synchronous or asynchronous (by taking a `done` callback or
