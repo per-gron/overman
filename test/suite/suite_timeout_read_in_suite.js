@@ -18,7 +18,7 @@
 
 var expect = require('chai').expect;
 
-describe('A suite', function() {
+describe('A suite', function() {
   expect(this.timeout()).to.be.null;
   this.timeout(1234);
   expect(this.timeout()).to.be.equal(1234);

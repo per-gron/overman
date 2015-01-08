@@ -16,9 +16,7 @@
 
 'use strict';
 
-var expect = require('chai').expect;
-
-describe('A suite', function() {
+describe('A suite', function() {
   this.slow(1234);
   it('should print its slowness threshold', function() {
     console.log(this.slow());
