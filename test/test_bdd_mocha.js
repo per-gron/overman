@@ -306,6 +306,18 @@ describe('BDD interface (Mocha flavor)', function() {
       var fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
+
+    it('should allow leaving breadcrumbs that are Error objects', function(done) {
+      var suite = parseSuite('suite_leave_error_breadcrumb', {
+        leaveBreadcrumb: function(message, trace) {
+          expect(message).to.be.equal('An Error breadcrumb');
+          expect(trace).to.contain('suite_leave_error_breadcrumb.js:');
+          done();
+        }
+      });
+      var fn = getKeypath(suite, '.contents[0].run');
+      fn();
+    });
   });
 
   describe('Debug info', function() {
