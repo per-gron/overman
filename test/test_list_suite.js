@@ -103,7 +103,7 @@ describe('List suite', function() {
           expect(result).to.be.deep.equal([{
             'path': {
               'file': suite,
-              'path': ['A suite', 'should have the slowness threshold set']
+              'path': ['A suite', 'should print its slowness threshold']
             },
             'slow': 1234
           }]);

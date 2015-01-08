@@ -435,6 +435,12 @@ describe('Suite runner', function() {
         'should print its slow threshold': [1337]
       }, { slowThreshold: 1337 });
     });
+
+    it('should respect per test slow threshold overrides', function() {
+      return ensureOutputFromTests('suite_slow_set_in_suite', {
+        'should print its slowness threshold': [1234]
+      });
+    });
   });
 
   describe('Interface parameter', function() {
