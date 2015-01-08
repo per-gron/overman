@@ -68,6 +68,20 @@ describe('List suite', function() {
         });
     });
 
+    it('should report skipped tests as skipped', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_single_skipped_test');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['should be skipped']
+            },
+            'skipped': true
+          }]);
+        });
+    });
+
     it('should fail with a ListTestError when the listing fails', function() {
       var suite = path.resolve(__dirname + '/suite/suite_syntax_error');
       return shouldFail(list(suite), function(error) {
