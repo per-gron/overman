@@ -270,29 +270,17 @@ describe('BDD interface (Mocha flavor)', function() {
     });
 
     it('should allow setting the timeout in a suite', function() {
-      var suite = parseSuite('suite_timeout_set_in_suite');
-      var test = getKeypath(suite, '.contents[0].contents[0]');
-      expect(test).property('timeout').to.be.equal(1234);
-    });
-
-    it('should shadow but not overwrite when setting the timeout in a subsuite', function() {
-      var suite = parseSuite('suite_timeout_set_in_subsuite');
-
-      var test1 = getKeypath(suite, '.contents[0].contents[0]');
-      expect(test1).property('timeout').to.be.equal(1234);
-
-      var test2 = getKeypath(suite, '.contents[0].contents[1].contents[0]');
-      expect(test2).property('timeout').to.be.equal(2345);
-
-      var test3 = getKeypath(suite, '.contents[0].contents[2]');
-      expect(test3).property('timeout').to.be.equal(1234);
-
-      var test4 = getKeypath(suite, '.contents[1]');
-      expect(test4).to.not.have.property('timeout');
+      var rootSuite = parseSuite('suite_timeout_set_in_suite');
+      var suite = getKeypath(rootSuite, '.contents[0]');
+      expect(suite).property('timeout').to.be.equal(1234);
     });
 
     it('should allow reading timeout overrides in suites', function() {
       parseSuite('suite_timeout_read_in_suite');
+    });
+
+    it('should shadow but not overwrite when reading the timeout in a subsuite', function() {
+      parseSuite('suite_timeout_get_in_subsuite');
     });
   });
 
@@ -320,9 +308,9 @@ describe('BDD interface (Mocha flavor)', function() {
     });
 
     it('should allow setting the slow threshold in a suite', function() {
-      var suite = parseSuite('suite_slow_set_in_suite');
-      var test = getKeypath(suite, '.contents[0].contents[0]');
-      expect(test).property('slow').to.be.equal(1234);
+      var rootSuite = parseSuite('suite_slow_set_in_suite');
+      var suite = getKeypath(rootSuite, '.contents[0]');
+      expect(suite).property('slow').to.be.equal(1234);
     });
   });
 
