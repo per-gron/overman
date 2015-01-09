@@ -284,6 +284,18 @@ describe('Test runner', function() {
         ])
       ]);
     });
+
+    it('should invoke after hooks only once even when tests finish after the \'sigint\' message was received', function() {
+      var process = runTest('suite_ensure_after_hook_is_only_run_once', 'should be run');
+      process.send({ type: 'sigint' });
+      return when.all([
+        waitForProcessToFail(process),
+        stream.waitForStreamToEmitLines(process.stdout, [
+          /in_test/,
+          /in_after_hook/
+        ])
+      ]);
+    });
   });
 
   describe('Getting and setting timeouts', function() {
