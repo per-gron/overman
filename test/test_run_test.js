@@ -268,7 +268,7 @@ describe('Test runner', function() {
   });
 
   describe('Timeout handling', function() {
-    it.only('should exit when receiving a \'sigint\' message', function() {
+    it('should exit when receiving a \'sigint\' message', function() {
       var process = runTest('suite_single_test_that_never_finishes', 'should never finish');
       process.send({ type: 'sigint' });
       return waitForProcessToFail(process);
