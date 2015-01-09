@@ -267,7 +267,15 @@ describe('Test runner', function() {
     return waitForProcessToExit(process);
   });
 
-  describe('Timeouts', function() {
+  describe('Timeout handling', function() {
+    it.only('should exit when receiving a \'sigint\' message', function() {
+      var process = runTest('suite_single_test_that_never_finishes', 'should never finish');
+      process.send({ type: 'sigint' });
+      return waitForProcessToFail(process);
+    });
+  });
+
+  describe('Getting and setting timeouts', function() {
     it('should pass test timeout to the interface', function() {
       var process = runTest('suite_timeout_print', 'should print its timeout');
       return when.all([
