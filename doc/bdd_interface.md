@@ -164,16 +164,10 @@ describe('Something', function() {
 });
 ```
 
-Hooks for a given suite are run in the order they are specified. With before
-hooks, the top level suite hooks are run first, then the suite below that etc.
-With after hooks, the order is reversed: The most specific suite's after hooks
-are run first, and the top level suite's after hooks are run last.
-
-Unlike Mocha, when a test times out, the after hooks are *not* run. This is done
-to avoid rare and confusing races where an after each hooks deletes something
-while the still running test needs it. Something really needs to be
-unconditionally done after a test is run, listen to the `process.on('SIGINT')`
-event.
+With before hooks, the top level suite hooks are run first, then the suite below
+that etc. With after hooks, the order is reversed: The most specific suite's
+after hooks are run first, and the top level suite's after hooks are run last.
+Hooks within a given suite or subsuite are run in the order they are specified.
 
 Like tests, before and after hooks can be synchronous or asynchronous. Both the
 `done` style of asynchrony and promises are supported.
@@ -181,8 +175,8 @@ Like tests, before and after hooks can be synchronous or asynchronous. Both the
 When a before hook fails, subsequent before hooks and the test will not be run.
 
 All after each hooks are always run, even if the test or any other before or
-after hook fails. This means you sometimes have to code a bit defensively in the
-after hooks.
+after hook fails, or if the test times out. This means you sometimes have to
+code defensively in the after hooks.
 
 `beforeEach` and `afterEach` hooks don't only help with deduplication, they also
 behave differently to running that code inside the test in other ways:

@@ -319,6 +319,41 @@ describe('Suite runner', function() {
       ]);
     });
 
+    it('should suppress all messages from a test process after it times out', function() {
+      var lastMessage = null;
+      var didTimeout = false;
+
+      function fork() {
+        var child = new EventEmitter();
+        child.stdin = new stream.Readable();
+
+        child.kill = function() {};
+        child.send = function(message) {
+          expect(message).property('type').to.be.equal('sigint');
+          child.emit('message', { type: 'debugInfo', name: 'a', value: 'should be suppressed' });
+          child.emit('exit', 0, null);
+          child.emit('close');
+          didTimeout = true;
+        };
+
+        return child;
+      }
+
+      return shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
+          childProcess: { fork: fork },
+          timeout: 10,
+          reporters: [new OnMessage(function(path, message) {
+            lastMessage = message;
+          })]
+        }), function(error) {
+          return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
+        })
+        .then(function() {
+          expect(didTimeout, 'The test wasn\'t run as expected').to.be.true;
+          expect(lastMessage, 'Finish should be the last message sent').to.be.deep.equal({ type: 'finish', result: 'timeout' });
+        });
+    });
+
     it('should send SIGKILL to tests that don\'t die after \'sigint\' message', function() {
       var deferred = when.defer();
 

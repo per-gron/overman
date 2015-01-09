@@ -32,8 +32,8 @@ runner:
 * `files`: Array of paths to suite files to test. *Required*.
 * `timeout`: Default test timeout in ms. Defaults to 10000.
 * `listingTimeout`: Timeout for listing tests. Defaults to 1000.
-* `graceTime`: Time that a test process has to shut down after a timeout (and it
-  gets SIGINT) before it is hard killed.
+* `graceTime`: Time that a test process has to shut down after a timeout (and
+  the after hooks are run) before it is hard killed.
 * `slowThreshold`: The time, in ms, a test should take to be considered slow.
   Defaults to 1000.
 * `interface`: Path to interface file. Optional, the BDD interface is chosen by
