@@ -19,6 +19,7 @@
 var _ = require('lodash');
 var expect = require('chai').expect;
 var stripAnsi = require('strip-ansi');
+var through = require('through');
 var when = require('when');
 var SpecProgress = require('../lib/reporters/spec_progress');
 
@@ -75,7 +76,7 @@ describe('Spec progress reporter', function() {
             suiteLineId = id;
           },
 
-          logAfter: function(afterId, line, id) {
+          logAfter: function(afterId, line) {
             expect(suiteLineId).not.to.be.null;
             expect(suiteLineId).to.be.equal(afterId);
             expect(stripAnsi(line)).to.be.equal('    test');
@@ -166,8 +167,52 @@ describe('Spec progress reporter', function() {
     });
   });
 
+  describe('Stream piping', function() {
+    ['stdout', 'stderr'].forEach(function(streamName) {
+      describe(streamName, function() {
+        it('should pipe the output from a test', function() {
+          var testLineId = null;
+          var testOutputLineId = null;
+
+          return when.promise(function(resolve) {
+            var reporter = new SpecProgress(null, mock({
+              log: function() {},
+
+              logAfter: function(afterId, line, id) {
+                expect(afterId).to.not.be.null;
+
+                if (line.match(/test/)) {
+                  testLineId = id;
+                } else if (afterId === testLineId) {
+                  expect(line).to.be.equal('a_line');
+                  testOutputLineId = id;
+                } else if (afterId === testOutputLineId) {
+                  expect(line).to.be.equal('a_second_line');
+                  resolve();
+                }
+              }
+            }));
+
+            var suitePath = { file: 'file', path: [] };
+            var testPath = { file: 'file', path: ['test'] };
+            reporter.gotMessage(null, { type: 'suiteStart', suite: suitePath });
+            reporter.gotMessage(testPath, { type: 'start' });
+
+            var msg = { type: 'stdio' };
+            var stream = through();
+            msg[streamName] = stream;
+            reporter.gotMessage(testPath, msg);
+
+            stream.write('a_line\n');
+            stream.write('a_second_line\n');
+          });
+        });
+      });
+    });
+  });
+
   it('should do nothing on other messages', function() {
     var reporter = new SpecProgress(null, mock({}));
-    reporter.gotMessage(null, { type: 'stdio' });
+    reporter.gotMessage(null, { type: 'breadcrumb' });
   });
 });
