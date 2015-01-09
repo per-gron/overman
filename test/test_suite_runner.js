@@ -290,15 +290,16 @@ describe('Suite runner', function() {
       });
     });
 
-    it('should send SIGINT to tests that time out', function() {
+    it('should send \'sigint\' message to tests that time out', function() {
       var deferred = when.defer();
 
       function fork() {
         var child = new EventEmitter();
         child.stdin = new stream.Readable();
 
-        child.kill = function(signal) {
-          expect(signal).to.be.equal('SIGINT');
+        child.kill = function() {};
+        child.send = function(message) {
+          expect(message).property('type').to.be.equal('sigint');
           child.emit('exit', 0, null);
           child.emit('close');
           deferred.resolve();
@@ -318,7 +319,7 @@ describe('Suite runner', function() {
       ]);
     });
 
-    it('should send SIGKILL to tests that don\'t die after SIGINT', function() {
+    it('should send SIGKILL to tests that don\'t die after \'sigint\' message', function() {
       var deferred = when.defer();
 
       function fork() {
@@ -326,14 +327,12 @@ describe('Suite runner', function() {
         child.stdin = new stream.Readable();
 
         child.kill = function(signal) {
-          if (signal === 'SIGINT') {
-            return; // Ignore SIGINT, wait until we get SIGKILL
-          }
           expect(signal).to.be.equal('SIGKILL');
           child.emit('exit', 0, null);
           child.emit('close');
           deferred.resolve();
         };
+        child.send = function() {};
 
         return child;
       }
@@ -414,7 +413,8 @@ describe('Suite runner', function() {
         var child = new EventEmitter();
         child.stdin = new stream.Readable();
 
-        child.kill = function() {
+        child.send = function(message) {
+          expect(message).property('type').to.be.equal('sigint');
           child.emit('exit', 0, null);
           child.emit('close');
         };
