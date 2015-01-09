@@ -405,6 +405,15 @@ describe('Suite runner', function() {
         suitePromise
       ]);
     });
+
+    it('should treat timeout of 0 as no timeout', function() {
+      return runTestSuite('suite_single_successful_test', [], {
+        timeout: 0,
+        timeoutTimer: function() {
+          throw new Error('No TimeoutTimer should be instantiated when timeout is 0');
+        }
+      });
+    });
   });
 
   describe('Retries', function() {
