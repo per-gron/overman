@@ -273,6 +273,17 @@ describe('Test runner', function() {
       process.send({ type: 'sigint' });
       return waitForProcessToFail(process);
     });
+
+    it('should invoke after hooks when receiving a \'sigint\' message', function() {
+      var process = runTest('suite_single_test_that_never_finishes_with_after_hook', 'should never finish');
+      process.send({ type: 'sigint' });
+      return when.all([
+        waitForProcessToFail(process),
+        stream.waitForStreamToEmitLines(process.stdout, [
+          /in_after_hook/
+        ])
+      ]);
+    });
   });
 
   describe('Getting and setting timeouts', function() {
