@@ -20,21 +20,22 @@ var expect = require('chai').expect;
 var softKill = require('../lib/soft_kill');
 var EventEmitter = require('events').EventEmitter;
 
-function fakeProcess(kill) {
+function fakeProcess(kill, send) {
   var process = new EventEmitter();
   process.kill = kill || function() {};
+  process.send = send || function() {};
   return process;
 }
 
 describe('Soft kill', function() {
-  it('should immediately send a SIGINT to the process', function() {
+  it('should immediately send a \'sigint\' message to the process', function() {
     var sigintWasSent = false;
 
-    softKill(fakeProcess(function kill(signal) {
-      sigintWasSent = sigintWasSent || signal === 'SIGINT';
+    softKill(fakeProcess(function kill() {}, function send(message) {
+      sigintWasSent = sigintWasSent || message.type === 'sigint';
     }), 1);
 
-    expect(sigintWasSent, 'SIGINT should be sent immediately').to.be.true;
+    expect(sigintWasSent, '\'sigint\' message should be sent immediately').to.be.true;
   });
 
   it('should set up a timer with the specified timeout', function(done) {
