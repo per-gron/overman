@@ -33,7 +33,7 @@ describe('Spec progress reporter', function() {
     it('should pass stream to the InsertionLog', function() {
       return when.promise(function(resolve) {
         var stream = {};
-        new SpecProgress(stream, function InsertionLog(param) {
+        new SpecProgress({ stdout: stream }, function InsertionLog(param) {
           expect(stream).to.be.equal(param);
           resolve();
         });
