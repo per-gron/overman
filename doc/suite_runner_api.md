@@ -30,10 +30,13 @@ Overman can be configured in a variety of ways by passing options to the suite
 runner:
 
 * `files`: Array of paths to suite files to test. *Required*.
-* `timeout`: Default test timeout in ms. Defaults to 10000.
-* `listingTimeout`: Timeout for listing tests. Defaults to 1000.
+* `timeout`: Default test timeout in ms. Defaults to 10000. If 0 is passed, the
+  test never times out.
+* `listingTimeout`: Timeout for listing tests. Defaults to 1000. If 0 is passed,
+  the listing never times out.
 * `graceTime`: Time that a test process has to shut down after a timeout (and
-  the after hooks are run) before it is hard killed.
+  the after hooks are run) before it is hard killed. If 0 is passed, tests are
+  hard killed immediately.
 * `slowThreshold`: The time, in ms, a test should take to be considered slow.
   Defaults to 1000.
 * `interface`: Path to interface file. Optional, the BDD interface is chosen by
