@@ -16,6 +16,7 @@
 
 'use strict';
 
+var _ = require('lodash');
 var expect = require('chai').expect;
 var path = require('path');
 var through = require('through');
@@ -24,7 +25,7 @@ var listSuite = require('../lib/list_suite');
 var shouldFail = require('./util/should_fail');
 
 function list(suite, timeout, childProcess) {
-  return listSuite.listTestsOfFile(timeout || 2000, __dirname + '/../lib/interfaces/bdd_mocha', 'param', suite, childProcess);
+  return listSuite.listTestsOfFile(_.isNumber(timeout) ? timeout : 2000, __dirname + '/../lib/interfaces/bdd_mocha', 'param', suite, childProcess);
 }
 
 describe('List suite', function() {
@@ -165,6 +166,11 @@ describe('List suite', function() {
         }),
         killDeferred.promise
       ]);
+    });
+
+    it('should treat a 0 timeout as no timeout', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_single_successful_test');
+      return list(suite, 0);
     });
 
     it('should provide the test interface parameter to the list_suite process', function() {

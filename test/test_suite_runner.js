@@ -290,6 +290,17 @@ describe('Suite runner', function() {
       });
     });
 
+    it('should treat 0 listingTimeout as no listing timeout', function() {
+      return runTestSuite('suite_single_successful_test', [], {
+        listingTimeout: 0,
+        reporters: [{
+          registerTests: function(tests, parameters) {
+            expect(parameters).property('listingTimeout').to.be.equal(0);
+          }
+        }]
+      });
+    });
+
     it('should send \'sigint\' message to tests that time out', function() {
       var deferred = when.defer();
 
@@ -383,27 +394,38 @@ describe('Suite runner', function() {
       ]);
     });
 
-    it('should respect the graceTime parameter', function() {
-      var softKillDeferred = when.defer();
+    [0, 1234].forEach(function(graceTime) {
+      it('should respect the graceTime parameter of ' + graceTime, function() {
+        var softKillDeferred = when.defer();
 
-      function softKill(process, timeout) {
-        process.kill('SIGKILL');
-        expect(timeout).to.be.equal(1234);
-        softKillDeferred.resolve();
-      }
+        function softKill(process, timeout) {
+          process.kill('SIGKILL');
+          expect(timeout).to.be.equal(graceTime);
+          softKillDeferred.resolve();
+        }
 
-      var suitePromise = shouldFail(runTestSuite('suite_single_successful_test', [], {
-        timeout: 1,
-        graceTime: 1234,
-        softKill: softKill
-      }), function(error) {
-        return error instanceof TestFailureError;
+        var suitePromise = shouldFail(runTestSuite('suite_single_successful_test', [], {
+          timeout: 1,
+          graceTime: graceTime,
+          softKill: softKill
+        }), function(error) {
+          return error instanceof TestFailureError;
+        });
+
+        return when.all([
+          softKillDeferred.promise,
+          suitePromise
+        ]);
       });
+    });
 
-      return when.all([
-        softKillDeferred.promise,
-        suitePromise
-      ]);
+    it('should treat timeout of 0 as no timeout', function() {
+      return runTestSuite('suite_single_successful_test', [], {
+        timeout: 0,
+        timeoutTimer: function() {
+          throw new Error('No TimeoutTimer should be instantiated when timeout is 0');
+        }
+      });
     });
   });
 
