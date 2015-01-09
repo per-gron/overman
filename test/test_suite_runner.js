@@ -290,6 +290,17 @@ describe('Suite runner', function() {
       });
     });
 
+    it('should treat 0 listingTimeout as no listing timeout', function() {
+      return runTestSuite('suite_single_successful_test', [], {
+        listingTimeout: 0,
+        reporters: [{
+          registerTests: function(tests, parameters) {
+            expect(parameters).property('listingTimeout').to.be.equal(0);
+          }
+        }]
+      });
+    });
+
     it('should send \'sigint\' message to tests that time out', function() {
       var deferred = when.defer();
 
