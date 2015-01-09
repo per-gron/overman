@@ -30,10 +30,10 @@
     "lodash": "~2.4.1",
     "chalk": "~0.5.1",
     "teamcity-service-messages": "~0.1.6",
-    "exit": "~0.1.2"
+    "exit": "~0.1.2",
+    "through": "~2.3.6"
   },
   "devDependencies": {
-    "through": "~2.3.6",
     "chai": "~1.10.0",
     "strip-ansi": "~2.0.0",
     "mocha": "~2.0.1",
