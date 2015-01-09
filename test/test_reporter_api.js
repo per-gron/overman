@@ -280,6 +280,14 @@ describe('Reporter API', function() {
     }]);
   });
 
+  it('should emit finish message for successful test when attempts > 1', function() {
+    return ensureMessages('suite_single_successful_test', [function(testPath, message) {
+      expect(message).property('type').to.be.equal('finish');
+      expect(message).property('result').to.be.equal('success');
+      expect(message).property('code').to.be.equal(0);
+    }], { attempts: 2 });
+  });
+
   it('should emit finish message for failing test', function() {
     return ensureMessages('suite_single_throwing_test', [function(testPath, message) {
       expect(message).property('type').to.be.equal('finish');
