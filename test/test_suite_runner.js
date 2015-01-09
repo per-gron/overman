@@ -320,8 +320,6 @@ describe('Suite runner', function() {
     });
 
     it('should suppress all messages from a test process after it times out', function() {
-      var deferred = when.defer();
-
       var lastMessage = null;
       var didTimeout = false;
 
