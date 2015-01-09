@@ -68,6 +68,62 @@ describe('List suite', function() {
         });
     });
 
+    it('should report skipped tests as skipped', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_single_skipped_test');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['should be skipped']
+            },
+            'skipped': true
+          }]);
+        });
+    });
+
+    it('should report tests where the suite overrides the timeout', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_timeout_set_in_suite');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['A suite', 'should print its timeout']
+            },
+            'timeout': 1234
+          }]);
+        });
+    });
+
+    it('should report tests where the suite overrides the slowness threshold', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_slow_set_in_suite');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['A suite', 'should print its slowness threshold']
+            },
+            'slow': 1234
+          }]);
+        });
+    });
+
+    it('should report tests marked as only', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_single_only_test');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['should be run only']
+            },
+            'only': true
+          }]);
+        });
+    });
+
     it('should fail with a ListTestError when the listing fails', function() {
       var suite = path.resolve(__dirname + '/suite/suite_syntax_error');
       return shouldFail(list(suite), function(error) {

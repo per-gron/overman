@@ -268,6 +268,20 @@ describe('BDD interface (Mocha flavor)', function() {
       expect(fn).to.be.a('function');
       expect(fn()).to.be.equal(12345);
     });
+
+    it('should allow setting the timeout in a suite', function() {
+      var rootSuite = parseSuite('suite_timeout_set_in_suite');
+      var suite = getKeypath(rootSuite, '.contents[0]');
+      expect(suite).property('timeout').to.be.equal(1234);
+    });
+
+    it('should allow reading timeout overrides in suites', function() {
+      parseSuite('suite_timeout_read_in_suite');
+    });
+
+    it('should shadow but not overwrite when reading the timeout in a subsuite', function() {
+      parseSuite('suite_timeout_get_in_subsuite');
+    });
   });
 
   describe('Slow thresholds', function() {
@@ -291,6 +305,12 @@ describe('BDD interface (Mocha flavor)', function() {
       });
       var fn = getKeypath(suite, '.contents[0].run');
       fn();
+    });
+
+    it('should allow setting the slow threshold in a suite', function() {
+      var rootSuite = parseSuite('suite_slow_set_in_suite');
+      var suite = getKeypath(rootSuite, '.contents[0]');
+      expect(suite).property('slow').to.be.equal(1234);
     });
   });
 
