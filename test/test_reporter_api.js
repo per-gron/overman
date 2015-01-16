@@ -525,7 +525,7 @@ describe('Reporter API', function() {
   });
 
   it('should gracefully handle when the interface takes forever', function() {
-    return shouldFail(runTestSuite('suite_neverending_listing'), function(error) {
+    return shouldFail(runTestSuite('suite_neverending_listing', [], { listingTimeout: 1000 }), function(error) {
       return (error instanceof TestFailureError) &&
         error.message.match(/Timed out while listing tests of .*suite_neverending_listing/);
     });
