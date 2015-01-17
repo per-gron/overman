@@ -17,6 +17,7 @@
 'use strict';
 
 var _ = require('lodash');
+var childProcess = require('child_process');
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var stream = require('stream');
@@ -149,6 +150,26 @@ describe('Suite runner', function() {
 
   it('should fail with TestFailureError if a test has a syntax error', function() {
     return shouldFail(runTestSuite('suite_syntax_error'), isTestFailureError);
+  });
+
+  it('should not leak things to the runloop', function() {
+    return when.race([
+      when().delay(1000).then(function() {
+        throw new Error('Should be done by now');
+      }),
+      when.promise(function(resolve, reject) {
+        var child = childProcess.fork(
+          __dirname + '/util/run_single_test');
+
+        child.on('exit', function(code) {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error('Process exited with non-zero code ' + code));
+          }
+        });
+      })
+    ]);
   });
 
   describe('Suite cancellation', function() {
