@@ -119,6 +119,12 @@ function ensureOutputFromTests(suite, tests, options) {
 }
 
 describe('Suite runner', function() {
+  it('should require files parameter', function() {
+    expect(function() {
+      suiteRunner({});
+    }).to.throw(/not present or not Array/);
+  });
+
   it('should run tests', function() {
     return ensureOutputFromTests('suite_single_successful_test', {
       'should succeed': [ /running_test/ ]
