@@ -32,7 +32,7 @@ runner:
 * `files`: Array of paths to suite files to test. *Required*.
 * `timeout`: Default test timeout in ms. Defaults to 10000. If 0 is passed, the
   test never times out.
-* `listingTimeout`: Timeout for listing tests. Defaults to 1000. If 0 is passed,
+* `listingTimeout`: Timeout for listing tests. Defaults to 60000. If 0 is passed,
   the listing never times out.
 * `graceTime`: Time that a test process has to shut down after a timeout (and
   the after hooks are run) before it is hard killed. If 0 is passed, tests are
