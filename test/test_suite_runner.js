@@ -17,6 +17,7 @@
 'use strict';
 
 var _ = require('lodash');
+var childProcess = require('child_process');
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var stream = require('stream');
@@ -151,16 +152,76 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_syntax_error'), isTestFailureError);
   });
 
-  it('should fail when the suite is cancelled', function() {
-    var suitePromise = runTestSuite('suite_single_successful_test', [
-      new OnMessage(function(testPath, message) {
-        if (message.type === 'start') {
-          suitePromise.cancel();
-        }
+  it('should not leak things to the runloop', function() {
+    return when.race([
+      when().delay(1000).then(function() {
+        throw new Error('Should be done by now');
+      }),
+      when.promise(function(resolve, reject) {
+        var child = childProcess.fork(
+          __dirname + '/util/run_single_test');
+
+        child.on('exit', function(code) {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error('Process exited with non-zero code ' + code));
+          }
+        });
       })
     ]);
-    return shouldFail(suitePromise, function(error) {
-      return isTestFailureError(error) && error.message.match(/cancelled/);
+  });
+
+  describe('Suite cancellation', function() {
+    it('should fail when the suite is cancelled', function() {
+      var suitePromise = runTestSuite('suite_single_successful_test', [
+        new OnMessage(function(testPath, message) {
+          if (message.type === 'start') {
+            suitePromise.cancel();
+          }
+        })
+      ]);
+      return shouldFail(suitePromise, function(error) {
+        return isTestFailureError(error) && error.message.match(/cancelled/);
+      });
+    });
+
+    it('should do nothing when cancelled after the suite is done', function() {
+      var doneCalledTimes = 0;
+
+      var suitePromise = runTestSuite('suite_single_successful_test', [{
+        done: function() {
+          doneCalledTimes++;
+        }
+      }]);
+      return suitePromise
+        .then(function() {
+          expect(doneCalledTimes, 'done should have been called').to.be.equal(1);
+          suitePromise.cancel();
+          expect(doneCalledTimes, 'done should not be called when cancelling finished suite').to.be.equal(1);
+        });
+    });
+
+    it('should do nothing when cancelled subsequent times', function() {
+      var doneCalledTimes = 0;
+
+      var suitePromise = runTestSuite('suite_single_successful_test', [{
+        gotMessage: function(testPath, message) {
+          if (message.type === 'start') {
+            suitePromise.cancel();
+            expect(doneCalledTimes, 'done should be called when cancelling the first time').to.be.equal(1);
+            suitePromise.cancel();
+            expect(doneCalledTimes, 'done should not be called when cancelling the second time').to.be.equal(1);
+          }
+        },
+
+        done: function() {
+          doneCalledTimes++;
+        }
+      }]);
+      return shouldFail(suitePromise, function(error) {
+        return isTestFailureError(error) && error.message.match(/cancelled/);
+      });
     });
   });
 

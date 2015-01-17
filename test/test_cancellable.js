@@ -48,6 +48,43 @@ describe('Cancellable reporter', function() {
     });
   });
 
+  describe('Finished', function() {
+    it('should not be finished from the start', function() {
+      var cancellable = new Cancellable({});
+      expect(cancellable.isFinished()).to.be.false;
+    });
+
+    it('should be finished after registrationFailed', function() {
+      var cancellable = new Cancellable({});
+      cancellable.registrationFailed(new Error('Fail'));
+      expect(cancellable.isFinished()).to.be.true;
+    });
+
+    it('should not be finished after registerTests', function() {
+      var cancellable = new Cancellable({});
+      cancellable.registerTests([]);
+      expect(cancellable.isFinished()).to.be.false;
+    });
+
+    it('should not be finished after gotMessage', function() {
+      var cancellable = new Cancellable({});
+      cancellable.gotMessage({}, {});
+      expect(cancellable.isFinished()).to.be.false;
+    });
+
+    it('should be finished after done', function() {
+      var cancellable = new Cancellable({});
+      cancellable.done();
+      expect(cancellable.isFinished()).to.be.true;
+    });
+
+    it('should be finished after cancel', function() {
+      var cancellable = new Cancellable({});
+      cancellable.cancel();
+      expect(cancellable.isFinished()).to.be.true;
+    });
+  });
+
   describe('Cancellation', function() {
     it('should report outstanding tests as aborted when cancelled', function(done) {
       var finishedTests = [];

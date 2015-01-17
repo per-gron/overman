@@ -26,8 +26,20 @@ var suiteFiles = fs.readdirSync('test')
 
 var suitePromise = overman({ files: suiteFiles });
 
+var finished = false;
+suitePromise.finally(function() {
+  finished = true;
+});
+
 process.on('SIGINT', function() {
-  suitePromise.cancel();
+  if (finished) {
+    // It is possible that the test suite has finished running, but that
+    // something is still left on the runloop. In that case, we shoulnd't
+    // prevent the user from shutting down the process.
+    process.exit(1);
+  } else {
+    suitePromise.cancel();
+  }
 });
 
 suitePromise.done(function() {}, function(err) {
