@@ -165,6 +165,22 @@ describe('Suite runner', function() {
       });
     });
 
+    it('should do nothing when cancelled after the suite is done', function() {
+      var doneCalledTimes = 0;
+
+      var suitePromise = runTestSuite('suite_single_successful_test', [{
+        done: function() {
+          doneCalledTimes++;
+        }
+      }]);
+      return suitePromise
+        .then(function() {
+          expect(doneCalledTimes, 'done should have been called').to.be.equal(1);
+          suitePromise.cancel();
+          expect(doneCalledTimes, 'done should not be called when cancelling finished suite').to.be.equal(1);
+        });
+    });
+
     it('should do nothing when cancelled subsequent times', function() {
       var doneCalledTimes = 0;
 
