@@ -151,16 +151,40 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_syntax_error'), isTestFailureError);
   });
 
-  it('should fail when the suite is cancelled', function() {
-    var suitePromise = runTestSuite('suite_single_successful_test', [
-      new OnMessage(function(testPath, message) {
-        if (message.type === 'start') {
-          suitePromise.cancel();
+  describe('Suite cancellation', function() {
+    it('should fail when the suite is cancelled', function() {
+      var suitePromise = runTestSuite('suite_single_successful_test', [
+        new OnMessage(function(testPath, message) {
+          if (message.type === 'start') {
+            suitePromise.cancel();
+          }
+        })
+      ]);
+      return shouldFail(suitePromise, function(error) {
+        return isTestFailureError(error) && error.message.match(/cancelled/);
+      });
+    });
+
+    it('should do nothing when cancelled subsequent times', function() {
+      var doneCalledTimes = 0;
+
+      var suitePromise = runTestSuite('suite_single_successful_test', [{
+        gotMessage: function(testPath, message) {
+          if (message.type === 'start') {
+            suitePromise.cancel();
+            expect(doneCalledTimes, 'done should be called when cancelling the first time').to.be.equal(1);
+            suitePromise.cancel();
+            expect(doneCalledTimes, 'done should not be called when cancelling the second time').to.be.equal(1);
+          }
+        },
+
+        done: function() {
+          doneCalledTimes++;
         }
-      })
-    ]);
-    return shouldFail(suitePromise, function(error) {
-      return isTestFailureError(error) && error.message.match(/cancelled/);
+      }]);
+      return shouldFail(suitePromise, function(error) {
+        return isTestFailureError(error) && error.message.match(/cancelled/);
+      });
     });
   });
 
