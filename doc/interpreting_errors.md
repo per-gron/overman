@@ -67,8 +67,6 @@ Tests that take too long to run are terminated by Overman and are reported as te
 
 Tests that time out will be reported as such. Additionally, Overman will say in which phase of the test it was when the test timed out (in a hook or in the test).
 
-When tests time out, after hooks are run, but no further reporting is done. This is done in order to let reporters live in the illusion that when tests time out, that's the last thing that happened to the test.
-
 ```javascript
 it('should loop infinitely', function() {
   for (;;);
