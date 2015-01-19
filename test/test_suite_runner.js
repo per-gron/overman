@@ -277,18 +277,18 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_single_only_test', [], { disallowOnly: true }));
   });
 
-  it('should run only tests that match the specified match regex', function() {
+  it('should run only tests that match the specified grep regex', function() {
     return ensureOutputFromTests('suite_various_tests', {
       'should work': [ /should_work/ ],
       'should really work': [ /should_really_work/ ]
-    }, { match: /should.*work$/ });
+    }, { grep: /should.*work$/ });
   });
 
-  it('should run only tests that match the specified match string', function() {
+  it('should run only tests that match the specified grep string', function() {
     return ensureOutputFromTests('suite_various_tests', {
       'should work': [ /should_work/ ],
       'should really work': [ /should_really_work/ ]
-    }, { match: 'work' });
+    }, { grep: 'work' });
   });
 
   it('should print internal error information to the internalErrorOutput stream', function() {
