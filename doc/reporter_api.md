@@ -223,6 +223,18 @@ before hook has failed. It means that the test runner is about to execute the
 after hooks. This message is emitted even when there are not after hooks. This
 message is *not* emitted when the test timed out before this stage.
 
+### timeout
+
+```javascript
+{
+  "type": "timeout"
+}
+```
+
+When a test times out, this message is emitted. It is not necessary to listen to
+this message in order to determine if a test timed out or not. When a test times
+out there is always also a `finish` message with `result` `timeout`.
+
 ### finish
 
 ```javascript
