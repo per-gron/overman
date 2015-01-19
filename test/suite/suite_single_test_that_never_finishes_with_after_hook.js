@@ -23,5 +23,6 @@ it('should never finish', function() {
 });
 
 after(function() {
+  this.debugInfo('in', 'afterHook');
   console.log('in_after_hook');
 });
