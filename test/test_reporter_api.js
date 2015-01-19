@@ -310,11 +310,37 @@ describe('Reporter API', function() {
     }]);
   });
 
-  it('should emit finish message for test that times out', function() {
-    return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
-      expect(message).property('type').to.be.equal('finish');
-      expect(message).property('result').to.be.equal('timeout');
-    }]);
+  describe('Timeouts', function() {
+    it('should emit timeout message for test that times out', function() {
+      return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
+        expect(message).property('type').to.be.equal('timeout');
+      }]);
+    });
+
+    it('should emit finish message for test that times out', function() {
+      return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
+        expect(message).property('type').to.be.equal('finish');
+        expect(message).property('result').to.be.equal('timeout');
+      }]);
+    });
+
+    it('should emit reporter messages even after the test times out', function() {
+      return ensureMessages('suite_single_test_that_never_finishes_with_after_hook', [function(testPath, message) {
+        expect(message).property('type').to.be.equal('debugInfo');
+        expect(message).property('name').to.be.equal('in');
+        expect(message).property('value').to.be.equal('afterHook');
+      }]);
+    });
+
+    it('should emit messages in the right order when test times out', function() {
+      return ensureMessages('suite_single_test_that_never_finishes_with_after_hook', [function(testPath, message) {
+        expect(message).property('type').to.be.equal('timeout');
+      }, function(testPath, message) {
+        expect(message).property('type').to.be.equal('debugInfo');
+      }, function(testPath, message) {
+        expect(message).property('type').to.be.equal('finish');
+      }]);
+    });
   });
 
   it('should emit only start and finish message for skipped test', function() {
