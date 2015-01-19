@@ -48,7 +48,8 @@ runner:
 * `attempts`: Maximum number of times to run a test; if >1 the test will be
   retried on failure. Defaults to 1.
 * `parallelism`: Number of tests to run in parallel. Defaults to 8.
-* `match`: Regex or string. Only tests that match the criteria will be run.
+* `grep`: Regex or string. Only tests that match the criteria will be run.
+* `invertGrep`: If true, the criteria given to `grep` is inverted.
 * `disallowOnly`: Fail if there are tests marked as only. This may be useful to
   set on CI servers, to catch tests mistakenly checked in as only.
 * `internalErrorOutput`: When the suite runner fails with an internal error, it

@@ -277,18 +277,32 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_single_only_test', [], { disallowOnly: true }));
   });
 
-  it('should run only tests that match the specified match regex', function() {
-    return ensureOutputFromTests('suite_various_tests', {
-      'should work': [ /should_work/ ],
-      'should really work': [ /should_really_work/ ]
-    }, { match: /should.*work$/ });
-  });
+  describe('Grep', function() {
+    it('should run only tests that match the specified grep regex', function() {
+      return ensureOutputFromTests('suite_various_tests', {
+        'should work': [ /should_work/ ],
+        'should really work': [ /should_really_work/ ]
+      }, { grep: /should.*work$/ });
+    });
 
-  it('should run only tests that match the specified match string', function() {
-    return ensureOutputFromTests('suite_various_tests', {
-      'should work': [ /should_work/ ],
-      'should really work': [ /should_really_work/ ]
-    }, { match: 'work' });
+    it('should run only tests that match the specified grep string', function() {
+      return ensureOutputFromTests('suite_various_tests', {
+        'should work': [ /should_work/ ],
+        'should really work': [ /should_really_work/ ]
+      }, { grep: 'work' });
+    });
+
+    it('should not run tests that match inverted grep regex', function() {
+      return ensureOutputFromTests('suite_various_tests', {
+        'should be awesome': []
+      }, { grep: /Something/, invertGrep: true });
+    });
+
+    it('should not run tests that match inverted grep string', function() {
+      return ensureOutputFromTests('suite_various_tests', {
+        'should be awesome': []
+      }, { grep: 'Something', invertGrep: true });
+    });
   });
 
   it('should print internal error information to the internalErrorOutput stream', function() {
