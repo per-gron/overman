@@ -310,6 +310,12 @@ describe('Reporter API', function() {
     }]);
   });
 
+  it('should emit timeout message for test that times out', function() {
+    return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
+      expect(message).property('type').to.be.equal('timeout');
+    }]);
+  });
+
   it('should emit finish message for test that times out', function() {
     return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
       expect(message).property('type').to.be.equal('finish');
