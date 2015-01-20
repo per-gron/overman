@@ -617,4 +617,4 @@ var messages = tracker.getMessages();
 It is sometimes useful to store away all tests of a particular type, for example
 all `error` or `breadcrumb` messages. `MessageTracker` is a simple reporter that
 does that for you. It also has logic for resetting its messages when it
-encounters a `retry` message.
+encounters a `retry` message and suppressing messages after tests time out.
