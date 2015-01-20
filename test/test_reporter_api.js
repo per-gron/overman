@@ -381,6 +381,7 @@ describe('Reporter API', function() {
       'breadcrumb',
       'error',
       'startedAfterHooks',
+      'breadcrumb',
       'finishedAfterHooks',
       'retry',
       'stdio',
@@ -389,6 +390,7 @@ describe('Reporter API', function() {
       'breadcrumb',
       'error',
       'startedAfterHooks',
+      'breadcrumb',
       'finishedAfterHooks',
       'finish',
     ];
@@ -571,6 +573,16 @@ describe('Reporter API', function() {
         expect(message).to.be.deep.equal({
           type: 'breadcrumb',
           message: 'Starting test',
+          systemGenerated: true
+        });
+      }]);
+    });
+
+    it('should emit breadcrumb message after the after hooks are done', function() {
+      return ensureMessages('suite_single_successful_test', [function(testPath, message) {
+        expect(message).to.be.deep.equal({
+          type: 'breadcrumb',
+          message: 'Finished running after hooks',
           systemGenerated: true
         });
       }]);
