@@ -66,4 +66,26 @@ describe('MessageTracker', function() {
     tracker.gotMessage(path, { type: 'retry' });
     expect(tracker.getMessages(path)).to.be.empty;
   });
+
+  it('should cease to collect messages on timeout', function() {
+    var path = { test: 'path' };
+    var errorMessage = { type: 'error', stack: 'Hey!' };
+
+    tracker.gotMessage(path, errorMessage);
+    tracker.gotMessage(path, { type: 'timeout' });
+    tracker.gotMessage(path, errorMessage);
+    expect(tracker.getMessages(path)).to.be.deep.equal([errorMessage]);
+  });
+
+  it('should collect messages after timeout + retry', function() {
+    var path = { test: 'path' };
+    var errorMessage1 = { type: 'error', stack: 'Hey 1!' };
+    var errorMessage2 = { type: 'error', stack: 'Hey 2!' };
+
+    tracker.gotMessage(path, errorMessage1);
+    tracker.gotMessage(path, { type: 'timeout' });
+    tracker.gotMessage(path, { type: 'retry' });
+    tracker.gotMessage(path, errorMessage2);
+    expect(tracker.getMessages(path)).to.be.deep.equal([errorMessage2]);
+  });
 });

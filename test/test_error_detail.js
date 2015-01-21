@@ -128,11 +128,13 @@ describe('Error detail reporter', function() {
     ]);
   });
 
-  it('should report the last breadcrumb for tests that time out', function() {
+  it('should report the last breadcrumb before timeout for tests that time out', function() {
     return doWithReporterAndCheck(function(reporter) {
       reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
       reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'other_breadcrumb_msg', trace: 'trace' });
       reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'timeout' });
+      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'yet_another_breadcrumb_msg', trace: 'trace' });
       reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
       reporter.done();
     }, [
