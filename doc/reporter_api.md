@@ -609,9 +609,9 @@ run; before and after hooks are not counted.
 
 ```javascript
 var overman = require('overman');
-var tracker = new overman.MessageTracker('error');
+var tracker = new overman.reporters.MessageTracker('error');
 // Run tests
-var messages = tracker.getMessages();
+var messages = tracker.getMessages(testPath);
 ```
 
 It is sometimes useful to store away all tests of a particular type, for example
