@@ -170,7 +170,7 @@ after hooks are run first, and the top level suite's after hooks are run last.
 Hooks within a given suite or subsuite are run in the order they are specified.
 
 Like tests, before and after hooks can be synchronous or asynchronous. Both the
-`done` style of asynchrony and promises are supported.
+`done` style of asynchrony, promises and generators are supported.
 
 When a before hook fails, subsequent before hooks and the test will not be run.
 
@@ -270,14 +270,29 @@ it('should fail', function() {
 ### Promises
 
 Overman also supports promise style asynchronous tests. When a test function
-returns a promise-like object, it the test result will be the value of the
-promise:
+returns a promise-like object, the test result will be the value of the promise:
 
 ```javascript
 var when = require('when');
 
 it('should succeed', function() {
   return when().delay(100);  
+});
+```
+
+### Generators
+
+In node 0.11+ and iojs, overman offers support for writing tests with
+[co](https://github.com/tj/co) style asynchronous generators. When a test
+function returns a generator-like object, Overman uses `co` to run the test.
+
+```javascript
+var when = require('when');
+
+it('should use generators', function *() {
+  if ((yield when.resolve(1)) != (yield when.resolve(1))) {
+    throw new Error('Insanity!');
+  }
 });
 ```
 
