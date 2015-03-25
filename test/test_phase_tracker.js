@@ -61,4 +61,19 @@ describe('PhaseTracker', function() {
     tracker.gotMessage({ test: 'path' }, { type: 'retry' });
     expect(tracker.getLastPhase({ test: 'path' })).to.not.exist;
   });
+
+  it('should ignore phases after timeout', function() {
+    tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
+    tracker.gotMessage({ test: 'path' }, { type: 'timeout' });
+    tracker.gotMessage({ test: 'path' }, { type: 'startedAfterHook', name: 'The hook 2' });
+    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'beforeHook', inName: 'The hook 1' });
+  });
+
+  it('should start saving phases again after retries even if the previous attempt timed out', function() {
+    tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
+    tracker.gotMessage({ test: 'path' }, { type: 'timeout' });
+    tracker.gotMessage({ test: 'path' }, { type: 'retry' });
+    tracker.gotMessage({ test: 'path' }, { type: 'startedAfterHook', name: 'The hook 2' });
+    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'afterHook', inName: 'The hook 2' });
+  });
 });
