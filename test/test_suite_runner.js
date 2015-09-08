@@ -591,4 +591,86 @@ describe('Suite runner', function() {
       });
     });
   });
+
+  describe('Debug', function() {
+    it('should run only one test when debugPort is specified', function() {
+      var tests = when.promise(function(resolve) {
+        runTestSuite('suite_two_passing_tests', [], {
+          reporters: [{
+            registerTests: function(tests) {
+              resolve(tests);
+            }
+          }],
+          debugPort: 1234
+        }).done(function() {}, function() {});
+      });
+
+      return tests.then(function(tests) {
+        expect(tests.length).to.be.equal(1);
+      });
+    });
+
+    it('should require debugPort when inspectorPort is set', function() {
+      return shouldFail(runTestSuite('suite_single_successful_test', [], {
+        inspectorPort: 1234
+      }), function(error) {
+        return isTestFailureError(error) &&
+          error.message.match(/inspectorPort specified without debugPort/);
+      });
+    });
+
+    function extractSubprocessForkOptions(options) {
+      return when.promise(function(resolve, reject) {
+        var mockChildProcess = {
+          fork: function(path, args, options) {
+            resolve(options);
+          }
+        };
+        runTestSuite('suite_single_successful_test', [], _.extend({
+          childProcess: mockChildProcess }, options))
+          .done(function() {}, reject);
+      });
+    }
+
+    it('should pass debug option to test subprocess', function() {
+      return extractSubprocessForkOptions({ debugPort: 1234 })
+        .then(function(options) {
+          expect(options).property('execArgv').to.be.deep.equal(['--debug-brk=1234']);
+        });
+    });
+
+    it('should not pass debug option to test subprocess when debugPort is not set', function() {
+      return extractSubprocessForkOptions({})
+        .then(function(options) {
+          expect(options).property('execArgv').to.be.deep.equal([]);
+        });
+    });
+
+    it('should start node-inspector subprocess', function() {
+      return when.promise(function(resolve, reject) {
+        var mockChildProcess = {
+          fork: function(path, args, options) {
+            if (path.match(/run_test/)) {
+              return childProcess.fork(path, args, options);
+            } else {
+              try {
+                expect(path).to.match(/bin\/inspector.js/);
+                expect(args).to.be.deep.equal(['--debug-port=1234', '--web-port=1235']);
+                expect(options).property('silent').to.be.true;
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            }
+          }
+        };
+        runTestSuite('suite_single_successful_test', [], {
+            childProcess: mockChildProcess,
+            debugPort: 1234,
+            inspectorPort: 1235
+          })
+          .done(function() {}, reject);
+      });
+    });
+  });
 });
