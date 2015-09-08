@@ -25,14 +25,15 @@
     }
   ],
   "dependencies": {
-    "when": "~3.5.2",
     "async": "~0.9.0",
-    "lodash": "~2.4.1",
     "chalk": "~1.0.0",
-    "teamcity-service-messages": "~0.1.6",
+    "co": "~4.4.0",
     "exit": "~0.1.2",
+    "lodash": "~2.4.1",
+    "node-inspector": "^0.12.3",
+    "teamcity-service-messages": "~0.1.6",
     "through": "~2.3.6",
-    "co": "~4.4.0"
+    "when": "~3.5.2"
   },
   "devDependencies": {
     "chai": "~1.10.0",
