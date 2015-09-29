@@ -55,26 +55,6 @@ function simulateOneTestAndWaitForLine(line) {
 }
 
 describe('Spec reporter', function() {
-  it('should pipe test output', function() {
-    var test = through();
-    var out = through();
-
-    var outputPromise = streamUtil.waitForStreamToEmitLines(out, [
-      /Hello/
-    ]);
-
-    var spec = new Spec({ stdout: out });
-    spec.gotMessage({ file: 'file', path: ['test'] }, {
-      type: 'stdio',
-      stdout: test
-    });
-
-    out.write('Hello\n');
-    out.end();
-
-    return outputPromise;
-  });
-
   it('should mark slow tests', function() {
     return simulateOneTestAndWaitForLine(/\(123ms\)/);
   });
