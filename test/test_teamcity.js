@@ -48,17 +48,13 @@ describe('TeamCity reporter', function() {
     });
   });
 
-  describe('stdio message', function() {
+  describe('stdio messages', function() {
     it('should forward stdout', function() {
       return performActionsAndCheckOutput(function(reporter) {
-        var stdout = through();
-        var stderr = through();
         reporter.gotMessage({ file: 'file', path: ['test'] }, {
-          type: 'stdio',
-          stdout: stdout,
-          stderr: stderr
+          type: 'stdout',
+          data: 'Hello!\na'
         });
-        stdout.write('Hello!\na');
       }, [
         /##teamcity\[testStdOut name='test' out='Hello!\|na' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
       ]);
@@ -66,14 +62,10 @@ describe('TeamCity reporter', function() {
 
     it('should forward stderr', function() {
       return performActionsAndCheckOutput(function(reporter) {
-        var stdout = through();
-        var stderr = through();
         reporter.gotMessage({ file: 'file', path: ['test'] }, {
-          type: 'stdio',
-          stdout: stdout,
-          stderr: stderr
+          type: 'stderr',
+          data: 'Hello!\na'
         });
-        stderr.write('Hello!\na');
       }, [
         /##teamcity\[testStdErr name='test' out='Hello!\|na' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
       ]);
@@ -81,17 +73,22 @@ describe('TeamCity reporter', function() {
 
     it('should forward stodut and stderr in order', function() {
       return performActionsAndCheckOutput(function(reporter) {
-        var stdout = through();
-        var stderr = through();
         reporter.gotMessage({ file: 'file', path: ['test'] }, {
-          type: 'stdio',
-          stdout: stdout,
-          stderr: stderr
+          type: 'stderr',
+          data: 'a'
         });
-        stderr.write('a');
-        stdout.write('b');
-        stderr.write('c');
-        stdout.write('d');
+        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+          type: 'stdout',
+          data: 'b'
+        });
+        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+          type: 'stderr',
+          data: 'c'
+        });
+        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+          type: 'stdout',
+          data: 'd'
+        });
       }, [
         /##teamcity\[testStdErr name='test' out='a' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
         /##teamcity\[testStdOut name='test' out='b' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
