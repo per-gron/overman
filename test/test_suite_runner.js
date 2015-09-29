@@ -81,6 +81,8 @@ function ensureOutputFromTests(suite, tests, options) {
 
   var testsPromises = _.keys(tests).map(function(testName) {
     var lines = tests[testName];
+    var out = through();
+
     return when.promise(function(resolve, reject) {
       reporters.push(new OnMessage(function(testPath, message) {
         var currentTestName = _.last(testPath.path);
@@ -89,9 +91,13 @@ function ensureOutputFromTests(suite, tests, options) {
         if (currentTestName === testName) {
           if (message.type === 'start') {
             gotStartForTests.push(testName);
-          } else if (message.type === 'stdio') {
-            streamUtil.waitForStreamToEmitLines(message.stdout, lines)
+
+            streamUtil.waitForStreamToEmitLines(out, lines)
               .done(resolve, reject);
+          } else if (message.type === 'stdout') {
+            out.write(message.data);
+          } else if (message.type === 'finish') {
+            out.end();
           }
         }
       }));
