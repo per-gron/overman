@@ -387,7 +387,6 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
-        child.stdin = new stream.Readable();
 
         child.kill = function() {};
         child.send = function(message) {
@@ -417,7 +416,6 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
-        child.stdin = new stream.Readable();
 
         child.kill = function() {};
         child.send = function(message) {
@@ -451,7 +449,6 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
-        child.stdin = new stream.Readable();
 
         child.kill = function(signal) {
           expect(signal).to.be.equal('SIGKILL');
@@ -549,7 +546,6 @@ describe('Suite runner', function() {
     it('should retry tests that time out even when the test process exits with a 0 exit code', function() {
       function fork() {
         var child = new EventEmitter();
-        child.stdin = new stream.Readable();
 
         child.send = function(message) {
           expect(message).property('type').to.be.equal('sigint');

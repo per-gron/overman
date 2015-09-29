@@ -164,7 +164,6 @@ if the test is going to be skipped.
 ```javascript
 {
   "type": "stdio",
-  "stdin": [Stream],
   "stdout": [Stream],
   "stderr": [Stream]
 }

@@ -222,7 +222,6 @@ describe('Reporter API', function() {
   it('should emit stdio message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
       expect(message).property('type').to.be.equal('stdio');
-      expect(message).property('stdin').to.exist;
       expect(message).property('stdout').to.exist;
       expect(message).property('stderr').to.exist;
     }]);
@@ -352,7 +351,6 @@ describe('Reporter API', function() {
   it('should emit finish message last, even when messages arrive after process exit', function() {
     function fork() {
       var child = new EventEmitter();
-      child.stdin = new stream.Readable();
 
       process.nextTick(function() {
         child.emit('exit', 0, null);
