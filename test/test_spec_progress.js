@@ -198,13 +198,14 @@ describe('Spec progress reporter', function() {
             reporter.gotMessage(null, { type: 'suiteStart', suite: suitePath });
             reporter.gotMessage(testPath, { type: 'start' });
 
-            var msg = { type: 'stdio' };
-            var stream = through();
-            msg[streamName] = stream;
-            reporter.gotMessage(testPath, msg);
-
-            stream.write('a_line\n');
-            stream.write('a_second_line\n');
+            reporter.gotMessage(testPath, {
+              type: streamName,
+              data: 'a_line\n'
+            });
+            reporter.gotMessage(testPath, {
+              type: streamName,
+              data: 'a_second_line\n'
+            });
           });
         });
       });
