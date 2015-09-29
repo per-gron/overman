@@ -159,19 +159,27 @@ The test will begin momentarily. This message is emitted exactly once per test,
 and is always the first message for a given test run. `skipped` will be `true`
 if the test is going to be skipped.
 
-### stdio
+### stdout
 
 ```javascript
 {
-  "type": "stdio",
-  "stdout": [Stream],
-  "stderr": [Stream]
+  "type": "stdout",
+  "data": [String]
 }
 ```
 
-The test process has started and the streams of the test process are handed to
-reporters. This message is emitted once, directly after the "start" message.
-When the test is skipped this message is not emitted.
+The test process has printed something to stdout.
+
+### stderr
+
+```javascript
+{
+  "type": "stderr",
+  "data": [String]
+}
+```
+
+The test process has printed something to stderr.
 
 ### startedBeforeHooks
 
