@@ -351,6 +351,8 @@ describe('Reporter API', function() {
   it('should emit finish message last, even when messages arrive after process exit', function() {
     function fork() {
       var child = new EventEmitter();
+      child.stdout = { on: function() {} };
+      child.stderr = { on: function() {} };
 
       process.nextTick(function() {
         child.emit('exit', 0, null);

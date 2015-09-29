@@ -178,6 +178,30 @@ describe('Suite runner', function() {
     ]);
   });
 
+  describe('Stdio', function() {
+    var testSuite = {
+      stdout: 'suite_single_successful_test',
+      stderr: 'suite_single_successful_test_stderr'
+    };
+
+    ['stdout', 'stderr'].forEach(function(streamName) {
+      it('should forward ' + streamName + ' data', function() {
+        var doneCalledTimes = 0;
+
+        return when.promise(function(resolve) {
+          runTestSuite(testSuite[streamName], [{
+            gotMessage: function(testPath, message) {
+              if (message.type === streamName) {
+                expect(message.data).to.be.equal('running_test\n');
+                resolve();
+              }
+            }
+          }]);
+        });
+      });
+    });
+  });
+
   describe('Suite cancellation', function() {
     it('should fail when the suite is cancelled', function() {
       var suitePromise = runTestSuite('suite_single_successful_test', [
@@ -387,6 +411,8 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
+        child.stdout = { on: function() {} };
+        child.stderr = { on: function() {} };
 
         child.kill = function() {};
         child.send = function(message) {
@@ -416,6 +442,8 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
+        child.stdout = { on: function() {} };
+        child.stderr = { on: function() {} };
 
         child.kill = function() {};
         child.send = function(message) {
@@ -449,6 +477,8 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
+        child.stdout = { on: function() {} };
+        child.stderr = { on: function() {} };
 
         child.kill = function(signal) {
           expect(signal).to.be.equal('SIGKILL');
@@ -546,6 +576,8 @@ describe('Suite runner', function() {
     it('should retry tests that time out even when the test process exits with a 0 exit code', function() {
       function fork() {
         var child = new EventEmitter();
+        child.stdout = { on: function() {} };
+        child.stderr = { on: function() {} };
 
         child.send = function(message) {
           expect(message).property('type').to.be.equal('sigint');
