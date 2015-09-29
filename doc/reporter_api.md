@@ -449,17 +449,6 @@ console.log(detector.didFail());
 non-skipped tests finished with a non-`"success"` state. If so, its `didFail`
 method returns `true`.
 
-### Pipe
-
-```javascript
-var overman = require('overman');
-new overman.reporters.Pipe({ stdout: process.stdout, stderr: process.stderr });
-```
-
-By default, Overman swallows all test output. It is often useful to actually
-print what tests print. The `Pipe` reporter takes streams and pipes the test
-streams to those streams.
-
 ### Serializer
 
 ```javascript
