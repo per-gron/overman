@@ -75,7 +75,7 @@ function isTestFailureError(err) {
  * the test output exactly matches the specification.
  */
 function ensureOutputFromTests(suite, tests, options) {
-  var gotStdioForTests = [];
+  var gotStartForTests = [];
   var reporters = [];
   var encounteredTests = {};
 
@@ -86,10 +86,13 @@ function ensureOutputFromTests(suite, tests, options) {
         var currentTestName = _.last(testPath.path);
         encounteredTests[currentTestName] = true;
 
-        if (currentTestName === testName && message.type === 'stdio') {
-          gotStdioForTests.push(testName);
-          streamUtil.waitForStreamToEmitLines(message.stdout, lines)
-            .done(resolve, reject);
+        if (currentTestName === testName) {
+          if (message.type === 'start') {
+            gotStartForTests.push(testName);
+          } else if (message.type === 'stdio') {
+            streamUtil.waitForStreamToEmitLines(message.stdout, lines)
+              .done(resolve, reject);
+          }
         }
       }));
     });
@@ -103,10 +106,10 @@ function ensureOutputFromTests(suite, tests, options) {
     })
     .then(function() {
       var testNames = _.keys(tests);
-      if (gotStdioForTests.length < testNames.length) {
-        var missingTests = _.difference(testNames, gotStdioForTests);
+      if (gotStartForTests.length < testNames.length) {
+        var missingTests = _.difference(testNames, gotStartForTests);
 
-        throw new Error('Did not run all tests (ran ' + listNames(gotStdioForTests) + '. Missing ' + listNames(missingTests) + ')');
+        throw new Error('Did not run all tests (ran ' + listNames(gotStartForTests) + '. Missing ' + listNames(missingTests) + ')');
       }
     });
 
