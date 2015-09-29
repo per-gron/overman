@@ -107,7 +107,12 @@ describe('Spec reporter', function() {
   });
 
   it('should print to stdout by default', function() {
-    var outputDeferred = when.defer();
+    var out = through();
+    var outputPromise = streamUtil.waitForStreamToEmitLines(out, [
+      /./,
+      /suite_name/,
+      /test/
+    ]);
 
     // This test can't be done within the test process, because when the test
     // runs in Mocha it's not ok to pipe stdout to something else.
@@ -115,19 +120,15 @@ describe('Spec reporter', function() {
       files: [__dirname + '/suite/' + 'suite_spec_should_print_to_stdout_by_default'],
       timeout: 500,
       reporters: new OnMessage(function(path, message) {
-        if (message.type !== 'stdio') {
-          return;
+        if (message.type === 'finish') {
+          out.end();
+        } else if (message.type === 'stdout') {
+          out.write(message.data);
         }
-
-        streamUtil.waitForStreamToEmitLines(message.stdout, [
-          /./,
-          /suite_name/,
-          /test/
-        ]).done(outputDeferred.resolve, outputDeferred.reject);
       }),
       internalErrorOutput: through(),
     });
 
-    return when.all([suitePromise, outputDeferred.promise]);
+    return when.all([suitePromise, outputPromise]);
   });
 });
