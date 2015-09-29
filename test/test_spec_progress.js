@@ -19,7 +19,6 @@
 var _ = require('lodash');
 var expect = require('chai').expect;
 var stripAnsi = require('strip-ansi');
-var through = require('through');
 var when = require('when');
 var SpecProgress = require('../lib/reporters/spec_progress');
 

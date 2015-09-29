@@ -20,7 +20,6 @@ var _ = require('lodash');
 var childProcess = require('child_process');
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
-var stream = require('stream');
 var through = require('through');
 var when = require('when');
 var OnMessage = require('./util/on_message');
@@ -195,8 +194,6 @@ describe('Suite runner', function() {
 
     ['stdout', 'stderr'].forEach(function(streamName) {
       it('should forward ' + streamName + ' data', function() {
-        var doneCalledTimes = 0;
-
         return when.promise(function(resolve) {
           runTestSuite(testSuite[streamName], [{
             gotMessage: function(testPath, message) {

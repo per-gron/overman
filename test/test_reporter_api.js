@@ -25,7 +25,6 @@ var _ = require('lodash');
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var path = require('path');
-var stream = require('stream');
 var when = require('when');
 var OnMessage = require('./util/on_message');
 var shouldFail = require('./util/should_fail');
