@@ -381,7 +381,6 @@ describe('Reporter API', function() {
   it('should emit retry message when a test is retried', function() {
     var messages = [
       'start',
-      'stdio',
       'startedBeforeHooks',
       'startedTest',
       'breadcrumb',
@@ -390,7 +389,6 @@ describe('Reporter API', function() {
       'breadcrumb',
       'finishedAfterHooks',
       'retry',
-      'stdio',
       'startedBeforeHooks',
       'startedTest',
       'breadcrumb',
