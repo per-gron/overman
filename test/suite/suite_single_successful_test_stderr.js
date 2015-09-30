@@ -16,16 +16,6 @@
 
 'use strict';
 
-// This file exports things for the public API. It intentionally does not
-// export all reporters.
-
-exports.Combined = require('./combined');
-exports.ErrorDetail = require('./error_detail');
-exports.ErrorDetector = require('./error_detector');
-exports.MessageTracker = require('./message_tracker');
-exports.Serializer = require('./serializer');
-exports.Spec = require('./spec');
-exports.SuiteMarker = require('./suite_marker');
-exports.Summary = require('./summary');
-exports.Teamcity = require('./teamcity');
-exports.Timer = require('./timer');
+it('should succeed', function() {
+  console.error('running_test');
+});

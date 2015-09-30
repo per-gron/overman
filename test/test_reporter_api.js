@@ -25,7 +25,6 @@ var _ = require('lodash');
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var path = require('path');
-var stream = require('stream');
 var when = require('when');
 var OnMessage = require('./util/on_message');
 var shouldFail = require('./util/should_fail');
@@ -219,12 +218,17 @@ describe('Reporter API', function() {
     }]);
   });
 
-  it('should emit stdio message', function() {
+  it('should emit stdout message', function() {
     return ensureMessages('suite_single_successful_test', [function(testPath, message) {
-      expect(message).property('type').to.be.equal('stdio');
-      expect(message).property('stdin').to.exist;
-      expect(message).property('stdout').to.exist;
-      expect(message).property('stderr').to.exist;
+      expect(message).property('type').to.be.equal('stdout');
+      expect(message).property('data').to.exist;
+    }]);
+  });
+
+  it('should emit stderr message', function() {
+    return ensureMessages('suite_single_successful_test_stderr', [function(testPath, message) {
+      expect(message).property('type').to.be.equal('stderr');
+      expect(message).property('data').to.exist;
     }]);
   });
 
@@ -352,7 +356,8 @@ describe('Reporter API', function() {
   it('should emit finish message last, even when messages arrive after process exit', function() {
     function fork() {
       var child = new EventEmitter();
-      child.stdin = new stream.Readable();
+      child.stdout = { on: function() {} };
+      child.stderr = { on: function() {} };
 
       process.nextTick(function() {
         child.emit('exit', 0, null);
@@ -375,7 +380,6 @@ describe('Reporter API', function() {
   it('should emit retry message when a test is retried', function() {
     var messages = [
       'start',
-      'stdio',
       'startedBeforeHooks',
       'startedTest',
       'breadcrumb',
@@ -384,7 +388,6 @@ describe('Reporter API', function() {
       'breadcrumb',
       'finishedAfterHooks',
       'retry',
-      'stdio',
       'startedBeforeHooks',
       'startedTest',
       'breadcrumb',

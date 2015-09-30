@@ -20,7 +20,6 @@ var _ = require('lodash');
 var childProcess = require('child_process');
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
-var stream = require('stream');
 var through = require('through');
 var when = require('when');
 var OnMessage = require('./util/on_message');
@@ -75,21 +74,30 @@ function isTestFailureError(err) {
  * the test output exactly matches the specification.
  */
 function ensureOutputFromTests(suite, tests, options) {
-  var gotStdioForTests = [];
+  var gotStartForTests = [];
   var reporters = [];
   var encounteredTests = {};
 
   var testsPromises = _.keys(tests).map(function(testName) {
     var lines = tests[testName];
+    var out = through();
+
     return when.promise(function(resolve, reject) {
       reporters.push(new OnMessage(function(testPath, message) {
         var currentTestName = _.last(testPath.path);
         encounteredTests[currentTestName] = true;
 
-        if (currentTestName === testName && message.type === 'stdio') {
-          gotStdioForTests.push(testName);
-          streamUtil.waitForStreamToEmitLines(message.stdout, lines)
-            .done(resolve, reject);
+        if (currentTestName === testName) {
+          if (message.type === 'start') {
+            gotStartForTests.push(testName);
+
+            streamUtil.waitForStreamToEmitLines(out, lines)
+              .done(resolve, reject);
+          } else if (message.type === 'stdout') {
+            out.write(message.data);
+          } else if (message.type === 'finish') {
+            out.end();
+          }
         }
       }));
     });
@@ -103,10 +111,10 @@ function ensureOutputFromTests(suite, tests, options) {
     })
     .then(function() {
       var testNames = _.keys(tests);
-      if (gotStdioForTests.length < testNames.length) {
-        var missingTests = _.difference(testNames, gotStdioForTests);
+      if (gotStartForTests.length < testNames.length) {
+        var missingTests = _.difference(testNames, gotStartForTests);
 
-        throw new Error('Did not run all tests (ran ' + listNames(gotStdioForTests) + '. Missing ' + listNames(missingTests) + ')');
+        throw new Error('Did not run all tests (ran ' + listNames(gotStartForTests) + '. Missing ' + listNames(missingTests) + ')');
       }
     });
 
@@ -176,6 +184,28 @@ describe('Suite runner', function() {
         });
       })
     ]);
+  });
+
+  describe('Stdio', function() {
+    var testSuite = {
+      stdout: 'suite_single_successful_test',
+      stderr: 'suite_single_successful_test_stderr'
+    };
+
+    ['stdout', 'stderr'].forEach(function(streamName) {
+      it('should forward ' + streamName + ' data', function() {
+        return when.promise(function(resolve) {
+          runTestSuite(testSuite[streamName], [{
+            gotMessage: function(testPath, message) {
+              if (message.type === streamName) {
+                expect(message.data).to.be.equal('running_test\n');
+                resolve();
+              }
+            }
+          }]);
+        });
+      });
+    });
   });
 
   describe('Suite cancellation', function() {
@@ -387,7 +417,8 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
-        child.stdin = new stream.Readable();
+        child.stdout = { on: function() {} };
+        child.stderr = { on: function() {} };
 
         child.kill = function() {};
         child.send = function(message) {
@@ -417,7 +448,8 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
-        child.stdin = new stream.Readable();
+        child.stdout = { on: function() {} };
+        child.stderr = { on: function() {} };
 
         child.kill = function() {};
         child.send = function(message) {
@@ -451,7 +483,8 @@ describe('Suite runner', function() {
 
       function fork() {
         var child = new EventEmitter();
-        child.stdin = new stream.Readable();
+        child.stdout = { on: function() {} };
+        child.stderr = { on: function() {} };
 
         child.kill = function(signal) {
           expect(signal).to.be.equal('SIGKILL');
@@ -549,7 +582,8 @@ describe('Suite runner', function() {
     it('should retry tests that time out even when the test process exits with a 0 exit code', function() {
       function fork() {
         var child = new EventEmitter();
-        child.stdin = new stream.Readable();
+        child.stdout = { on: function() {} };
+        child.stderr = { on: function() {} };
 
         child.send = function(message) {
           expect(message).property('type').to.be.equal('sigint');

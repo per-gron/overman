@@ -159,20 +159,27 @@ The test will begin momentarily. This message is emitted exactly once per test,
 and is always the first message for a given test run. `skipped` will be `true`
 if the test is going to be skipped.
 
-### stdio
+### stdout
 
 ```javascript
 {
-  "type": "stdio",
-  "stdin": [Stream],
-  "stdout": [Stream],
-  "stderr": [Stream]
+  "type": "stdout",
+  "data": [String]
 }
 ```
 
-The test process has started and the streams of the test process are handed to
-reporters. This message is emitted once, directly after the "start" message.
-When the test is skipped this message is not emitted.
+The test process has printed something to stdout.
+
+### stderr
+
+```javascript
+{
+  "type": "stderr",
+  "data": [String]
+}
+```
+
+The test process has printed something to stderr.
 
 ### startedBeforeHooks
 
@@ -449,17 +456,6 @@ console.log(detector.didFail());
 `ErrorDetector` is a very simple reporter. It keeps track of whether any
 non-skipped tests finished with a non-`"success"` state. If so, its `didFail`
 method returns `true`.
-
-### Pipe
-
-```javascript
-var overman = require('overman');
-new overman.reporters.Pipe({ stdout: process.stdout, stderr: process.stderr });
-```
-
-By default, Overman swallows all test output. It is often useful to actually
-print what tests print. The `Pipe` reporter takes streams and pipes the test
-streams to those streams.
 
 ### Serializer
 
