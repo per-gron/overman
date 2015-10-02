@@ -229,11 +229,12 @@ describe('TeamCity reporter', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
-        reporter.gotMessage(path, { type: 'finish', result: 'timeout' });
+        reporter.gotMessage(path, { type: 'timeout' });
+        reporter.gotMessage(path, { type: 'finish', result: 'failure' });
       }, [
         /testStarted/,
-        /##teamcity\[testFailed name='test1' message='Test timed out' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
-        /testFinished/,
+        /##teamcity\[testFailed 'Test timed out']/,
+        /testFinished/
       ]);
     });
 
@@ -291,7 +292,8 @@ describe('TeamCity reporter', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
-        reporter.gotMessage(path, { type: 'finish', result: 'timeout' });
+        reporter.gotMessage(path, { type: 'timeout' });
+        reporter.gotMessage(path, { type: 'finish', result: 'failure' });
       }, [
         /testStarted/,
         /testFailed/,
@@ -330,6 +332,22 @@ describe('TeamCity reporter', function() {
         reporter.gotMessage(path, { type: 'finish', result: 'skipped' });
       }, [
         /testIgnored/
+      ]);
+    });
+
+    it('should treat timeout in before hook as error', function() {
+      return performActionsAndCheckOutput(function(reporter) {
+        var path = { file: 'file', path: ['test1'] };
+        reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, { type: 'startedBeforeHooks', data: 'a' });
+        reporter.gotMessage(path, { type: 'timeout', data: 'b' });
+        reporter.gotMessage(path, { type: 'startedTest', data: 'c' });
+        reporter.gotMessage(path, { type: 'error', data: 'd', stack: 'Error'});
+        reporter.gotMessage(path, { type: 'finish', result: 'timeout' });
+      }, [
+        /testStarted/,
+        /##teamcity\[testFailed 'Test timed out']/,
+        /##teamcity\[testFinished name='test1' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
       ]);
     });
   });
