@@ -51,73 +51,77 @@ describe('TeamCity reporter', function() {
   describe('stdio messages', function() {
     it('should forward stdout', function() {
       return performActionsAndCheckOutput(function(reporter) {
-        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+	var path = { file: 'file', path: ['test'] };
+        reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, {
           type: 'stdout',
           data: 'Hello!\na'
         });
+        reporter.gotMessage(path, { type: 'finish', result: 'success', duration: 0 });
       }, [
-        /##teamcity\[testStdOut name='test' out='Hello!\|na' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /testStarted/,
+        /##teamcity\[testStdOut name='test' out='Hello!\|na' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/,
       ]);
     });
 
     it('should forward stderr', function() {
       return performActionsAndCheckOutput(function(reporter) {
-        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+	var path = { file: 'file', path: ['test'] };
+        reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, {
           type: 'stderr',
           data: 'Hello!\na'
         });
+        reporter.gotMessage(path, { type: 'finish', result: 'success', duration: 0 });	
       }, [
-        /##teamcity\[testStdErr name='test' out='Hello!\|na' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /testStarted/,
+        /##teamcity\[testStdErr name='test' out='Hello!\|na' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/,
       ]);
     });
 
     it('should forward stodut and stderr in order', function() {
       return performActionsAndCheckOutput(function(reporter) {
-        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+	var path = { file: 'file', path: ['test'] };
+        reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, {
           type: 'stderr',
           data: 'a'
         });
-        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+        reporter.gotMessage(path, {
           type: 'stdout',
           data: 'b'
         });
-        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+        reporter.gotMessage(path, {
           type: 'stderr',
           data: 'c'
         });
-        reporter.gotMessage({ file: 'file', path: ['test'] }, {
+        reporter.gotMessage(path, {
           type: 'stdout',
           data: 'd'
         });
+        reporter.gotMessage(path, { type: 'finish', result: 'success', duration: 0 });	
       }, [
+        /testStarted/,
         /##teamcity\[testStdErr name='test' out='a' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
         /##teamcity\[testStdOut name='test' out='b' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
         /##teamcity\[testStdErr name='test' out='c' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
-        /##teamcity\[testStdOut name='test' out='d' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /##teamcity\[testStdOut name='test' out='d' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/,
       ]);
     });
   });
 
   describe('suiteStart/suiteEnd messages', function() {
-    it('should emit testSuiteStarted messages', function() {
-      return performActionsAndCheckOutput(function(reporter) {
-        var path = { file: 'file', path: ['suite', 'test'] };
-        reporter.registerTests([path]);
-        reporter.gotMessage(path, { type: 'start' });
-      }, [
-        /##teamcity\[testSuiteStarted name='suite' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
-        /testStarted/
-      ]);
-    });
-
-    it('should emit testSuiteFinished messages', function() {
+    it('should emit testSuiteStarted and testSuiteFinished messages', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['suite', 'test'] };
         reporter.registerTests([path]);
         reporter.gotMessage(path, { type: 'start' });
         reporter.gotMessage(path, { type: 'finish', result: 'success', duration: 0 });
       }, [
-        /testSuiteStarted/,
+        /##teamcity\[testSuiteStarted name='suite' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
         /testStarted/,
         /testFinished/,
         /##teamcity\[testSuiteFinished name='suite' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
@@ -141,18 +145,23 @@ describe('TeamCity reporter', function() {
     it('should emit testFailed messages', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test'] };
+        reporter.gotMessage(path, { type: 'start' });
         reporter.gotMessage(path, {
           type: 'error',
           stack: 'Line\nLine'
         });
+        reporter.gotMessage(path, { type: 'finish', result: 'failure', duration: 0 });	
       }, [
-        /##teamcity\[testFailed name='test' message='Line' details='Line\|nLine' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /testStarted/,
+        /##teamcity\[testFailed name='test' message='Line' details='Line\|nLine' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/,
       ]);
     });
 
     it('should emit testFailed message only for the first error for a given test', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test'] };
+        reporter.gotMessage(path, { type: 'start' });
         reporter.gotMessage(path, {
           type: 'error',
           stack: 'One'
@@ -161,8 +170,11 @@ describe('TeamCity reporter', function() {
           type: 'error',
           stack: 'Two'
         });
+        reporter.gotMessage(path, { type: 'finish', result: 'failure', duration: 0 });
       }, [
-        /##teamcity\[testFailed name='test' message='One' details='One' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /testStarted/,
+        /##teamcity\[testFailed name='test' message='One' details='One' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/,
       ]);
     });
 
@@ -182,26 +194,32 @@ describe('TeamCity reporter', function() {
           type: 'error',
           stack: 'Two'
         });
+        reporter.gotMessage(path2, { type: 'finish', result: 'failure', duration: 0 });
       }, [
         /testStarted/,
         /##teamcity\[testFailed name='test1' message='One' details='One' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
         /testFinished/,
         /testStarted/,
-        /##teamcity\[testFailed name='test2' message='Two' details='Two' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /##teamcity\[testFailed name='test2' message='Two' details='Two' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/,
       ]);
     });
 
     it('should emit comparisonFailure testFailed message for errors with actual and expected fields', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test'] };
+        reporter.gotMessage(path, { type: 'start' });
         reporter.gotMessage(path, {
           type: 'error',
           stack: 'Line\nLine',
           expected: 'expected',
           actual: 'actual'
         });
+        reporter.gotMessage(path, { type: 'finish', result: 'failure' });
       }, [
-        /##teamcity\[testFailed name='test' message='Line' details='Line\|nLine' type='comparisonFailure' expected='expected' actual='actual' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /testStarted/,
+        /##teamcity\[testFailed name='test' message='Line' details='Line\|nLine' type='comparisonFailure' expected='expected' actual='actual' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/
       ]);
     });
   });
@@ -211,8 +229,10 @@ describe('TeamCity reporter', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, { type: 'finish', result: 'success' });
       }, [
-        /##teamcity\[testStarted name='test1' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /##teamcity\[testStarted name='test1' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/
       ]);
     });
 
@@ -220,8 +240,10 @@ describe('TeamCity reporter', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start', skipped: true });
+        reporter.gotMessage(path, { type: 'finish', result: 'success' });
       }, [
-        /##teamcity\[testIgnored name='test1' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+        /##teamcity\[testIgnored name='test1' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/
       ]);
     });
 
@@ -348,6 +370,33 @@ describe('TeamCity reporter', function() {
         /testStarted/,
         /##teamcity\[testFailed 'Test timed out']/,
         /##teamcity\[testFinished name='test1' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
+      ]);
+    });
+  });
+
+  describe('retry handling', function() {
+    it ('should ignore previous failures if a retry succeeds', function() {
+      return performActionsAndCheckOutput(function(reporter) {
+        var path = { file: 'file', path: ['test1'] };
+        reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, { type: 'error', data: 'd', stack: 'Error'});
+        reporter.gotMessage(path, { type: 'retry', result: 'error' });
+        reporter.gotMessage(path, { type: 'finish', result: 'success' });
+      }, [
+        /testStarted/,
+        /testFinished/
+      ]);
+    });
+
+    it ('should ignore previous timeouts if a retry succeeds', function() {
+      return performActionsAndCheckOutput(function(reporter) {
+        var path = { file: 'file', path: ['test1'] };
+        reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, { type: 'retry', result: 'timeout' });
+        reporter.gotMessage(path, { type: 'finish', result: 'success' });
+      }, [
+        /testStarted/,
+        /testFinished/
       ]);
     });
   });
