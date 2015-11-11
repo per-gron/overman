@@ -374,13 +374,13 @@ describe('TeamCity reporter', function() {
     });
   });
 
-  describe('retry handling', function() {
-    it ('should ignore previous failures if a retry succeeds', function() {
+  describe('Retry handling', function() {
+    it('should ignore previous failures if a retry succeeds', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
         reporter.gotMessage(path, { type: 'error', data: 'd', stack: 'Error'});
-        reporter.gotMessage(path, { type: 'retry', result: 'error' });
+        reporter.gotMessage(path, { type: 'retry', result: 'failure' });
         reporter.gotMessage(path, { type: 'finish', result: 'success' });
       }, [
         /testStarted/,
@@ -388,7 +388,22 @@ describe('TeamCity reporter', function() {
       ]);
     });
 
-    it ('should ignore previous timeouts if a retry succeeds', function() {
+    it('should emit error for the last failing test when retries happen', function() {
+      return performActionsAndCheckOutput(function(reporter) {
+        var path = { file: 'file', path: ['test1'] };
+        reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, { type: 'error', data: 'd', stack: 'Error'});
+        reporter.gotMessage(path, { type: 'retry', result: 'failure' });
+        reporter.gotMessage(path, { type: 'error', data: 'e', stack: 'Error'});
+        reporter.gotMessage(path, { type: 'finish', result: 'failure' });
+      }, [
+        /testStarted/,
+        /##teamcity\[testFailed name='test1' message='Error' details='Error' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/
+      ]);
+    });
+
+    it('should ignore previous timeouts if a retry succeeds', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test1'] };
         reporter.gotMessage(path, { type: 'start' });
