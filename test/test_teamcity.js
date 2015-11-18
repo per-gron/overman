@@ -255,7 +255,7 @@ describe('TeamCity reporter', function() {
         reporter.gotMessage(path, { type: 'finish', result: 'failure' });
       }, [
         /testStarted/,
-        /##teamcity\[testFailed 'Test timed out']/,
+        /##teamcity\[testFailed name='test1' message='Test timed out' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
         /testFinished/
       ]);
     });
@@ -368,7 +368,7 @@ describe('TeamCity reporter', function() {
         reporter.gotMessage(path, { type: 'finish', result: 'timeout' });
       }, [
         /testStarted/,
-        /##teamcity\[testFailed 'Test timed out']/,
+        /##teamcity\[testFailed name='test1' message='Test timed out' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
         /##teamcity\[testFinished name='test1' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/
       ]);
     });
