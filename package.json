@@ -18,12 +18,7 @@
     "parallel"
   ],
   "author": "Per Eckerdal <per.eckerdal@gmail.com>",
-  "license": [
-    {
-      "type": "Apache-2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-    }
-  ],
+  "license": "Apache-2.0",
   "dependencies": {
     "async": "~0.9.0",
     "chalk": "~1.0.0",
