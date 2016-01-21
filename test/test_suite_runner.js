@@ -707,4 +707,12 @@ describe('Suite runner', function() {
       });
     });
   });
+  describe('Members in currentTest', function() {
+    it('should include title and full title', function() {
+      return ensureOutputFromTests('suite_test_title_in_tests', {
+        'should succeed 1': [ /should succeed 1/, /Suite:should succeed 1/ ],
+        'should succeed 2': [ /should succeed 2/, /Suite:should succeed 2/ ]
+      });
+    });
+  });
 });

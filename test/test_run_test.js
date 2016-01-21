@@ -167,6 +167,39 @@ describe('Test runner', function() {
     ]);
   });
 
+  it('should have title and full title in the test', function() {
+    var process = runTest('suite_test_title', 'should succeed');
+    return when.all([
+      waitForProcessToExit(process),
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /should succeed/,
+        /should succeed/
+      ])
+    ]);
+  });
+
+  it('should have title and full title in before each hook', function() {
+    var process = runTest('suite_before_each_hook_title', 'should succeed');
+    return when.all([
+      waitForProcessToExit(process),
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /should succeed/,
+        /should succeed/
+      ])
+    ]);
+  });
+
+  it('should have title and full title in after each hook', function() {
+    var process = runTest('suite_after_each_hook_title', 'should succeed');
+    return when.all([
+      waitForProcessToExit(process),
+      stream.waitForStreamToEmitLines(process.stdout, [
+        /should succeed/,
+        /should succeed/
+      ])
+    ]);
+  });
+
   it('should run tests that don\'t return a promise', function() {
     var process = runTest('suite_single_successful_test', 'should succeed');
     return when.all([

@@ -344,6 +344,13 @@ The return value of `this.timeout()` is not defined if the value has not been
 overridden. (In the future this might be the global timeout, but that is not
 currently implemented.)
 
+### Accessing the title
+
+You may access the title or the full title inside `beforeEach`, `it` and `afterEach`
+by referring to this.title or this.currentTest.title. The difference between full
+title and title is that the full title includes all the describe strings concatenated
+by the ':' character.
+
 ### Accessing the slow threshold
 
 Some Overman reporters, for example the spec reporter, will mark tests that are
