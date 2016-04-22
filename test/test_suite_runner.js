@@ -168,7 +168,7 @@ describe('Suite runner', function() {
 
   it('should not leak things to the runloop', function() {
     return Promise.race([
-      delay(1000).then(function() {
+      delay(2000).then(function() {
         throw new Error('Should be done by now');
       }),
       new Promise(function(resolve, reject) {
