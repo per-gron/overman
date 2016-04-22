@@ -20,7 +20,7 @@
   "author": "Per Eckerdal <per.eckerdal@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "async": "~0.9.0",
+    "async": "~1.5.2",
     "chalk": "~1.0.0",
     "co": "~4.6.0",
     "exit": "~0.1.2",
