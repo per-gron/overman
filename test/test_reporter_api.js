@@ -36,7 +36,7 @@ function pathForSuite(suite) {
 }
 
 function runTestSuite(suite, reporter, options) {
-  return suiteRunner(_.extend({
+  return suiteRunner(_.assign({
       files: [pathForSuite(suite)],
       timeout: 500,
       reporters: reporter ? [reporter] : []

@@ -23,7 +23,7 @@ var SpecProgress = require('../lib/reporters/spec_progress');
 
 function mock(methods) {
   return function Mock() {
-    _.extend(this, methods);
+    _.assign(this, methods);
   };
 }
 
@@ -148,7 +148,7 @@ describe('Spec progress reporter', function() {
         var testPath = { file: 'file', path: ['test'] };
         reporter.gotMessage(null, { type: 'suiteStart', suite: suitePath });
         reporter.gotMessage(testPath, { type: 'start' });
-        reporter.gotMessage(testPath, _.extend({ type: 'finish', result: result }, extraFinishOptions));
+        reporter.gotMessage(testPath, _.assign({ type: 'finish', result: result }, extraFinishOptions));
       });
     }
 

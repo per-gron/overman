@@ -53,7 +53,7 @@ function listNames(names) {
 }
 
 function runTestSuite(suite, reporters, options) {
-  return suiteRunner(_.extend({
+  return suiteRunner(_.assign({
       files: [__dirname + '/suite/' + suite],
       timeout: 500,
       reporters: reporters || [],
@@ -660,7 +660,7 @@ describe('Suite runner', function() {
             resolve(options);
           }
         };
-        runTestSuite('suite_single_successful_test', [], _.extend({
+        runTestSuite('suite_single_successful_test', [], _.assign({
           childProcess: mockChildProcess }, options))
           .then(function() {}, reject);
       });
