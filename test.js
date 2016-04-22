@@ -19,6 +19,9 @@
 var fs = require('fs');
 var path = require('path');
 var overman = require('./lib/overman');
+var promiseUtil = require('./lib/promise_util');
+
+process.env['FORCE_COLOR'] = 'true';
 
 var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
@@ -27,7 +30,7 @@ var suiteFiles = fs.readdirSync('test')
 var suitePromise = overman({ files: suiteFiles });
 
 var finished = false;
-suitePromise.finally(function() {
+promiseUtil.finally(suitePromise, function() {
   finished = true;
 });
 
@@ -42,6 +45,6 @@ process.on('SIGINT', function() {
   }
 });
 
-suitePromise.done(function() {}, function(err) {
+suitePromise.then(function() {}, function(err) {
   process.exit(1);
 });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2015-2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,13 @@
 
 'use strict';
 
-var when = require('when');
-
 // This code is a bit weird. It is designed to detect if the test runner invokes
 // the after hooks both when a test times out and when a test finishes. It
 // shouldn't do that: The after hooks must be invoked only once per test, even
 // when the test finishes while the after hooks are running because the test
 // timed out.
 
-var afterDeferred = when.defer();
+var afterDeferred = Promise.defer();
 
 it('should be run', function() {
   console.log('in_test');

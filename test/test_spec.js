@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014-2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 'use strict';
 
 var through = require('through');
-var when = require('when');
 var Spec = require('../lib/reporters/spec');
 var suiteRunner = require('../lib/suite_runner');
 var OnMessage = require('./util/on_message');
@@ -109,6 +108,6 @@ describe('Spec reporter', function() {
       internalErrorOutput: through(),
     });
 
-    return when.all([suitePromise, outputPromise]);
+    return Promise.all([suitePromise, outputPromise]);
   });
 });

@@ -273,10 +273,10 @@ Overman also supports promise style asynchronous tests. When a test function
 returns a promise-like object, the test result will be the value of the promise:
 
 ```javascript
-var when = require('when');
-
 it('should succeed', function() {
-  return when().delay(100);  
+  return new Promise(function(resolve) {
+    setTimeout(resolve, 100);
+  });
 });
 ```
 
@@ -287,10 +287,8 @@ In node 0.11+ and iojs, overman offers support for writing tests with
 function returns a generator-like object, Overman uses `co` to run the test.
 
 ```javascript
-var when = require('when');
-
 it('should use generators', function *() {
-  if ((yield when.resolve(1)) != (yield when.resolve(1))) {
+  if ((yield Promise.resolve(1)) != (yield Promise.resolve(1))) {
     throw new Error('Insanity!');
   }
 });

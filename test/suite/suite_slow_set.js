@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014, 2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 'use strict';
 
-var when = require('when');
-
 it('should set the slow threshold', function() {
   this.slow(20);
-  return when.promise(function() {});  // Never complete the test
+  return new Promise(function() {});  // Never complete the test
 });

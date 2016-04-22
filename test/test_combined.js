@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014, 2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 
 var _ = require('lodash');
 var expect = require('chai').expect;
-var when = require('when');
 var Combined = require('../lib/reporters/combined');
 
 describe('Combined reporter', function() {
@@ -44,7 +43,7 @@ describe('Combined reporter', function() {
 
       it('should forward ' + message + 'calls to multiple reporters', function() {
         var reporter1 = {};
-        var reporter1Promise = when.promise(function(resolve) {
+        var reporter1Promise = new Promise(function(resolve) {
           reporter1[message] = function() {
             expect(_.toArray(arguments)).to.be.deep.equal([1, 2, 3]);
             resolve();
@@ -52,7 +51,7 @@ describe('Combined reporter', function() {
         });
 
         var reporter2 = {};
-        var reporter2Promise = when.promise(function(resolve) {
+        var reporter2Promise = new Promise(function(resolve) {
           reporter2[message] = function() {
             expect(_.toArray(arguments)).to.be.deep.equal([1, 2, 3]);
             resolve();
@@ -61,7 +60,7 @@ describe('Combined reporter', function() {
 
         (new Combined([reporter1, reporter2]))[message](1, 2, 3);
 
-        return when.all([reporter1Promise, reporter2Promise]);
+        return Promise.all([reporter1Promise, reporter2Promise]);
       });
     });
   });

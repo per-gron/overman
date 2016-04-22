@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014, 2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 'use strict';
 
-var when = require('when');
-
 it('should never finish', function() {
-  return when.promise(function() {});
+  return new Promise(function() {});
 });

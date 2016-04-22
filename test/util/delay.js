@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, 2016 Per Eckerdal
+ * Copyright 2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 'use strict';
 
-it('should set the timeout', function() {
-  this.timeout(10);
-  return new Promise(function() {});  // Never complete the test
-});
+function delay(timeout) {
+  return new Promise(function(resolve) {
+    setTimeout(resolve, timeout);
+  });
+}
+
+module.exports = delay;

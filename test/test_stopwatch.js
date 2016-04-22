@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014, 2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 'use strict';
 
 var expect = require('chai').expect;
-var when = require('when');
 var Stopwatch = require('../lib/stopwatch');
 var makeFakeClock = require('./util/fake_clock');
+var delay = require('./util/delay');
 
 describe('Stopwatch', function() {
   var clock;
@@ -64,8 +64,7 @@ describe('Stopwatch', function() {
 
   it('should use wall time as default clock', function() {
     var stopwatch = new Stopwatch();
-    return when()
-      .delay(300)
+    return delay(300)
       .then(function() {
         expect(stopwatch.getTimeSinceStart()).to.be.within(290, 400);
       });

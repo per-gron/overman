@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014-2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,18 @@
 var _ = require('lodash');
 var expect = require('chai').expect;
 var stripAnsi = require('strip-ansi');
-var when = require('when');
 var SpecProgress = require('../lib/reporters/spec_progress');
 
 function mock(methods) {
   return function Mock() {
-    _.extend(this, methods);
+    _.assign(this, methods);
   };
 }
 
 describe('Spec progress reporter', function() {
   describe('Constructor', function() {
     it('should pass stream to the InsertionLog', function() {
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var stream = {};
         new SpecProgress({ stdout: stream }, function InsertionLog(param) {
           expect(stream).to.be.equal(param);
@@ -43,7 +42,7 @@ describe('Spec progress reporter', function() {
 
   describe('Suites', function() {
     function verifySuiteStartLog(path, expectedOutput) {
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var reporter = new SpecProgress(null, mock({
           log: function(msg) {
             expect(msg).to.be.equal(expectedOutput);
@@ -69,7 +68,7 @@ describe('Spec progress reporter', function() {
     it('should log first test name after suite name', function() {
       var suiteLineId = null;
 
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var reporter = new SpecProgress(null, mock({
           log: function(msg, id) {
             suiteLineId = id;
@@ -94,7 +93,7 @@ describe('Spec progress reporter', function() {
       var suiteLineId = null;
       var test1LineId = null;
 
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var reporter = new SpecProgress(null, mock({
           log: function(msg, id) {
             suiteLineId = id;
@@ -128,7 +127,7 @@ describe('Spec progress reporter', function() {
     function verifyTestFinishLog(result, expectedOutput, extraFinishOptions) {
       var testLineId = null;
 
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var reporter = new SpecProgress(null, mock({
           log: function() {},
 
@@ -149,7 +148,7 @@ describe('Spec progress reporter', function() {
         var testPath = { file: 'file', path: ['test'] };
         reporter.gotMessage(null, { type: 'suiteStart', suite: suitePath });
         reporter.gotMessage(testPath, { type: 'start' });
-        reporter.gotMessage(testPath, _.extend({ type: 'finish', result: result }, extraFinishOptions));
+        reporter.gotMessage(testPath, _.assign({ type: 'finish', result: result }, extraFinishOptions));
       });
     }
 
@@ -173,7 +172,7 @@ describe('Spec progress reporter', function() {
           var testLineId = null;
           var testOutputLineId = null;
 
-          return when.promise(function(resolve) {
+          return new Promise(function(resolve) {
             var reporter = new SpecProgress(null, mock({
               log: function() {},
 

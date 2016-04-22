@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2015-2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,6 @@
 
 'use strict';
 
-var when = require('when');
-
-if (!('Promise' in global)) {
-  // Polyfill Promise for node 0.10 compatibility; it is required by co
-  require('when/es6-shim/Promise');
-}
-
 it('should succeed', function() {
   // Simulate a generator without actually using the syntax, for node 0.10 compatibility
   var state = 0;
@@ -31,7 +24,7 @@ it('should succeed', function() {
       state++;
       if (state === 1) {
         console.log('running_test');
-        return { value: when.resolve('running_test'), done: false };
+        return { value: Promise.resolve('running_test'), done: false };
       } else if (state === 2) {
         console.log('still_' + value);
         return { value: undefined, done: true };

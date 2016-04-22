@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014, 2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@
 
 var expect = require('chai').expect;
 var through = require('through');
-var when = require('when');
 var InsertionLog = require('../lib/insertion_log');
 
 function readEntireStream(stream) {
-  return when.promise(function(resolve) {
+  return new Promise(function(resolve) {
     var data = '';
     stream.on('data', function(chunk) {
       data += chunk;

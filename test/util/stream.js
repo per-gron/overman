@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014, 2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@
 var readline = require('readline');
 var stripAnsi = require('strip-ansi');
 var through = require('through');
-var when = require('when');
 
 function waitForStreamToEmitLines(stream, linesToWatchFor) {
-  return when.promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     var lines = readline.createInterface({ input: stream, output: stream });
 
     lines.on('line', function(line) {
@@ -54,7 +53,7 @@ exports.waitForStreamToEmitLines = waitForStreamToEmitLines;
  * Wait for a single line (ignoring others)
  */
 function waitForStreamToEmitLine(stream, lineToWatchFor) {
-  return when.promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     var found = false;
     var lines = readline.createInterface({ input: stream, output: stream });
 

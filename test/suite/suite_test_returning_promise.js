@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Per Eckerdal
+ * Copyright 2014, 2016 Per Eckerdal
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 'use strict';
 
-var when = require('when');
-
 it('should succeed', function() {
-  return when.promise(function(resolve) {
+  return new Promise(function(resolve) {
     console.log('running_test');
     process.nextTick(function() {
       // The idea here is that if the test runner respects that we return a
