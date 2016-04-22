@@ -21,13 +21,13 @@ var childProcess = require('child_process');
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var through = require('through');
-var when = require('when');
 var OnMessage = require('./util/on_message');
 var streamUtil = require('./util/stream');
 var shouldFail = require('./util/should_fail');
+var delay = require('./util/delay');
 var TestFailureError = require('../lib/test_failure_error');
 var suiteRunner = require('../lib/suite_runner');
-
+var promiseUtil = require('../lib/promise_util');
 
 function ParallelismCounter() {
   this.maxParallelism = 0;
@@ -82,7 +82,7 @@ function ensureOutputFromTests(suite, tests, options) {
     var lines = tests[testName];
     var out = through();
 
-    return when.promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
       reporters.push(new OnMessage(function(testPath, message) {
         var currentTestName = _.last(testPath.path);
         encounteredTests[currentTestName] = true;
@@ -92,7 +92,7 @@ function ensureOutputFromTests(suite, tests, options) {
             gotStartForTests.push(testName);
 
             streamUtil.waitForStreamToEmitLines(out, lines)
-              .done(resolve, reject);
+              .then(resolve, reject);
           } else if (message.type === 'stdout') {
             out.write(message.data);
           } else if (message.type === 'finish') {
@@ -118,7 +118,7 @@ function ensureOutputFromTests(suite, tests, options) {
       }
     });
 
-  return when.all(testsPromises.concat([suitePromise]))
+  return Promise.all(testsPromises.concat([suitePromise]))
     .then(function() {
       if (!_.isEqual(_.keys(encounteredTests).sort(), _.keys(tests).sort())) {
         throw new Error('Encountered unexpected tests ' + listNames(_.difference(_.keys(encounteredTests), _.keys(tests))));
@@ -167,11 +167,11 @@ describe('Suite runner', function() {
   });
 
   it('should not leak things to the runloop', function() {
-    return when.race([
-      when().delay(1000).then(function() {
+    return Promise.race([
+      delay(1000).then(function() {
         throw new Error('Should be done by now');
       }),
-      when.promise(function(resolve, reject) {
+      new Promise(function(resolve, reject) {
         var child = childProcess.fork(
           __dirname + '/util/run_single_test');
 
@@ -194,7 +194,7 @@ describe('Suite runner', function() {
 
     ['stdout', 'stderr'].forEach(function(streamName) {
       it('should forward ' + streamName + ' data', function() {
-        return when.promise(function(resolve) {
+        return new Promise(function(resolve) {
           runTestSuite(testSuite[streamName], [{
             gotMessage: function(testPath, message) {
               if (message.type === streamName) {
@@ -358,14 +358,15 @@ describe('Suite runner', function() {
       internalErrorOutput: out
     });
 
-    return when.all([
+    var expectFailure = shouldFail(suitePromise, function(raisedError) {
+      return raisedError === error;
+    });
+
+    return Promise.all([
       streamOutput,
-      shouldFail(suitePromise, function(raisedError) {
-          return raisedError === error;
-        })
-        .finally(function() {
-          out.end();
-        })
+      promiseUtil.finally(expectFailure, function() {
+        out.end();
+      })
     ]);
   });
 
@@ -377,10 +378,9 @@ describe('Suite runner', function() {
     });
 
     it('should let the test set the timeout', function() {
-      return when.race([
+      return Promise.race([
         shouldFail(runTestSuite('suite_timeout_set', [], { timeout: 2000 })),
-        when()
-          .delay(1500)
+        delay(1500)
           .then(function() {
             throw new Error('Test should have finished by now');
           })
@@ -413,7 +413,7 @@ describe('Suite runner', function() {
     });
 
     it('should send \'sigint\' message to tests that time out', function() {
-      var deferred = when.defer();
+      var deferred = Promise.defer();
 
       function fork() {
         var child = new EventEmitter();
@@ -431,7 +431,7 @@ describe('Suite runner', function() {
         return child;
       }
 
-      return when.all([
+      return Promise.all([
         shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
           childProcess: { fork: fork },
           timeout: 10
@@ -479,7 +479,7 @@ describe('Suite runner', function() {
     });
 
     it('should send SIGKILL to tests that don\'t die after \'sigint\' message', function() {
-      var deferred = when.defer();
+      var deferred = Promise.defer();
 
       function fork() {
         var child = new EventEmitter();
@@ -497,7 +497,7 @@ describe('Suite runner', function() {
         return child;
       }
 
-      return when.all([
+      return Promise.all([
         shouldFail(runTestSuite('suite_single_test_that_never_finishes', [], {
           childProcess: { fork: fork },
           timeout: 10
@@ -510,7 +510,7 @@ describe('Suite runner', function() {
 
     [0, 1234].forEach(function(graceTime) {
       it('should respect the graceTime parameter of ' + graceTime, function() {
-        var softKillDeferred = when.defer();
+        var softKillDeferred = Promise.defer();
 
         function softKill(process, timeout) {
           process.kill('SIGKILL');
@@ -526,7 +526,7 @@ describe('Suite runner', function() {
           return error instanceof TestFailureError;
         });
 
-        return when.all([
+        return Promise.all([
           softKillDeferred.promise,
           suitePromise
         ]);
@@ -628,7 +628,7 @@ describe('Suite runner', function() {
 
   describe('Debug', function() {
     it('should run only one test when debugPort is specified', function() {
-      var tests = when.promise(function(resolve) {
+      var tests = new Promise(function(resolve) {
         runTestSuite('suite_two_passing_tests', [], {
           reporters: [{
             registerTests: function(tests) {
@@ -636,7 +636,7 @@ describe('Suite runner', function() {
             }
           }],
           debugPort: 1234
-        }).done(function() {}, function() {});
+        }).then(function() {}, function() {});
       });
 
       return tests.then(function(tests) {
@@ -654,7 +654,7 @@ describe('Suite runner', function() {
     });
 
     function extractSubprocessForkOptions(options) {
-      return when.promise(function(resolve, reject) {
+      return new Promise(function(resolve, reject) {
         var mockChildProcess = {
           fork: function(path, args, options) {
             resolve(options);
@@ -662,7 +662,7 @@ describe('Suite runner', function() {
         };
         runTestSuite('suite_single_successful_test', [], _.extend({
           childProcess: mockChildProcess }, options))
-          .done(function() {}, reject);
+          .then(function() {}, reject);
       });
     }
 
@@ -681,7 +681,7 @@ describe('Suite runner', function() {
     });
 
     it('should start node-inspector subprocess', function() {
-      return when.promise(function(resolve, reject) {
+      return new Promise(function(resolve, reject) {
         var mockChildProcess = {
           fork: function(path, args, options) {
             if (path.match(/run_test/)) {
@@ -703,7 +703,7 @@ describe('Suite runner', function() {
             debugPort: 1234,
             inspectorPort: 1235
           })
-          .done(function() {}, reject);
+          .then(function() {}, reject);
       });
     });
   });

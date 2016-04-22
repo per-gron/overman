@@ -19,7 +19,6 @@
 var _ = require('lodash');
 var expect = require('chai').expect;
 var stripAnsi = require('strip-ansi');
-var when = require('when');
 var SpecProgress = require('../lib/reporters/spec_progress');
 
 function mock(methods) {
@@ -31,7 +30,7 @@ function mock(methods) {
 describe('Spec progress reporter', function() {
   describe('Constructor', function() {
     it('should pass stream to the InsertionLog', function() {
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var stream = {};
         new SpecProgress({ stdout: stream }, function InsertionLog(param) {
           expect(stream).to.be.equal(param);
@@ -43,7 +42,7 @@ describe('Spec progress reporter', function() {
 
   describe('Suites', function() {
     function verifySuiteStartLog(path, expectedOutput) {
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var reporter = new SpecProgress(null, mock({
           log: function(msg) {
             expect(msg).to.be.equal(expectedOutput);
@@ -69,7 +68,7 @@ describe('Spec progress reporter', function() {
     it('should log first test name after suite name', function() {
       var suiteLineId = null;
 
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var reporter = new SpecProgress(null, mock({
           log: function(msg, id) {
             suiteLineId = id;
@@ -94,7 +93,7 @@ describe('Spec progress reporter', function() {
       var suiteLineId = null;
       var test1LineId = null;
 
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var reporter = new SpecProgress(null, mock({
           log: function(msg, id) {
             suiteLineId = id;
@@ -128,7 +127,7 @@ describe('Spec progress reporter', function() {
     function verifyTestFinishLog(result, expectedOutput, extraFinishOptions) {
       var testLineId = null;
 
-      return when.promise(function(resolve) {
+      return new Promise(function(resolve) {
         var reporter = new SpecProgress(null, mock({
           log: function() {},
 
@@ -173,7 +172,7 @@ describe('Spec progress reporter', function() {
           var testLineId = null;
           var testOutputLineId = null;
 
-          return when.promise(function(resolve) {
+          return new Promise(function(resolve) {
             var reporter = new SpecProgress(null, mock({
               log: function() {},
 

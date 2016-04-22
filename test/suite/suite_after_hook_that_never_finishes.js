@@ -16,10 +16,8 @@
 
 'use strict';
 
-var when = require('when');
-
 after(function() {
-  return when.promise(function() {});
+  return new Promise(function() {});
 });
 
 it('should succeed', function() {});

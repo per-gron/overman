@@ -16,10 +16,8 @@
 
 'use strict';
 
-var when = require('when');
-
 it('should never finish', function() {
-  return when.promise(function() {});
+  return new Promise(function() {});
 });
 
 after(function() {

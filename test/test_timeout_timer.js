@@ -17,9 +17,9 @@
 'use strict';
 
 var expect = require('chai').expect;
-var when = require('when');
 var TimeoutTimer = require('../lib/timeout_timer');
 var makeFakeClock = require('./util/fake_clock');
+var delay = require('./util/delay');
 
 describe('TimeoutTimer', function() {
   it('should require timeout parameter', function() {
@@ -171,7 +171,7 @@ describe('TimeoutTimer', function() {
 
   it('should support cancellation when no options are specified', function() {
     var timer = new TimeoutTimer(50);
-    var timerPromise = when.promise(function(resolve, reject) {
+    var timerPromise = new Promise(function(resolve, reject) {
       timer.on('timeout', function() {
         reject(new Error('Should have been cancelled by now'));
       });
@@ -179,9 +179,9 @@ describe('TimeoutTimer', function() {
 
     timer.cancel();
 
-    return when.race([
+    return Promise.race([
       timerPromise,
-      when().delay(200)  // Wait for a little while to really see that the timer was cancelled
+      delay(200)  // Wait for a little while to really see that the timer was cancelled
     ]);
   });
 });

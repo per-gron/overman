@@ -17,7 +17,6 @@
 'use strict';
 
 var through = require('through');
-var when = require('when');
 var Spec = require('../lib/reporters/spec');
 var suiteRunner = require('../lib/suite_runner');
 var OnMessage = require('./util/on_message');
@@ -109,6 +108,6 @@ describe('Spec reporter', function() {
       internalErrorOutput: through(),
     });
 
-    return when.all([suitePromise, outputPromise]);
+    return Promise.all([suitePromise, outputPromise]);
   });
 });

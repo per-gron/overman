@@ -19,10 +19,9 @@
 var readline = require('readline');
 var stripAnsi = require('strip-ansi');
 var through = require('through');
-var when = require('when');
 
 function waitForStreamToEmitLines(stream, linesToWatchFor) {
-  return when.promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     var lines = readline.createInterface({ input: stream, output: stream });
 
     lines.on('line', function(line) {
@@ -54,7 +53,7 @@ exports.waitForStreamToEmitLines = waitForStreamToEmitLines;
  * Wait for a single line (ignoring others)
  */
 function waitForStreamToEmitLine(stream, lineToWatchFor) {
-  return when.promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     var found = false;
     var lines = readline.createInterface({ input: stream, output: stream });
 

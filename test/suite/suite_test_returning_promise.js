@@ -16,10 +16,8 @@
 
 'use strict';
 
-var when = require('when');
-
 it('should succeed', function() {
-  return when.promise(function(resolve) {
+  return new Promise(function(resolve) {
     console.log('running_test');
     process.nextTick(function() {
       // The idea here is that if the test runner respects that we return a

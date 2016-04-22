@@ -18,11 +18,10 @@
 
 var expect = require('chai').expect;
 var through = require('through');
-var when = require('when');
 var InsertionLog = require('../lib/insertion_log');
 
 function readEntireStream(stream) {
-  return when.promise(function(resolve) {
+  return new Promise(function(resolve) {
     var data = '';
     stream.on('data', function(chunk) {
       data += chunk;

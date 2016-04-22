@@ -20,7 +20,6 @@ var _ = require('lodash');
 var expect = require('chai').expect;
 var path = require('path');
 var through = require('through');
-var when = require('when');
 var listSuite = require('../lib/list_suite');
 var shouldFail = require('./util/should_fail');
 
@@ -145,7 +144,7 @@ describe('List suite', function() {
     });
 
     it('should kill the subprocess on timeout', function() {
-      var killDeferred = when.defer();
+      var killDeferred = Promise.defer();
 
       function fork() {
         return {
@@ -160,7 +159,7 @@ describe('List suite', function() {
       }
 
       var suite = path.resolve(__dirname + '/suite/suite_neverending_listing');
-      return when.all([
+      return Promise.all([
         shouldFail(list(suite, 10, { fork: fork }), function(error) {
           return error instanceof listSuite.ListTestError;
         }),
@@ -174,7 +173,7 @@ describe('List suite', function() {
     });
 
     it('should provide the test interface parameter to the list_suite process', function() {
-      var paramDeferred = when.defer();
+      var paramDeferred = Promise.defer();
 
       function fork(path, parameters) {
         expect(parameters).deep.property('[1]').to.be.equal('param');
@@ -194,7 +193,7 @@ describe('List suite', function() {
         };
       }
 
-      return when.all([
+      return Promise.all([
         list('dummy_suite', 100, { fork: fork }),
         paramDeferred.promise
       ]);

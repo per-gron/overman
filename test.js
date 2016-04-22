@@ -19,6 +19,7 @@
 var fs = require('fs');
 var path = require('path');
 var overman = require('./lib/overman');
+var promiseUtil = require('./lib/promise_util');
 
 var suiteFiles = fs.readdirSync('test')
   .filter(function(filename) { return filename.match(/^test_/); })
@@ -27,7 +28,7 @@ var suiteFiles = fs.readdirSync('test')
 var suitePromise = overman({ files: suiteFiles });
 
 var finished = false;
-suitePromise.finally(function() {
+promiseUtil.finally(suitePromise, function() {
   finished = true;
 });
 
