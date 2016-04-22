@@ -22,6 +22,7 @@
     "after": false,
     "afterEach": false,
     "it": false,
-    "describe": false
+    "describe": false,
+    "Promise": false
   }
 }
