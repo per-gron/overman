@@ -158,6 +158,22 @@ describe('TeamCity reporter', function() {
       ]);
     });
 
+    it.only('should emit testFailed messages when stack is missing', function() {
+      return performActionsAndCheckOutput(function(reporter) {
+        var path = { file: 'file', path: ['test'] };
+        reporter.gotMessage(path, { type: 'start' });
+        reporter.gotMessage(path, {
+          type: 'error'
+        });
+        reporter.gotMessage(path, { type: 'finish', result: 'failure', duration: 0 });
+      }, [
+        /testStarted/,
+        // We don't really care about the error message in this case; just make sure not to crash
+        /##teamcity\[testFailed name='test' message='.*' details='.*' flowId='\d+' timestamp='....-..-..T..:..:..\....'\]/,
+        /testFinished/,
+      ]);
+    });
+
     it('should emit testFailed message only for the first error for a given test', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test'] };
