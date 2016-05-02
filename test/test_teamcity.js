@@ -158,7 +158,7 @@ describe('TeamCity reporter', function() {
       ]);
     });
 
-    it.only('should emit testFailed messages when stack is missing', function() {
+    it('should emit testFailed messages when stack is missing', function() {
       return performActionsAndCheckOutput(function(reporter) {
         var path = { file: 'file', path: ['test'] };
         reporter.gotMessage(path, { type: 'start' });
