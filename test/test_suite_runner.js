@@ -690,7 +690,6 @@ describe('Suite runner', function() {
               try {
                 expect(path).to.match(/bin\/inspector.js/);
                 expect(args).to.be.deep.equal(['--debug-port=1234', '--web-port=1235']);
-                expect(options).property('silent').to.be.true;
                 resolve();
               } catch (err) {
                 reject(err);
