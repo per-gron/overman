@@ -628,19 +628,18 @@ describe('Suite runner', function() {
 
   describe('Debug', function() {
     it('should run only one test when debugPort is specified', function() {
-      var tests = new Promise(function(resolve) {
-        runTestSuite('suite_two_passing_tests', [], {
-          reporters: [{
-            registerTests: function(tests) {
-              resolve(tests);
-            }
-          }],
-          debugPort: 1234
-        }).then(function() {}, function() {});
-      });
+      var suiteTests = [];
+      var tests = runTestSuite('suite_two_passing_tests', [], {
+        reporters: [{
+          registerTests: function(tests) {
+            suiteTests = tests;
+          }
+        }],
+        debugPort: 1234
+      }).then(function() {}, function() {});
 
-      return tests.then(function(tests) {
-        expect(tests.length).to.be.equal(1);
+      return tests.then(function() {
+        expect(suiteTests.length).to.be.equal(1);
       });
     });
 
