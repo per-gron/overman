@@ -27,7 +27,8 @@ function runTestWithInterfacePath(suite, interfacePath) {
   var parameters = JSON.stringify({
     timeout: 1234,
     slowThreshold: 2345,
-    interfaceParameter: 'interface_param'
+    interfaceParameter: 'interface_param',
+    killSubProcesses: true
   });
   return childProcess.fork(
     __dirname + '/../lib/bin/run_test',
@@ -433,6 +434,77 @@ describe('Test runner', function() {
           /param: "interface_param"/
         ])
       ]);
+    });
+  });
+
+  describe('Subprocess lifetime', function() {
+    it('should kill spawned subprocesses on exit', function() {
+      var process = runTest('suite_single_test_that_spawns_never_ending_processes.js', 'should spawn child processes');
+      var childPID1 = true;
+      var childPID2 = true;
+      return new Promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'finishedAfterHooks') {
+            // There could be instability here, since the process could potentially be killed
+            // before listing children.
+            require('ps-tree')(process.pid, function (err, children) {
+              childPID1 = children[0].PID;
+              childPID2 = children[1].PID;
+              resolve();
+            });
+          }
+        });
+      }).then(waitForProcessToExit(process)).then(
+        function() {
+          return new Promise(function(resolve) {
+            var isRunning = require('is-running');
+            // Timeout for making sure the processes have been killed, could cause
+            // instability and might need to be changed
+            setTimeout(function() {
+              if (!isRunning(childPID1) && !isRunning(childPID2)) {
+                resolve();
+              }
+            }, 250);
+          });
+        }
+      );
+    });
+
+    it('should kill spawned subprocesses on timeout', function() {
+      var process = runTest('suite_single_test_that_never_finishes_and_spawns_never_ending_processes.js', 'should spawn child processes and never finish');
+      var childPID1 = true;
+      var childPID2 = true;
+      return new Promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'startedTest') {
+            // There could be instability here, since the process could potentially be killed
+            // before listing children.
+            require('ps-tree')(process.pid, function (err, children) {
+              childPID1 = children[0].PID;
+              childPID2 = children[1].PID;
+              resolve();
+            });
+          }
+        });
+      }).then(function() {
+        return new Promise(function(resolve) {
+          process.send({ type: 'sigint' });
+          resolve();
+        });
+      }).then(waitForProcessToFail(process)).then(
+        function() {
+          return new Promise(function(resolve) {
+            var isRunning = require('is-running');
+            // Timeout for making sure the processes have been killed, could cause
+            // instability and might need to be increased
+            setTimeout(function() {
+              if (!isRunning(childPID1) && !isRunning(childPID2)) {
+                resolve();
+              }
+            }, 250);
+          });
+        }
+      );
     });
   });
 });

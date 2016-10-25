@@ -186,6 +186,23 @@ describe('Suite runner', function() {
     ]);
   });
 
+  it('should pass killSubProcesses option to test subprocess', function() {
+    var killSubProcesses = false;
+    var mockChildProcess = {
+      fork: function(path, args) {
+        killSubProcesses = JSON.parse(args[1]).killSubProcesses;
+        return childProcess.fork(path, args);
+      },
+      on: { on: function() {} }
+    };
+    return runTestSuite('suite_single_successful_test', [], {
+      childProcess: mockChildProcess,
+      killSubProcesses: true
+    }).then(function() {
+      expect(killSubProcesses).to.be.true;
+    });
+  });
+
   describe('Stdio', function() {
     var testSuite = {
       stdout: 'suite_single_successful_test',

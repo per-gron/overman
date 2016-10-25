@@ -60,6 +60,11 @@ runner:
   web server. Requires the `debugPort` option to be set.
 * `internalErrorOutput`: When the suite runner fails with an internal error, it
   writes information about it to this stream. Defaults to stderr
+* `killSubProcesses`: If true, then overman will kill all subprocesses spawned by
+  the test. A SIGKILL will be triggered for each process in the tree when the test
+  has finished. There could be an issue that the subprocess does not get the chance
+  of cleaning up so that has to be done synchrously before the test finishes.
+  SIGKILL was choosen since its supported by the platforms used.
 
 ## Cancelling the test runner
 
