@@ -20,8 +20,7 @@
 var childProcess = require('child_process');
 
 beforeEach(function() {
-  var spawnChildWithChild = String.raw`node -e 'require("child_process").exec("node"); while(true);'`;
-  childProcess.exec(spawnChildWithChild);
+  childProcess.fork(__dirname + '/../util/never_ending_program_that_may_fork_subprocess.js', ['fork']);
   return new Promise(function(resolve) { setTimeout(function() { resolve(); }, 500); });
 });
 
