@@ -440,31 +440,35 @@ describe('Test runner', function() {
   describe('Subprocess lifetime', function() {
     it('should kill spawned subprocesses on exit', function() {
       var process = runTest('suite_single_test_that_spawns_never_ending_processes.js', 'should spawn child processes');
-      var childPID1 = true;
-      var childPID2 = true;
-      return new Promise(function(resolve) {
+      var childrenPID = [];
+      return new Promise(function(resolve, reject) {
         process.on('message', function(message) {
-          if (message.type === 'finishedAfterHooks') {
-            // There could be instability here, since the process could potentially be killed
-            // before listing children.
+          if (message.state === 'forked') {
             require('ps-tree')(process.pid, function (err, children) {
-              childPID1 = children[0].PID;
-              childPID2 = children[1].PID;
-              resolve();
+              childrenPID = children.filter(function(p) {
+                // command key is different on linux/windows
+                var command = p.COMMAND? p.COMMAND: p.COMM;
+                return command.includes('node');
+              }).map(function(p) { return p.PID; });
+              process.send({ state: 'killme' });
+              (childrenPID.length === 2)? resolve(): reject('Incorrect amount of processes running, was: ' + childrenPID);
             });
           }
         });
       }).then(waitForProcessToExit(process)).then(
         function() {
-          return new Promise(function(resolve) {
+          return new Promise(function(resolve, reject) {
             var isRunning = require('is-running');
             // Timeout for making sure the processes have been killed, could cause
             // instability and might need to be changed
             setTimeout(function() {
-              if (!isRunning(childPID1) && !isRunning(childPID2)) {
-                resolve();
-              }
-            }, 250);
+              var result = [
+                { pid: childrenPID[0], alive: isRunning(childrenPID[0]) },
+                { pid: childrenPID[1], alive: isRunning(childrenPID[1]) }
+              ];
+              (!result[0].alive && !result[1].alive) ? resolve():
+                  reject('A child was still alive: ' + JSON.stringify(result));
+            }, 500);
           });
         }
       );
@@ -472,17 +476,20 @@ describe('Test runner', function() {
 
     it('should kill spawned subprocesses on timeout', function() {
       var process = runTest('suite_single_test_that_never_finishes_and_spawns_never_ending_processes.js', 'should spawn child processes and never finish');
-      var childPID1 = true;
-      var childPID2 = true;
-      return new Promise(function(resolve) {
+      var childrenPID = [];
+      return new Promise(function(resolve, reject) {
         process.on('message', function(message) {
-          if (message.type === 'startedTest') {
+          if (message.state === 'forked') {
             // There could be instability here, since the process could potentially be killed
             // before listing children.
             require('ps-tree')(process.pid, function (err, children) {
-              childPID1 = children[0].PID;
-              childPID2 = children[1].PID;
-              resolve();
+              childrenPID = children.filter(function(p) {
+                // command key is different on linux/windows
+                var command = p.COMMAND? p.COMMAND: p.COMM;
+                return command.includes('node');
+              }).map(function(p) { return p.PID; });
+              process.send({ state: 'killme' });
+              (childrenPID.length === 2)? resolve(): reject('Incorrect amount of processes running, was: ' + childrenPID);
             });
           }
         });
@@ -493,15 +500,18 @@ describe('Test runner', function() {
         });
       }).then(waitForProcessToFail(process)).then(
         function() {
-          return new Promise(function(resolve) {
+          return new Promise(function(resolve, reject) {
             var isRunning = require('is-running');
             // Timeout for making sure the processes have been killed, could cause
             // instability and might need to be increased
             setTimeout(function() {
-              if (!isRunning(childPID1) && !isRunning(childPID2)) {
-                resolve();
-              }
-            }, 250);
+              var result = [
+                { pid: childrenPID[0], alive: isRunning(childrenPID[0]) },
+                { pid: childrenPID[1], alive: isRunning(childrenPID[1]) }
+              ];
+              (!result[0].alive && !result[1].alive) ? resolve():
+                  reject('A child was still alive: ' + JSON.stringify(result));
+            }, 500);
           });
         }
       );
