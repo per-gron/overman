@@ -324,6 +324,38 @@ describe('Suite runner', function() {
     return shouldFail(runTestSuite('suite_single_only_test', [], { disallowOnly: true }));
   });
 
+  it('should detect and kill orphan childprocess', function() {
+    var proc = require('child_process').fork('test/util/run_single_test_that_never_finishes.js');
+    return Promise.resolve(new Promise(function(resolve) {
+      var timeout = setInterval(function() {
+        require('ps-tree')(process.pid, function(err, children) {
+          var childrenPID = children.filter(function(p) {
+            // command key is different on linux/windows
+            var command = p.COMMAND? p.COMMAND: p.COMM;
+            return command.includes('node');
+          }).map(function(p) { return p.PID; });
+          if (childrenPID.length === 2) {
+            proc.kill('SIGKILL');
+            clearInterval(timeout);
+            resolve(childrenPID);
+          }
+        });
+      }, 300);
+    }).then(function(childrenPID) {
+      return new Promise(function(resolve) {
+        setInterval(function() {
+          var livingChildProcesses = [];
+          childrenPID.forEach(function(childPID) {
+            if (require('is-running')(childPID)) {
+              livingChildProcesses.push(childPID);
+            }
+          });
+          (livingChildProcesses.length === 0) && resolve();
+        }, 300);
+      });
+    }));
+  });
+
   describe('Grep', function() {
     it('should run only tests that match the specified grep regex', function() {
       return ensureOutputFromTests('suite_various_tests', {
