@@ -26,7 +26,6 @@
     "exit": "~0.1.2",
     "is-running": "~2.1.0",
     "lodash": "~4.11.1",
-    "node-inspector": "^0.12.8",
     "ps-tree": "^1.1.0",
     "teamcity-service-messages": "~0.1.7",
     "through": "~2.3.8"
