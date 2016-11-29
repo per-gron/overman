@@ -55,9 +55,6 @@ runner:
 * `debugPort`: Enable debugging. This causes Overman to run only one test (the
   first one) and configure the test process for debugging at the specified port.
   This will often be used together with the `debuggerPort` option.
-* `inspectorPort`: Open a `node-inspector` server that can be used for debugging
-  a test in a browser. The specified port will be used by the `node-inspector`
-  web server. Requires the `debugPort` option to be set.
 * `internalErrorOutput`: When the suite runner fails with an internal error, it
   writes information about it to this stream. Defaults to stderr
 * `killSubProcesses`: If true, then overman will kill all subprocesses spawned by

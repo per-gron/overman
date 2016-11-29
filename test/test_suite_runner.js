@@ -692,15 +692,6 @@ describe('Suite runner', function() {
       });
     });
 
-    it('should require debugPort when inspectorPort is set', function() {
-      return shouldFail(runTestSuite('suite_single_successful_test', [], {
-        inspectorPort: 1234
-      }), function(error) {
-        return isTestFailureError(error) &&
-          error.message.match(/inspectorPort specified without debugPort/);
-      });
-    });
-
     function extractSubprocessForkOptions(options) {
       return new Promise(function(resolve, reject) {
         var mockChildProcess = {
@@ -717,7 +708,7 @@ describe('Suite runner', function() {
     it('should pass debug option to test subprocess', function() {
       return extractSubprocessForkOptions({ debugPort: 1234 })
         .then(function(options) {
-          expect(options).property('execArgv').to.be.deep.equal(['--debug-brk=1234']);
+          expect(options).property('execArgv').to.be.deep.equal(['--debug-brk=1234', '--inspect=1234']);
         });
     });
 
@@ -726,32 +717,6 @@ describe('Suite runner', function() {
         .then(function(options) {
           expect(options).property('execArgv').to.be.deep.equal([]);
         });
-    });
-
-    it('should start node-inspector subprocess', function() {
-      return new Promise(function(resolve, reject) {
-        var mockChildProcess = {
-          fork: function(path, args, options) {
-            if (path.match(/run_test/)) {
-              return childProcess.fork(path, args, options);
-            } else {
-              try {
-                expect(path).to.match(/bin\/inspector.js/);
-                expect(args).to.be.deep.equal(['--debug-port=1234', '--web-port=1235']);
-                resolve();
-              } catch (err) {
-                reject(err);
-              }
-            }
-          }
-        };
-        runTestSuite('suite_single_successful_test', [], {
-            childProcess: mockChildProcess,
-            debugPort: 1234,
-            inspectorPort: 1235
-          })
-          .then(function() {}, reject);
-      });
     });
   });
   describe('Members in currentTest', function() {
