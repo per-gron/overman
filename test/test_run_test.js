@@ -297,6 +297,34 @@ describe('Test runner', function() {
     ]);
   });
 
+  it('should catch and propagate uncaught strings', function() {
+    var process = runTest('suite_single_test_uncaught_non_exception', 'should throw uncaught error');
+    return Promise.all([
+      waitForProcessToFail(process),
+      new Promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'error' && message.stack === 'Uncaught') {
+            resolve();
+          }
+        });
+      })
+    ]);
+  });
+
+  it('should catch and propagate uncaught nulls', function() {
+    var process = runTest('suite_single_test_uncaught_null', 'should throw uncaught error');
+    return Promise.all([
+      waitForProcessToFail(process),
+      new Promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'error' && message.stack === 'Unknown error') {
+            resolve();
+          }
+        });
+      })
+    ]);
+  });
+
   it('should mark tests that throw an exception as failing', function() {
     var process = runTest('suite_single_throwing_test', 'should throw');
     return waitForProcessToFail(process);
