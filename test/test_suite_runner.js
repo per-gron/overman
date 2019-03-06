@@ -708,7 +708,7 @@ describe('Suite runner', function() {
     it('should pass debug option to test subprocess', function() {
       return extractSubprocessForkOptions({ debugPort: 1234 })
         .then(function(options) {
-          expect(options).property('execArgv').to.be.deep.equal(['--debug-brk=1234', '--inspect=1234']);
+          expect(options).property('execArgv').to.be.deep.equal(['--inspect-brk=1234']);
         });
     });
 
