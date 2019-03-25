@@ -1,6 +1,6 @@
 {
   "name": "overman",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "description": "Test runner for integration tests",
   "main": "lib/overman.js",
   "scripts": {
