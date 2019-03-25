@@ -1,6 +1,6 @@
 {
   "name": "overman",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "description": "Test runner for integration tests",
   "main": "lib/overman.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "co": "~4.6.0",
     "exit": "~0.1.2",
     "is-running": "~2.1.0",
-    "lodash": "~4.11.1",
+    "lodash": ">=4.17.11",
     "ps-tree": "^1.1.0",
     "teamcity-service-messages": "~0.1.7",
     "through": "~2.3.8"
