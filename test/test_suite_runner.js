@@ -203,6 +203,20 @@ describe('Suite runner', function() {
     });
   });
 
+  it('should emit attributes message for test with attributes', function() {
+    var attributes = null;
+    var reporter = new OnMessage(function(testPath, message) {
+      if (message.type === 'attributes') {
+        expect(attributes).to.be.null;
+        attributes = message.attributes;
+      }
+    });
+    return runTestSuite('suite_attributes', [reporter])
+    .then(function() {
+      expect(attributes).to.be.deep.equal({ foo: 'baz', bar: 'qux' });
+    });
+  });
+
   describe('Stdio', function() {
     var testSuite = {
       stdout: 'suite_single_successful_test',
