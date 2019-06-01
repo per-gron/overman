@@ -356,6 +356,26 @@ describe('Suite runner', function() {
     }));
   });
 
+  describe('Attribute filter', function() {
+    it('should run only tests that passes the attribute filter function', function() {
+      return ensureOutputFromTests('suite_attributes', {
+        'should override': []
+      }, { attributeFilter: function(attributes) {
+        return attributes.foo === 'baz';
+      }});
+    });
+
+    it('should emit error for attribute filter which throws', function() {
+      function attributeFilter() {
+        throw new Error('client error');
+      }
+      var suitePromise = runTestSuite('suite_attributes', [], { attributeFilter: attributeFilter });
+      return shouldFail(suitePromise, function(error) {
+        return error.message.match(/^Encountered error while filtering attributes/);
+      });
+    });
+  });
+
   describe('Grep', function() {
     it('should run only tests that match the specified grep regex', function() {
       return ensureOutputFromTests('suite_various_tests', {
