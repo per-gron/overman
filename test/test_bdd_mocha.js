@@ -109,6 +109,20 @@ describe('BDD interface (Mocha flavor)', function() {
       });
     });
 
+    it('should declare tests with attributes with it', function() {
+      var suite = parseSuite('suite_single_test_attributes');
+      expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].run');
+      expect(suite).to.be.deep.equal({
+        type: 'suite',
+        contents: [{
+          type: 'test',
+          name: 'should succeed',
+          attributes: { foo: 'bar' },
+          run: null
+        }]
+      });
+    });
+
     it('should skip tests with it.skip', function() {
       var suite = parseSuite('suite_single_skipped_test');
       expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].run');

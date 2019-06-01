@@ -34,6 +34,16 @@ it('should succeed', function() {});
 it('should succeed', function() {});
 ```
 
+### Attributes
+
+A test with custom optional attributes looks like this:
+
+```javascript
+it('should be a test', { requirements: 'Requirement1' }, function() {
+  // Put test code here
+});
+```
+
 ## Assertions
 
 Overman does not provide utilities for asserting conditions in tests. Typically
@@ -311,6 +321,16 @@ it('should get the Context', function() {
 ```
 
 The `Context` is also accessible with the global variable `context`.
+
+### Attributes
+
+A test get its attributes like this:
+
+```javascript
+it('should be a test', { requirement: 'Requirement1' }, function() {
+  console.log(this.attributes.requirement);
+});
+```
 
 ### Accessing the timeout
 
