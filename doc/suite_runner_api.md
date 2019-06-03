@@ -48,6 +48,8 @@ runner:
 * `attempts`: Maximum number of times to run a test; if >1 the test will be
   retried on failure. Defaults to 1.
 * `parallelism`: Number of tests to run in parallel. Defaults to 8.
+* `attributeFilter`: Function that gets the test attributes as parameters.
+  Only tests that returns a truthy value will be run.
 * `grep`: Regex or string. Only tests that match the criteria will be run.
 * `invertGrep`: If true, the criteria given to `grep` is inverted.
 * `disallowOnly`: Fail if there are tests marked as only. This may be useful to

@@ -203,6 +203,20 @@ describe('Suite runner', function() {
     });
   });
 
+  it('should emit attributes message for test with attributes', function() {
+    var attributes = null;
+    var reporter = new OnMessage(function(testPath, message) {
+      if (message.type === 'attributes') {
+        expect(attributes).to.be.null;
+        attributes = message.attributes;
+      }
+    });
+    return runTestSuite('suite_attributes', [reporter])
+    .then(function() {
+      expect(attributes).to.be.deep.equal({ foo: 'baz', bar: 'qux' });
+    });
+  });
+
   describe('Stdio', function() {
     var testSuite = {
       stdout: 'suite_single_successful_test',
@@ -354,6 +368,26 @@ describe('Suite runner', function() {
         }, 300);
       });
     }));
+  });
+
+  describe('Attribute filter', function() {
+    it('should run only tests that passes the attribute filter function', function() {
+      return ensureOutputFromTests('suite_attributes', {
+        'should override': []
+      }, { attributeFilter: function(attributes) {
+        return attributes.foo === 'baz';
+      }});
+    });
+
+    it('should emit error for attribute filter which throws', function() {
+      function attributeFilter() {
+        throw new Error('client error');
+      }
+      var suitePromise = runTestSuite('suite_attributes', [], { attributeFilter: attributeFilter });
+      return shouldFail(suitePromise, function(error) {
+        return error.message.match(/^Encountered error while filtering attributes/);
+      });
+    });
   });
 
   describe('Grep', function() {

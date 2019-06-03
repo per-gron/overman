@@ -181,6 +181,17 @@ The test process has printed something to stdout.
 
 The test process has printed something to stderr.
 
+### attributes
+
+```javascript
+{
+  "type": "attributes",
+  "attributes": Object
+}
+```
+
+The test attributes. This message is emitted only for tests with declared or inherited attributes.
+
 ### startedBeforeHooks
 
 ```javascript

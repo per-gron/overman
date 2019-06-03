@@ -68,6 +68,39 @@ describe('List suite', function() {
         });
     });
 
+    it('should parse attributes', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_single_test_attributes');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['should succeed']
+            },
+            'attributes': {
+              'foo': 'bar'
+            }
+          }]);
+        });
+    });
+
+    it('should parse attributes where test attributes overrides the suite', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_attributes');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['suite', 'should override']
+            },
+            'attributes': {
+              'foo': 'baz',
+              'bar': 'qux'
+            }
+          }]);
+        });
+    });
+
     it('should report skipped tests as skipped', function() {
       var suite = path.resolve(__dirname + '/suite/suite_single_skipped_test');
       return list(suite)
