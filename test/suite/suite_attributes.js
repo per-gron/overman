@@ -18,4 +18,5 @@
 
 describe('suite', { foo: 'bar', bar: 'qux' }, function() {
   it('should override', { foo: 'baz' }, function() {});
+  it('should override again', { foo: 'quux' }, function() {});
 });
