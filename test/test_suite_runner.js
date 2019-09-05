@@ -204,16 +204,18 @@ describe('Suite runner', function() {
   });
 
   it('should emit attributes message for test with attributes', function() {
-    var attributes = null;
+    var attributes = [];
     var reporter = new OnMessage(function(testPath, message) {
       if (message.type === 'attributes') {
-        expect(attributes).to.be.null;
-        attributes = message.attributes;
+        attributes.push(message.attributes);
       }
     });
     return runTestSuite('suite_attributes', [reporter])
     .then(function() {
-      expect(attributes).to.be.deep.equal({ foo: 'baz', bar: 'qux' });
+      expect(attributes).to.be.deep.equal([
+        { foo: 'baz', bar: 'qux' },
+        { foo: 'quux', bar: 'qux' },
+       ]);
     });
   });
 

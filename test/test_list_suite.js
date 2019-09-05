@@ -97,6 +97,15 @@ describe('List suite', function() {
               'foo': 'baz',
               'bar': 'qux'
             }
+          }, {
+            'path': {
+              'file': suite,
+              'path': ['suite', 'should override again']
+            },
+            'attributes': {
+              'foo': 'quux',
+              'bar': 'qux'
+            }
           }]);
         });
     });
