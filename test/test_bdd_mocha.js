@@ -110,15 +110,26 @@ describe('BDD interface (Mocha flavor)', function() {
     });
 
     it('should declare tests with attributes with it', function() {
-      var suite = parseSuite('suite_single_test_attributes');
-      expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].run');
+      var suite = parseSuite('suite_attributes');
+      expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].contents[0].run');
+      expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].contents[1].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
         contents: [{
-          type: 'test',
-          name: 'should succeed',
-          attributes: { foo: 'bar' },
-          run: null
+          type: 'suite',
+          name: 'suite',
+          attributes: { foo: 'bar', bar: 'qux' },
+          contents: [{
+            type: 'test',
+            name: 'should override',
+            attributes: { foo: 'baz', bar: 'qux' },
+            run: null
+          }, {
+            type: 'test',
+            name: 'should override again',
+            attributes: { foo: 'quux', bar: 'qux' },
+            run: null
+          }]
         }]
       });
     });
