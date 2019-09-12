@@ -17,5 +17,9 @@
 'use strict';
 
 it('should succeed', { foo: 'bar' }, function() {
-  console.log('running_test');
+  process.send({
+    type: 'in_test_attributes',
+    contextAttributes: context.attributes,
+    testAttributes: this.attributes
+  });
 });

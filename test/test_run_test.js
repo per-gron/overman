@@ -28,7 +28,8 @@ function runTestWithInterfacePath(suite, interfacePath) {
     timeout: 1234,
     slowThreshold: 2345,
     interfaceParameter: 'interface_param',
-    killSubProcesses: true
+    killSubProcesses: true,
+    attributes: { attr: 'ibute' }
   });
   return childProcess.fork(
     __dirname + '/../lib/bin/run_test',
@@ -338,6 +339,23 @@ describe('Test runner', function() {
   it('should exit if the test is done but there are still things on the runloop', function() {
     var process = runTest('suite_with_nonempty_runloop', 'should succeed');
     return waitForProcessToExit(process);
+  });
+
+  describe('Attributes', function() {
+    it('should have attributes set on context and on this', function() {
+      var process = runTest('suite_single_test_attributes', 'should succeed');
+      return new Promise(function(resolve) {
+        process.on('message', function(message) {
+          if (message.type === 'in_test_attributes') {
+            var expectedAttributes = { attr: 'ibute' };
+            expect(message).property('contextAttributes').to.be.deep.equal(expectedAttributes);
+            expect(message).property('testAttributes').to.be.deep.equal(expectedAttributes);
+            process.kill();
+            resolve();
+          }
+        });
+      });
+    });
   });
 
   describe('Timeout handling', function() {
