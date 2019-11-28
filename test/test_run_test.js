@@ -304,7 +304,7 @@ describe('Test runner', function() {
       waitForProcessToFail(process),
       new Promise(function(resolve) {
         process.on('message', function(message) {
-          if (message.type === 'error' && message.stack === 'Uncaught') {
+          if (message.type === 'error' && message.stack.match(/Uncaught/)) {
             resolve();
           }
         });
@@ -318,7 +318,7 @@ describe('Test runner', function() {
       waitForProcessToFail(process),
       new Promise(function(resolve) {
         process.on('message', function(message) {
-          if (message.type === 'error' && message.stack === 'Unknown error') {
+          if (message.type === 'error' && message.stack.match(/Unknown error/)) {
             resolve();
           }
         });
