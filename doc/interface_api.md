@@ -66,6 +66,7 @@ The format is this:
   ["name": [String]],
   ["only": [boolean]],
   ["skipped": [boolean]],
+  ["unstable": [boolean]],
   ["timeout": [number]],
   ["slow": [number]],
   ["before": [Array of { "run": [Function], ["name": [String]] }]],
@@ -80,6 +81,8 @@ When `only` is true, only that test or suite and other tests and suites marked
 as only are run.
 
 When `skipped` is true, that test or suite will be skipped.
+
+When `unstable` is true, that test or suite will be skipped if run with `runUnstable` option.
 
 When `timeout` is present, all tests in the suite should be run with that as the
 timeout, rather than the global timeout (unless it is overridden again in a
@@ -102,6 +105,7 @@ The format of a test descriptor object is similar:
   "name": [String],
   ["only": [boolean]],
   ["skipped": [boolean]],
+  ["unstable": [boolean]],
   ["timeout": [number]],
   ["slow": [number]],
   ["run": [Function]]
@@ -111,7 +115,7 @@ The format of a test descriptor object is similar:
 The `name` field is always required for tests. It is an error to have two tests
 in the same suite that have the same name.
 
-The `only`, `skipped`, `timeout` and `slow` properties have the same semantics
+The `only`, `skipped`, `unstable`, `timeout` and `slow` properties have the same semantics
 as they have for suites.
 
 The `run` function is required if the test is not skipped. Like the hook

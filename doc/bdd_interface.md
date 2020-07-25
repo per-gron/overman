@@ -118,8 +118,19 @@ it.only('should be run and all other tests should not', function() {
 });
 ```
 
-Overman supports marking more than one test with `.only`. `.skip` and `.only`
-can be used for test suites as well, using `describe.skip` and `describe.only`.
+Tests can be marked unstable with `it.unstable`:
+
+```javascript
+it.unstable('should be run only if options.runUnstable is true', function() {
+  // Will not be run
+});
+```
+
+Flaky tests can be marked unstable and will run only if `runUnstable` is passed 
+to the options.
+
+Overman supports marking more than one test with `.only`. `.skip`, `.unstable`, and `.only`
+can be used for test suites as well, using `describe.skip`, `describe.unstable`, and `describe.only`.
 
 ## Before and after hooks
 
