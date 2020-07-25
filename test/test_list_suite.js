@@ -166,6 +166,20 @@ describe('List suite', function() {
         });
     });
 
+    it('should report unstable tests as unstable', function() {
+      var suite = path.resolve(__dirname + '/suite/suite_single_unstable_test');
+      return list(suite)
+        .then(function(result) {
+          expect(result).to.be.deep.equal([{
+            'path': {
+              'file': suite,
+              'path': ['should be run if unstable']
+            },
+            'unstable': true
+          }]);
+        });
+    });
+
     it('should fail with a ListTestError when the listing fails', function() {
       var suite = path.resolve(__dirname + '/suite/suite_syntax_error');
       return shouldFail(list(suite), function(error) {

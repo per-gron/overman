@@ -161,6 +161,20 @@ describe('BDD interface (Mocha flavor)', function() {
         }]
       });
     });
+
+    it('should mark unstable tests with it.unstable', function() {
+      var suite = parseSuite('suite_single_unstable_test');
+      expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].run');
+      expect(suite).to.be.deep.equal({
+        type: 'suite',
+        contents: [{
+          type: 'test',
+          name: 'should be run if unstable',
+          unstable: true,
+          run: null
+        }]
+      });
+    });
   });
 
   describe('Hooks', function() {

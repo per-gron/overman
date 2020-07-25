@@ -156,6 +156,26 @@ describe('Suite runner', function() {
     });
   });
 
+  it('should run tests that were marked as unstable', function() {
+    return ensureOutputFromTests('suite_unstable_tests_amongst_others', {
+      'should be run': [ /should_be_run/ ],
+      'should run if unstable': [ /should_run_if_unstable/ ],
+      'should also run if unstable': [ /should_also_run_if_unstable/ ],
+      'should also be run': [ /should_also_be_run/ ]
+    }, {
+      runUnstable: true
+    });
+  });
+
+  it('should not run tests that were marked as unstable', function() {
+    return ensureOutputFromTests('suite_unstable_tests_amongst_others', {
+      'should be run': [ /should_be_run/ ],
+      'should also be run': [ /should_also_be_run/ ]
+    }, {
+      runUnstable: false
+    });
+  });
+
   it('should fail if a test fails', function() {
     return shouldFail(runTestSuite('suite_various_tests'), function(error) {
       return isTestFailureError(error) && error.message.match(/failed/);

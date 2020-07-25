@@ -59,6 +59,7 @@ runner:
   This will often be used together with the `debuggerPort` option.
 * `internalErrorOutput`: When the suite runner fails with an internal error, it
   writes information about it to this stream. Defaults to stderr
+* `runUnstable`: If true, then overman will run all test marked as `unstable`.
 * `killSubProcesses`: If true, then overman will kill all subprocesses spawned by
   the test. A SIGKILL will be triggered for each process in the tree when the test
   has finished. There could be an issue that the subprocess does not get the chance
