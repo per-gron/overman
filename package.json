@@ -4,7 +4,7 @@
   "description": "Test runner for integration tests",
   "main": "lib/overman.js",
   "scripts": {
-    "lint": "jshint --verbose -c .jshintrc test lib",
+    "lint": "eslint test lib",
     "test": "npm run lint && mocha --timeout 5000 --slow 1000"
   },
   "repository": {
@@ -33,11 +33,42 @@
   "devDependencies": {
     "chai": "~3.5.0",
     "coveralls": "~2.11.9",
+    "eslint": "^7.7.0",
     "istanbul": "~0.4.3",
-    "jshint": "~2.9.2",
     "mocha": "~2.4.5",
     "recursive-readdir": "~2.0.0",
     "source-map-support": "^0.5.13",
     "strip-ansi": "~3.0.1"
+  },
+  "eslintConfig": {
+    "env": {
+      "commonjs": true,
+      "es2020": true,
+      "node": true
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "ignorePatterns": "test/suite/suite_syntax_error.js",
+    "rules": {
+      "no-regex-spaces": 0
+    },
+    "overrides": [
+      {
+        "files": [
+          "test/**"
+        ],
+        "env": {
+          "mocha": true
+        },
+        "rules": {
+          "no-control-regex": 0,
+          "no-empty": 0,
+          "no-undef": 0,
+          "no-unused-vars": 0,
+          "no-useless-escape": 0
+        }
+      }
+    ]
   }
 }

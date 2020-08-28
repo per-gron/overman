@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/*jshint esversion: 6 */
 'use strict';
 
 var childProcess = require('child_process');
