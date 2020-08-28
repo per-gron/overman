@@ -5,7 +5,7 @@
   "main": "lib/overman.js",
   "scripts": {
     "lint": "eslint test lib",
-    "test": "npm run lint && mocha --timeout 5000 --slow 1000"
+    "test": "npm run lint && mocha --timeout 5000 --slow 1000 --colors"
   },
   "repository": {
     "type": "git",
