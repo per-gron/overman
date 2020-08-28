@@ -85,7 +85,9 @@ function ensureOutputFromTests(suite, tests, options) {
     return new Promise(function(resolve, reject) {
       reporters.push(new OnMessage(function(testPath, message) {
         var currentTestName = _.last(testPath.path);
-        encounteredTests[currentTestName] = true;
+        if (message.type === 'start' && !message.skipped) {
+          encounteredTests[currentTestName] = true;
+        }
 
         if (currentTestName === testName) {
           if (message.type === 'start') {
@@ -579,7 +581,7 @@ describe('Suite runner', function() {
         })
         .then(function() {
           expect(didTimeout, 'The test wasn\'t run as expected').to.be.true;
-          expect(lastMessage, 'Finish should be the last message sent').to.be.deep.equal({ type: 'finish', result: 'timeout' });
+          expect(lastMessage, 'Finish should be the last message sent').to.be.deep.equal({ type: 'finish', result: 'timeout', unstable: false });
         });
     });
 
