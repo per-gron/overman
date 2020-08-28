@@ -22,22 +22,19 @@ var delay = require('./util/delay');
 
 describe('Promise utilities', function() {
   describe('finally', function() {
-    it('should support returning value when promise succeeds', function() {
-      var deferred = Promise.defer();
-      var mainPromise = promiseUtil.finally(Promise.resolve(123), function() {
-          deferred.resolve();
-        })
-        .then(function(value) {
-          expect(value).to.equal(123);
-        });
-
-      return Promise.all([deferred.promise, mainPromise]);
+    it('should support returning value when promise succeeds', async function() {
+      let callbackHit = false;
+      const value = await promiseUtil.finally(Promise.resolve(123), function() {
+        callbackHit = true;
+      });
+      expect(callbackHit).to.be.true;
+      expect(value).to.equal(123);
     });
 
-    it('should support returning value when promise fails', function() {
-      var deferred = Promise.defer();
-      var mainPromise = promiseUtil.finally(Promise.reject(123), function() {
-          deferred.resolve();
+    it('should support returning value when promise fails', async function() {
+      let callbackHit = false;
+      await promiseUtil.finally(Promise.reject(123), function() {
+          callbackHit = true;
         })
         .then(function() {
           throw new Error('should fail');
@@ -45,7 +42,7 @@ describe('Promise utilities', function() {
           expect(err).to.equal(123);
         });
 
-      return Promise.all([deferred.promise, mainPromise]);
+      expect(callbackHit).to.be.true;
     });
 
     [true, false].forEach(function(succeed) {

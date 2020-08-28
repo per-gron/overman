@@ -124,9 +124,10 @@ function ensureAllMessages(suite, predicate, options) {
   });
 }
 
-describe('Reporter API', function() {
+describe('Reporter API', async function() {
   it('should invoke registerTests with a list of the tests about to be run', function() {
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
     var testSuitePromise = runTestSuite('suite_single_successful_test', {
       registerTests: function(tests) {
@@ -134,14 +135,15 @@ describe('Reporter API', function() {
           file: pathForSuite('suite_single_successful_test'),
           path: [ 'should succeed' ]
         }]);
-        deferred.resolve();
+        deferredResolve();
       }
     });
-    return Promise.all([testSuitePromise, deferred.promise]);
+    return Promise.all([testSuitePromise, deferredPromise]);
   });
 
   it('should invoke registerTests with suite runner options', function() {
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
     var options = {
       timeout: 1234,  // Timeout needs to be adequately long
@@ -154,14 +156,15 @@ describe('Reporter API', function() {
     var testSuitePromise = runTestSuite('suite_single_successful_test', {
       registerTests: function(tests, options) {
         expect(options).to.be.deep.equal(options);
-        deferred.resolve();
+        deferredResolve();
       }
     }, options);
-    return Promise.all([testSuitePromise, deferred.promise]);
+    return Promise.all([testSuitePromise, deferredPromise]);
   });
 
   it('should invoke registerTests with default suite runner options', function() {
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
     var testSuitePromise = runTestSuite('suite_single_successful_test', {
       registerTests: function(tests, options) {
@@ -170,35 +173,37 @@ describe('Reporter API', function() {
         expect(options).property('slowThreshold').to.be.a('number');
         expect(options).property('graceTime').to.be.a('number');
         expect(options).property('attempts').to.be.a('number');
-        deferred.resolve();
+        deferredResolve();
       }
     });
-    return Promise.all([testSuitePromise, deferred.promise]);
+    return Promise.all([testSuitePromise, deferredPromise]);
   });
 
   it('should invoke registerTests with wall time by default', function() {
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
     var testSuitePromise = runTestSuite('suite_single_successful_test', {
       registerTests: function(tests, options, time) {
         expect(time.getTime() - (new Date()).getTime()).to.be.within(-150, 150);
-        deferred.resolve();
+        deferredResolve();
       }
     });
-    return Promise.all([testSuitePromise, deferred.promise]);
+    return Promise.all([testSuitePromise,deferredPromise]);
   });
 
   it('should invoke registerTests with current time', function() {
     var clock = makeFakeClock();
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
     var testSuitePromise = runTestSuite('suite_single_successful_test', {
       registerTests: function(tests, options, time) {
         expect(time).to.be.deep.equal(clock());
-        deferred.resolve();
+        deferredResolve();
       }
     }, { clock: clock });
-    return Promise.all([testSuitePromise, deferred.promise]);
+    return Promise.all([testSuitePromise, deferredPromise]);
   });
 
   it('should emit messages with current time', function() {
@@ -457,13 +462,14 @@ describe('Reporter API', function() {
   });
 
   it('should report syntax errors', function() {
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
     var testSuitePromise = runTestSuite('suite_syntax_error', {
       registrationFailed: function(error) {
         expect(error).property('message').to.match(/Failed to process .*suite_syntax_error/);
         expect(error).property('stack').to.match(/SyntaxError: Unexpected identifier/);
-        deferred.resolve();
+        deferredResolve();
       }
     });
 
@@ -471,18 +477,19 @@ describe('Reporter API', function() {
       shouldFail(testSuitePromise, function(err) {
         return err instanceof TestFailureError;
       }),
-      deferred.promise
+      deferredPromise
     ]);
   });
 
   it('should emit an aborted finish message when suite is cancelled while the test is running', function() {
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
     var suitePromise = runTestSuite('suite_single_successful_test', new OnMessage(function(testPath, message) {
       if (message.type === 'start') {
         suitePromise.cancel();
       } else if (message.type === 'finish') {
         expect(message).property('result').to.be.equal('aborted');
-        deferred.resolve();
+        deferredResolve();
       }
     }));
 
@@ -490,13 +497,14 @@ describe('Reporter API', function() {
       shouldFail(suitePromise, function(err) {
         return err instanceof TestFailureError;
       }),
-      deferred.promise
+      deferredPromise
     ]);
   });
 
   it('should not emit any start messages after the suite has been cancelled', function() {
     var cancelled = false;
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
     var suitePromise = runTestSuite('suite_various_tests', new OnMessage(function(testPath, message) {
       if (message.type === 'start') {
         if (cancelled) {
@@ -510,12 +518,13 @@ describe('Reporter API', function() {
 
     return Promise.race([
       shouldFail(suitePromise),
-      deferred.promise
+      deferredPromise
     ]);
   });
 
   it('should emit a done message after a suite has been cancelled', function() {
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
     var suitePromise = runTestSuite('suite_single_successful_test', {
       gotMessage: function(testPath, message) {
         if (message.type === 'start') {
@@ -523,7 +532,7 @@ describe('Reporter API', function() {
         }
       },
       done: function() {
-        deferred.resolve();
+        deferredResolve();
       }
     });
 
@@ -531,12 +540,13 @@ describe('Reporter API', function() {
       shouldFail(suitePromise, function(error) {
         return error instanceof TestFailureError;
       }),
-      deferred.promise
+      deferredPromise
     ]);
   });
 
   it('should emit done messages with the current time as parameter', function() {
-    var deferred = Promise.defer();
+    let deferredResolve;
+    const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
     var clock = makeFakeClock();
     var suitePromise = runTestSuite('suite_single_successful_test', {
       gotMessage: function() {
@@ -544,13 +554,13 @@ describe('Reporter API', function() {
       },
       done: function(time) {
         expect(time).to.be.deep.equal(clock());
-        deferred.resolve();
+        deferredResolve();
       }
     }, { clock: clock });
 
     return Promise.all([
       suitePromise,
-      deferred.promise
+      deferredPromise
     ]);
   });
 

@@ -199,8 +199,8 @@ describe('List suite', function() {
       });
     });
 
-    it('should kill the subprocess on timeout', function() {
-      var killDeferred = Promise.defer();
+    it('should kill the subprocess on timeout', async function() {
+      var killed = false;
 
       function fork() {
         return {
@@ -209,18 +209,16 @@ describe('List suite', function() {
           on: function() {},
           kill: function(signal) {
             expect(signal).to.be.equal('SIGKILL');
-            killDeferred.resolve();
+            killed = true;
           }
         };
       }
 
       var suite = path.resolve(__dirname + '/suite/suite_neverending_listing');
-      return Promise.all([
-        shouldFail(list(suite, 10, { fork: fork }), function(error) {
-          return error instanceof listSuite.ListTestError;
-        }),
-        killDeferred.promise
-      ]);
+      await shouldFail(list(suite, 10, { fork: fork }), function(error) {
+        return error instanceof listSuite.ListTestError;
+      });
+      expect(killed).to.be.true;
     });
 
     it('should treat a 0 timeout as no timeout', function() {
@@ -228,14 +226,14 @@ describe('List suite', function() {
       return list(suite, 0);
     });
 
-    it('should provide the test interface parameter to the list_suite process', function() {
-      var paramDeferred = Promise.defer();
+    it('should provide the test interface parameter to the list_suite process', async function() {
+      let paramChecked = false;
 
       function fork(path, parameters) {
         expect(parameters).deep.property('[1]').to.be.equal('param');
 
         // Trick the listTestsOfFile function that the process closes
-        paramDeferred.resolve();
+        paramChecked = true;
         var out = through();
         return {
           stdout: out,
@@ -249,10 +247,8 @@ describe('List suite', function() {
         };
       }
 
-      return Promise.all([
-        list('dummy_suite', 100, { fork: fork }),
-        paramDeferred.promise
-      ]);
+      await list('dummy_suite', 100, { fork: fork });
+      expect(paramChecked).to.be.true;
     });
 
     it('should provide the test interface parameter to the interface', function() {

@@ -22,14 +22,15 @@
 // when the test finishes while the after hooks are running because the test
 // timed out.
 
-var afterDeferred = Promise.defer();
+let afterHookCallback;
+const afterHookPromise = new Promise(resolve => (afterHookCallback = resolve));
 
 it('should be run', function() {
   console.log('in_test');
-  return afterDeferred.promise;
+  return afterHookPromise;
 });
 
 after('should be run only once', function() {
   console.log('in_after_hook');
-  afterDeferred.resolve();
+  afterHookCallback();
 });

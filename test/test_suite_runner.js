@@ -85,7 +85,9 @@ function ensureOutputFromTests(suite, tests, options) {
     return new Promise(function(resolve, reject) {
       reporters.push(new OnMessage(function(testPath, message) {
         var currentTestName = _.last(testPath.path);
-        encounteredTests[currentTestName] = true;
+        if (message.type === 'start' && !message.skipped) {
+          encounteredTests[currentTestName] = true;
+        }
 
         if (currentTestName === testName) {
           if (message.type === 'start') {
@@ -518,7 +520,8 @@ describe('Suite runner', function() {
     });
 
     it('should send \'sigint\' message to tests that time out', function() {
-      var deferred = Promise.defer();
+      let deferredResolve;
+      const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
       function fork() {
         var child = new EventEmitter();
@@ -530,7 +533,7 @@ describe('Suite runner', function() {
           expect(message).property('type').to.be.equal('sigint');
           child.emit('exit', 0, null);
           child.emit('close');
-          deferred.resolve();
+          deferredResolve();
         };
 
         return child;
@@ -543,7 +546,7 @@ describe('Suite runner', function() {
         }), function(error) {
           return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
         }),
-        deferred.promise
+        deferredPromise
       ]);
     });
 
@@ -579,12 +582,13 @@ describe('Suite runner', function() {
         })
         .then(function() {
           expect(didTimeout, 'The test wasn\'t run as expected').to.be.true;
-          expect(lastMessage, 'Finish should be the last message sent').to.be.deep.equal({ type: 'finish', result: 'timeout' });
+          expect(lastMessage, 'Finish should be the last message sent').to.be.deep.equal({ type: 'finish', result: 'timeout', unstable: false });
         });
     });
 
     it('should send SIGKILL to tests that don\'t die after \'sigint\' message', function() {
-      var deferred = Promise.defer();
+      let deferredResolve;
+      const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
       function fork() {
         var child = new EventEmitter();
@@ -595,7 +599,7 @@ describe('Suite runner', function() {
           expect(signal).to.be.equal('SIGKILL');
           child.emit('exit', 0, null);
           child.emit('close');
-          deferred.resolve();
+          deferredResolve();
         };
         child.send = function() {};
 
@@ -609,18 +613,19 @@ describe('Suite runner', function() {
         }), function(error) {
           return (error instanceof TestFailureError) && error.message.match(/Tests failed/);
         }),
-        deferred.promise
+        deferredPromise
       ]);
     });
 
     [0, 1234].forEach(function(graceTime) {
       it('should respect the graceTime parameter of ' + graceTime, function() {
-        var softKillDeferred = Promise.defer();
+        let softKillResolve;
+        const softKillPromise = new Promise(resolve => (softKillResolve = resolve));
 
         function softKill(process, timeout) {
           process.kill('SIGKILL');
           expect(timeout).to.be.equal(graceTime);
-          softKillDeferred.resolve();
+          softKillResolve();
         }
 
         var suitePromise = shouldFail(runTestSuite('suite_single_successful_test', [], {
@@ -632,7 +637,7 @@ describe('Suite runner', function() {
         });
 
         return Promise.all([
-          softKillDeferred.promise,
+          softKillPromise,
           suitePromise
         ]);
       });
