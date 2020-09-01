@@ -5,7 +5,8 @@
   "main": "dist/overman.js",
   "types": "dist/overman.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
     "lint": "eslint test src",
