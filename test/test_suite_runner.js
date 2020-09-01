@@ -55,7 +55,7 @@ function listNames(names) {
 function runTestSuite(suite, reporters, options) {
   return suiteRunner(_.assign({
       files: [__dirname + '/../test/suite/' + suite],
-      timeout: 500,
+      timeout: 4000,
       reporters: reporters || [],
       internalErrorOutput: through(),
     }, options));
