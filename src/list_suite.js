@@ -73,13 +73,13 @@ function withTimeout(promise, timeout, onTimeout) {
  * An error "class" that means that an error occured when listing the tests of
  * a suite.
  */
-function ListTestError(message, errorOutput) {
+function _ListTestError(message, errorOutput) {
   this.message = message;
   this.stack = this.message + (errorOutput ? ':\n' + errorOutput : '');
   this.name = this.constructor.name;
 }
-ListTestError.prototype = Object.create(Error.prototype);
-exports.ListTestError = ListTestError;
+_ListTestError.prototype = Object.create(Error.prototype);
+exports.ListTestError = _ListTestError;
 
 function listTestsOfFile(timeout, testInterfacePath, testInterfaceParameter, suite, opt_childProcess) {
   var child = (opt_childProcess || childProcess).fork(
@@ -95,7 +95,7 @@ function listTestsOfFile(timeout, testInterfacePath, testInterfaceParameter, sui
 
   var failureErrorPromise = streamToString(child.stderr)
     .then(function(string) {
-      return new ListTestError('Failed to process ' + suite, string);
+      return new _ListTestError('Failed to process ' + suite, string);
     });
 
   var resultPromise = new Promise(function(resolve, reject) {
@@ -113,7 +113,7 @@ function listTestsOfFile(timeout, testInterfacePath, testInterfaceParameter, sui
   return withTimeout(resultPromise, timeout, function() {
     child.kill('SIGKILL');
 
-    var error = new ListTestError('Timed out while listing tests of ' + suite);
+    var error = new _ListTestError('Timed out while listing tests of ' + suite);
     error.timeout = true;
     throw error;
   });

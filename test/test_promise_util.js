@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var promiseUtil = require('../lib/promise_util');
+var promiseUtil = require('../dist/promise_util');
 var delay = require('./util/delay');
 
 describe('Promise utilities', function() {

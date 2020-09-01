@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var TimeoutTimer = require('../lib/timeout_timer');
+var TimeoutTimer = require('../dist/timeout_timer');
 var makeFakeClock = require('./util/fake_clock');
 var delay = require('./util/delay');
 

@@ -19,7 +19,7 @@
 var chalk = require('chalk');
 var expect = require('chai').expect;
 var stripAnsi = require('strip-ansi');
-var errorMessageUtil = require('../lib/error_message_util');
+var errorMessageUtil = require('../dist/error_message_util');
 
 describe('Error message utilities', function() {
   before(function() {

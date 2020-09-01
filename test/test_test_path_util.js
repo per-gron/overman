@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var testPathUtil = require('../lib/test_path_util');
+var testPathUtil = require('../dist/test_path_util');
 
 describe('Test path util', function() {
   it('should return the parent path of a test path', function() {

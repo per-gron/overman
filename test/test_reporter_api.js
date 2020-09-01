@@ -28,17 +28,17 @@ var path = require('path');
 var OnMessage = require('./util/on_message');
 var shouldFail = require('./util/should_fail');
 var makeFakeClock = require('./util/fake_clock');
-var TestFailureError = require('../lib/test_failure_error');
-var suiteRunner = require('../lib/suite_runner');
+var TestFailureError = require('../dist/test_failure_error');
+var suiteRunner = require('../dist/suite_runner');
 
 function pathForSuite(suite) {
-  return path.resolve(__dirname + '/suite/' + suite);
+  return path.resolve(__dirname + '/../test/suite/' + suite);
 }
 
 function runTestSuite(suite, reporter, options) {
   return suiteRunner(_.assign({
       files: [pathForSuite(suite)],
-      timeout: 500,
+      timeout: 4000,
       reporters: reporter ? [reporter] : []
     }, options));
 }
@@ -146,8 +146,7 @@ describe('Reporter API', async function() {
     const deferredPromise = new Promise(resolve => (deferredResolve = resolve));
 
     var options = {
-      timeout: 1234,  // Timeout needs to be adequately long
-      listingTimeout: 234,
+      timeout: 9000,  // Timeout needs to be adequately long
       slowThreshold: 345,
       graceTime: 456,
       attempts: 567
@@ -322,14 +321,14 @@ describe('Reporter API', async function() {
     it('should emit timeout message for test that times out', function() {
       return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
         expect(message).property('type').to.be.equal('timeout');
-      }]);
+      }], { timeout: 1 });
     });
 
     it('should emit finish message for test that times out', function() {
       return ensureMessages('suite_single_test_that_never_finishes', [function(testPath, message) {
         expect(message).property('type').to.be.equal('finish');
         expect(message).property('result').to.be.equal('timeout');
-      }]);
+      }], { timeout: 1 });
     });
 
     it('should emit reporter messages even after the test times out', function() {
@@ -337,7 +336,7 @@ describe('Reporter API', async function() {
         expect(message).property('type').to.be.equal('debugInfo');
         expect(message).property('name').to.be.equal('in');
         expect(message).property('value').to.be.equal('afterHook');
-      }]);
+      }], { timeout: 1 });
     });
 
     it('should emit messages in the right order when test times out', function() {
@@ -347,7 +346,7 @@ describe('Reporter API', async function() {
         expect(message).property('type').to.be.equal('debugInfo');
       }, function(testPath, message) {
         expect(message).property('type').to.be.equal('finish');
-      }]);
+      }], { timeout: 1 });
     });
   });
 

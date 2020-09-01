@@ -32,13 +32,13 @@ function runTestWithInterfacePath(suite, interfacePath) {
     attributes: { attr: 'ibute' }
   });
   return childProcess.fork(
-    __dirname + '/../lib/bin/run_test',
-    [interfacePath, parameters, __dirname + '/suite/' + suite].concat(testPath),
+    __dirname + '/../dist/bin/run_test',
+    [interfacePath, parameters, __dirname + '/../test/suite/' + suite].concat(testPath),
     { silent: true });
 }
 
 function runTest(suite) {
-  var interfacePath = __dirname + '/../lib/interfaces/bdd_mocha';
+  var interfacePath = __dirname + '/../dist/interfaces/bdd_mocha';
   var testPath = _.toArray(arguments).slice(1);
   return runTestWithInterfacePath.apply(this, [suite, interfacePath].concat(testPath));
 }
@@ -472,7 +472,7 @@ describe('Test runner', function() {
 
   describe('Interface parameter', function() {
     it('should propagate the interface parameter', function() {
-      var process = runTestWithInterfacePath('suite_single_successful_test', __dirname + '/util/dummy_parameterized_interface', 'interface_param');
+      var process = runTestWithInterfacePath('suite_single_successful_test', __dirname + '/../test/util/dummy_parameterized_interface', 'interface_param');
 
       return Promise.all([
         waitForProcessToExit(process),

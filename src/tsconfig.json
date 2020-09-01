@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "composite": true,
+    "module": "commonjs",
+    "outDir": "../dist",
+    "target": "es5"
+  }
+}

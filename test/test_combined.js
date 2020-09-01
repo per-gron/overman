@@ -18,7 +18,7 @@
 
 var _ = require('lodash');
 var expect = require('chai').expect;
-var Combined = require('../lib/reporters/combined');
+var Combined = require('../dist/reporters/combined');
 
 describe('Combined reporter', function() {
   ['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function(message) {

@@ -17,8 +17,8 @@
 'use strict';
 
 var streamUtil = require('./util/stream');
-var ErrorDetail = require('../lib/reporters/error_detail');
-var listSuite = require('../lib/list_suite');
+var ErrorDetail = require('../dist/reporters/error_detail');
+var listSuite = require('../dist/list_suite');
 
 function doWithReporterAndCheck(callback, expectedLines) {
   // We don't care about colors here, since this is a unit test and ErrorDetail

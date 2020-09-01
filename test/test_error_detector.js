@@ -1,4 +1,4 @@
-var ErrorDetectorReporter = require('../lib/reporters/error_detector');
+var ErrorDetectorReporter = require('../dist/reporters/error_detector');
 var expect = require('chai').expect;
 
 describe('Error Detector', function() {

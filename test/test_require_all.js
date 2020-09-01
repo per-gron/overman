@@ -23,9 +23,10 @@ var recursive = require('recursive-readdir');
 // that all source files are required by at least one test, so that the test
 // coverage reporting is accurate.
 it('should require all files', function(done) {
-  recursive(__dirname + '/../lib', function(err, files) {
+  recursive(__dirname + '/../dist', function(err, files) {
     expect(err).to.be.null;
     files
+      .filter(file => file.endsWith('.js'))
       .filter(function(file) {
         // The scripts can't just be required. They are tested though so it
         // doesn't hurt much.

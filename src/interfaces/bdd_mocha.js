@@ -183,6 +183,17 @@ module.exports = function(parameter, file, runtimeContext) {
       suiteContext.attributes = attributes;
       suite.attributes = attributes;
     }
+
+    suiteContext.describe = describe.bind(this, {});
+    suiteContext.describe.skip = describe.bind(this, { skipped: true });
+    suiteContext.describe.only = describe.bind(this, { only: true });
+    suiteContext.describe.unstable = describe.bind(this, { unstable: true });
+
+    suiteContext.it = it.bind(this, {});
+    suiteContext.it.skip = it.bind(this, { skipped: true });
+    suiteContext.it.only = it.bind(this, { only: true });
+    suiteContext.it.unstable = it.bind(this, { unstable: true });
+
     if (fn) {
       fn.apply(suiteContext);
     }

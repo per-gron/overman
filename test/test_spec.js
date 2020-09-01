@@ -17,8 +17,8 @@
 'use strict';
 
 var through = require('through');
-var Spec = require('../lib/reporters/spec');
-var suiteRunner = require('../lib/suite_runner');
+var Spec = require('../dist/reporters/spec');
+var suiteRunner = require('../dist/suite_runner');
 var OnMessage = require('./util/on_message');
 var streamUtil = require('./util/stream');
 
@@ -96,7 +96,7 @@ describe('Spec reporter', function() {
     // This test can't be done within the test process, because when the test
     // runs in Mocha it's not ok to pipe stdout to something else.
     var suitePromise = suiteRunner({
-      files: [__dirname + '/suite/' + 'suite_spec_should_print_to_stdout_by_default'],
+      files: [__dirname + '/../test/suite/' + 'suite_spec_should_print_to_stdout_by_default'],
       timeout: 500,
       reporters: new OnMessage(function(path, message) {
         if (message.type === 'finish') {

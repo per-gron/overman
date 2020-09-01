@@ -17,9 +17,9 @@
 'use strict';
 
 var expect = require('chai').expect;
-var overman = require('../lib/overman');
-var reporters = require('../lib/reporters');
-var TestFailureError = require('../lib/test_failure_error');
+var overman = require('../dist/overman');
+var reporters = require('../dist/reporters');
+var TestFailureError = require('../dist/test_failure_error');
 
 describe('Overman public module', function() {
   it('should invoke the suite runner when called', function(done) {
