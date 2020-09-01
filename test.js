@@ -18,14 +18,14 @@
 
 var fs = require('fs');
 var path = require('path');
-var overman = require('./lib/overman');
-var promiseUtil = require('./lib/promise_util');
+var overman = require('./dist/overman');
+var promiseUtil = require('./dist/promise_util');
 
 process.env['FORCE_COLOR'] = 'true';
 
-var suiteFiles = fs.readdirSync('test')
+var suiteFiles = fs.readdirSync('build')
   .filter(function(filename) { return filename.match(/^test_/); })
-  .map(function(filename) { return path.join('test', filename) });
+  .map(function(filename) { return path.join('build', filename) });
 
 var suitePromise = overman({ files: suiteFiles });
 

@@ -16,7 +16,7 @@
 
 'use strict';
 
-var Spec = require('../../lib/reporters/spec');
+var Spec = require('../../dist/reporters/spec');
 
 describe('Spec reporter', function() {
   it('should print to stdout by default', function() {

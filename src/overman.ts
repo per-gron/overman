@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
+/// <reference path="interfaces/bdd_mocha.globals.ts" />
+
 'use strict';
 
-function overman() {
-  return require('./suite_runner').apply(this, arguments);
-}
+import * as suiteRunner from './suite_runner';
+import reporters = require('./reporters');
+import TestFailureError = require('./test_failure_error');
 
-overman.reporters = require('./reporters');
-overman.TestFailureError = require('./test_failure_error');
-
-module.exports = overman;
+export = Object.assign(suiteRunner, { reporters, TestFailureError });

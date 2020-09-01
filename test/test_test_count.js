@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var TestCount = require('../lib/test_count');
+var TestCount = require('../dist/test_count');
 
 describe('TestCount', function() {
   var testCount = new TestCount();

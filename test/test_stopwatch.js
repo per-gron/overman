@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Stopwatch = require('../lib/stopwatch');
+var Stopwatch = require('../dist/stopwatch');
 var makeFakeClock = require('./util/fake_clock');
 var delay = require('./util/delay');
 

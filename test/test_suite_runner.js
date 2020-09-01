@@ -25,9 +25,9 @@ var OnMessage = require('./util/on_message');
 var streamUtil = require('./util/stream');
 var shouldFail = require('./util/should_fail');
 var delay = require('./util/delay');
-var TestFailureError = require('../lib/test_failure_error');
-var suiteRunner = require('../lib/suite_runner');
-var promiseUtil = require('../lib/promise_util');
+var TestFailureError = require('../dist/test_failure_error');
+var suiteRunner = require('../dist/suite_runner');
+var promiseUtil = require('../dist/promise_util');
 
 function ParallelismCounter() {
   this.maxParallelism = 0;
@@ -54,7 +54,7 @@ function listNames(names) {
 
 function runTestSuite(suite, reporters, options) {
   return suiteRunner(_.assign({
-      files: [__dirname + '/suite/' + suite],
+      files: [__dirname + '/../test/suite/' + suite],
       timeout: 500,
       reporters: reporters || [],
       internalErrorOutput: through(),
@@ -195,7 +195,7 @@ describe('Suite runner', function() {
       }),
       new Promise(function(resolve, reject) {
         var child = childProcess.fork(
-          __dirname + '/util/run_single_test');
+          __dirname + '/../test/util/run_single_test');
 
         child.on('exit', function(code) {
           if (code === 0) {
@@ -730,7 +730,7 @@ describe('Suite runner', function() {
       return ensureOutputFromTests('suite_single_successful_test', {
         'interface_param': ['param: "interface_param"']
       }, {
-        interface: __dirname + '/util/dummy_parameterized_interface',
+        interface: __dirname + '/../test/util/dummy_parameterized_interface',
         interfaceParameter: 'interface_param',
       });
     });

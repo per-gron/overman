@@ -1,11 +1,19 @@
 {
   "name": "overman",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Test runner for integration tests",
-  "main": "lib/overman.js",
+  "main": "dist/overman.js",
+  "types": "dist/overman.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "lint": "eslint test lib",
-    "test": "npm run lint && mocha --timeout 5000 --slow 1000 --colors"
+    "lint": "eslint test src",
+    "build": "tsc -b src",
+    "build:test": "npm run build && tsc -b test",
+    "test:mocha": "npm run build && npm run lint && mocha -r ts-node/register --timeout 5000 --slow 1000 --colors test/test_*",
+    "test:overman": "npm run build:test && node test.js",
+    "test": "npm run test:mocha"
   },
   "repository": {
     "type": "git",
@@ -31,6 +39,7 @@
     "through": "~2.3.8"
   },
   "devDependencies": {
+    "@types/node": "^14.6.2",
     "chai": "~3.5.0",
     "coveralls": "~2.11.9",
     "eslint": "^7.7.0",
@@ -38,7 +47,9 @@
     "mocha": "~2.4.5",
     "recursive-readdir": "~2.0.0",
     "source-map-support": "^0.5.13",
-    "strip-ansi": "~3.0.1"
+    "strip-ansi": "~3.0.1",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.2"
   },
   "eslintConfig": {
     "env": {

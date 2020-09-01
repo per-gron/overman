@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Serializer = require('../lib/reporters/serializer');
+var Serializer = require('../dist/reporters/serializer');
 
 function getTestPathsFromMessages(messages) {
   var paths = [];

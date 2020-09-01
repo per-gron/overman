@@ -18,7 +18,7 @@
 
 var expect = require('chai').expect;
 var through = require('through');
-var InsertionLog = require('../lib/insertion_log');
+var InsertionLog = require('../dist/insertion_log');
 
 function readEntireStream(stream) {
   return new Promise(function(resolve) {

@@ -18,7 +18,7 @@
 
 var _ = require('lodash');
 var expect = require('chai').expect;
-var Timestamper = require('../lib/reporters/timestamper');
+var Timestamper = require('../dist/reporters/timestamper');
 
 describe('Timestamper reporter', function() {
   ['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function(message) {

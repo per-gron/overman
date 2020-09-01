@@ -18,11 +18,11 @@
 
 var expect = require('chai').expect;
 
-var bddMocha = require('../lib/interfaces/bdd_mocha');
-var suiteRunner = require('../lib/suite_runner');
+var bddMocha = require('../dist/interfaces/bdd_mocha');
+var suiteRunner = require('../dist/suite_runner');
 
 function parseSuite(name, runtimeContext) {
-  return bddMocha(undefined, __dirname + '/suite/' + name, runtimeContext);
+  return bddMocha(undefined, __dirname + '/../test/suite/' + name, runtimeContext);
 }
 
 function getKeypath(object, keypath) {
@@ -409,8 +409,8 @@ describe('BDD interface (Mocha flavor)', function() {
 
   it('should declare context global', function() {
     return suiteRunner({
-      files: [__dirname + '/suite/suite_access_context'],
-      interface: __dirname + '/../lib/interfaces/bdd_mocha',
+      files: [__dirname + '/../test/suite/suite_access_context'],
+      interface: __dirname + '/../dist/interfaces/bdd_mocha',
       timeout: 500,
       reporters: []
     });

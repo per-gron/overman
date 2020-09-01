@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var MessageTracker = require('../lib/reporters/message_tracker');
+var MessageTracker = require('../dist/reporters/message_tracker');
 
 describe('MessageTracker', function() {
   var tracker;

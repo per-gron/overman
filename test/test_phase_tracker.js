@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var PhaseTracker = require('../lib/reporters/phase_tracker');
+var PhaseTracker = require('../dist/reporters/phase_tracker');
 
 describe('PhaseTracker', function() {
   var tracker;

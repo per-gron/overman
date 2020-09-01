@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var prettyDuration = require('../lib/pretty_duration');
+var prettyDuration = require('../dist/pretty_duration');
 
 describe('Pretty duration', function() {
   it('should properly handle zero', function() {

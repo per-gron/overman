@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Cancellable = require('../lib/reporters/cancellable');
+var Cancellable = require('../dist/reporters/cancellable');
 
 describe('Cancellable reporter', function() {
   describe('Forwarding', function() {

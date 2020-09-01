@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var TestFailureError = require('../lib/test_failure_error');
+var TestFailureError = require('../dist/test_failure_error');
 
 describe('TestFailureError', function() {
   it('should be instanceof Error', function() {

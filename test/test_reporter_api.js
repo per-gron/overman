@@ -28,11 +28,11 @@ var path = require('path');
 var OnMessage = require('./util/on_message');
 var shouldFail = require('./util/should_fail');
 var makeFakeClock = require('./util/fake_clock');
-var TestFailureError = require('../lib/test_failure_error');
-var suiteRunner = require('../lib/suite_runner');
+var TestFailureError = require('../dist/test_failure_error');
+var suiteRunner = require('../dist/suite_runner');
 
 function pathForSuite(suite) {
-  return path.resolve(__dirname + '/suite/' + suite);
+  return path.resolve(__dirname + '/../test/suite/' + suite);
 }
 
 function runTestSuite(suite, reporter, options) {

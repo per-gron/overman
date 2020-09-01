@@ -19,7 +19,7 @@
 var _ = require('lodash');
 var expect = require('chai').expect;
 var stripAnsi = require('strip-ansi');
-var SpecProgress = require('../lib/reporters/spec_progress');
+var SpecProgress = require('../dist/reporters/spec_progress');
 
 function mock(methods) {
   return function Mock() {

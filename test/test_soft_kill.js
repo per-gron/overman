@@ -17,7 +17,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var softKill = require('../lib/soft_kill');
+var softKill = require('../dist/soft_kill');
 var EventEmitter = require('events').EventEmitter;
 
 function fakeProcess(kill, send) {
