@@ -27,7 +27,8 @@ var suiteFiles = fs.readdirSync('build')
   .filter(function(filename) { return filename.match(/^test_/); })
   .map(function(filename) { return path.join('build', filename) });
 
-var suitePromise = overman({ files: suiteFiles });
+const reporters = [new overman.reporters.Summary(process.stdout)];
+var suitePromise = overman({ files: suiteFiles, reporters });
 
 var finished = false;
 promiseUtil.finally(suitePromise, function() {
