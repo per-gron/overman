@@ -444,7 +444,3 @@ declare namespace NodeJS {
 }
 
 // #endregion Global augmentations
-
-declare module "overman" {
-    export = Overman;
-}
