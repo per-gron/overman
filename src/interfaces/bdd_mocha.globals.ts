@@ -169,13 +169,6 @@ declare namespace Overman {
      * - _Only available when invoked via Overman._
      */
     unstable: UnstableTestFunction<T>;
-
-    /**
-     * Number of attempts to retry.
-     *
-     * - _Only available when invoked via Overman._
-     */
-    retries(n: number): void;
   }
 
   interface ExclusiveTestFunction<T> extends BaseTestFunction<T> { }
