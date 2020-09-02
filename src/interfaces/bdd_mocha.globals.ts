@@ -279,7 +279,7 @@ declare namespace Overman {
    */
   class Context<T> {
     title: string;
-    currentTest?: Context<T>;
+    currentTest: Context<T>;
     attributes: T;
 
     fullTitle(): string;
