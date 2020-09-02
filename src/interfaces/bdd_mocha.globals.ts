@@ -260,6 +260,34 @@ declare namespace Overman {
     slow(ms: string | number): void;
 
     /**
+     * Execute before running tests.
+     *
+     * - _Only available when invoked via Overman._
+     */
+    before: HookFunction<T>;
+
+    /**
+     * Execute after running tests.
+     *
+     * - _Only available when invoked via Overman._
+     */
+    after: HookFunction<T>;
+
+    /**
+     * Execute before each test case.
+     *
+     * - _Only available when invoked via Overman._
+     */
+    beforeEach: HookFunction<T>;
+
+    /**
+     * Execute after each test case.
+     *
+     * - _Only available when invoked via Overman._
+     */
+    afterEach: HookFunction<T>;
+
+    /**
      * Describe a nested "suite".
      *
      * - _Only available when invoked via Overman._
