@@ -11,7 +11,7 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    (fn: Func<T>): void;
+    <U>(fn: Func<T extends null | undefined ? U : T & U>): void;
 
     /**
      * [bdd, qunit, tdd] Describe a "hook" to execute the given callback `fn`. The name of the
@@ -19,21 +19,21 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    (fn: AsyncFunc<T>): void;
+    <U>(fn: AsyncFunc<T extends null | undefined ? U : T & U>): void;
 
     /**
      * [bdd, qunit, tdd] Describe a "hook" to execute the given `title` and callback `fn`.
      *
      * - _Only available when invoked via Overman._
      */
-    (name: string, fn?: Func<T>): void;
+    <U>(name: string, fn?: Func<T extends null | undefined ? U : T & U>): void;
 
     /**
      * [bdd, qunit, tdd] Describe a "hook" to execute the given `title` and callback `fn`.
      *
      * - _Only available when invoked via Overman._
      */
-    (name: string, fn?: AsyncFunc<T>): void;
+    <U>(name: string, fn?: AsyncFunc<T extends null | undefined ? U : T & U>): void;
   }
 
   interface BaseSuiteFunction<T> {
@@ -43,7 +43,7 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    (title: string, fn: (this: SuiteContext<T>) => void): void;
+    <U>(title: string, fn: (this: SuiteContext<T extends null | undefined ? U : T & U>) => void): void;
 
     /**
      * [qunit] Describe a "suite" with the given `title`.
@@ -105,7 +105,7 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    (fn: Func<T>): void;
+    <U>(fn: Func<T extends null | undefined ? U : T & U>): void;
 
     /**
      * Describe a specification or test-case with the given callback `fn` acting as a thunk.
@@ -113,7 +113,7 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    (fn: AsyncFunc<T>): void;
+    <U>(fn: AsyncFunc<T extends null | undefined ? U : T & U>): void;
 
     /**
      * Describe a specification or test-case with the given `title` and callback `fn` acting
@@ -121,7 +121,7 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    (title: string, fn?: Func<T>): void;
+    <U>(title: string, fn?: Func<T extends null | undefined ? U : T & U>): void;
 
     /**
      * Describe a specification or test-case with the given `title` and callback `fn` acting
@@ -129,7 +129,7 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    (title: string, fn?: AsyncFunc<T>): void;
+    <U>(title: string, fn?: AsyncFunc<T extends null | undefined ? U : T & U>): void;
 
     /**
      * Describe a specification or test-case with the given `title`, `attributes` and callback
