@@ -367,11 +367,11 @@ declare namespace Overman {
     describe: SuiteFunction<undefined>;
 
     /**
-     * Describe a "suite" containing nested suites and tests.
+     * The currently runnning test context.
      *
      * - _Only available when invoked via Overman._
      */
-    context: SuiteFunction<undefined>;
+    context: Context<undefined>;
 
     /**
      * Describes a test case.
@@ -420,11 +420,11 @@ declare var afterEach: Overman.HookFunction<undefined>;
 declare var describe: Overman.SuiteFunction<undefined>;
 
 /**
- * Describe a "suite" containing nested suites and tests.
+ * The currently runnning test context.
  *
  * - _Only available when invoked via Overman._
  */
-declare var context: Overman.SuiteFunction<undefined>;
+declare var context: Overman.Context<undefined>;
 
 /**
  * Describes a test case.
@@ -444,7 +444,3 @@ declare namespace NodeJS {
 }
 
 // #endregion Global augmentations
-
-declare module "overman" {
-    export = Overman;
-}
