@@ -184,6 +184,9 @@ module.exports = function(parameter, file, runtimeContext) {
       suite.attributes = attributes;
     }
 
+    suiteContext.before = suiteContext.beforeEach = hookHandler('before');
+    suiteContext.after = suiteContext.afterEach = hookHandler('after');
+
     suiteContext.describe = describe.bind(this, {});
     suiteContext.describe.skip = describe.bind(this, { skipped: true });
     suiteContext.describe.only = describe.bind(this, { only: true });
