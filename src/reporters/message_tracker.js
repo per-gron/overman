@@ -60,7 +60,6 @@ MessageTracker.prototype.gotMessage = function(testPath, message) {
   } else if (message.type === 'timeout') {
     this._timedout[testPathToKey(testPath)] = true;
   } else if (message.type === 'retry') {
-    this._messages[testPathToKey(testPath)] = [];
     delete this._timedout[testPathToKey(testPath)];
   }
 };
