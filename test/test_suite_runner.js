@@ -19,7 +19,7 @@
 var _ = require('lodash');
 var childProcess = require('child_process');
 var EventEmitter = require('events').EventEmitter;
-var expect = require('chai').expect;
+var chai = require('chai');
 var through = require('through');
 var OnMessage = require('./util/on_message');
 var streamUtil = require('./util/stream');
@@ -28,6 +28,11 @@ var delay = require('./util/delay');
 var TestFailureError = require('../dist/test_failure_error');
 var suiteRunner = require('../dist/suite_runner');
 var promiseUtil = require('../dist/promise_util');
+var chaiAsPromised = require("chai-as-promised");
+
+var expect = chai.expect;
+
+chai.use(chaiAsPromised);
 
 function ParallelismCounter() {
   this.maxParallelism = 0;
@@ -133,6 +138,13 @@ describe('Suite runner', function() {
     expect(function() {
       suiteRunner({});
     }).to.throw(/not present or not Array/);
+  });
+
+  it('should throw on no test cases', function() {
+    return expect(suiteRunner({
+      files: [],
+      internalErrorOutput: through(),
+    })).to.be.rejectedWith(/No tests found/);
   });
 
   it('should run tests', function() {
@@ -456,7 +468,7 @@ describe('Suite runner', function() {
     error.stack = 'Test\nstack';
 
     var suitePromise = suiteRunner({
-      files: [],
+      files: [__dirname + '/../test/suite/suite_test_title'],
       reporters: [{
         registerTests: function() {
           throw error;
