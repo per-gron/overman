@@ -24,10 +24,13 @@ var TestFailureError = require('../dist/test_failure_error');
 describe('Overman public module', function() {
   it('should invoke the suite runner when called', function(done) {
     overman({
-      files: [],
+      files: [__dirname + '/../test/suite/suite_test_title'],
       reporters: [{
         registerTests: function(tests, options, time) {
-          expect(tests).to.be.deep.equal([]);
+          expect(tests).to.be.deep.equal([{
+            file: __dirname + '/../test/suite/suite_test_title',
+            path: ['should succeed']
+          }]);
           expect(options).to.have.property('timeout');
           expect(time).to.be.instanceof(Date);
           done();

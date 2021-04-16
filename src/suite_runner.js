@@ -328,6 +328,10 @@ module.exports = function(options) {
         tests = tests.slice(0, 1);  // Only run one test when debugging
       }
 
+      if (!tests.length) {
+        throw new Error('No tests found');
+      }
+
       if (reporter.registerTests) {
         reporter.registerTests(
           tests.map(function(test) { return test.path; }),
