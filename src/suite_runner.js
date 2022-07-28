@@ -229,6 +229,20 @@ function filterAttributes(attributeFilter, tests) {
   });
 }
 
+function filterTest(testFilter, tests) {
+  if (!testFilter) {
+    return tests;
+  }
+  return tests.filter(function(test) {
+    try {
+      return testFilter(test);
+    } catch (error) {
+      error.message = 'Encountered error while filtering tests: ' + error.message;
+      throw error;
+    }
+  });
+}
+
 function filterGrep(grep, invertGrep, tests) {
   if (!grep) {
     return tests;
@@ -322,6 +336,7 @@ module.exports = function(options) {
   var resultPromise = listTests(reporter, listingTimeout, testInterfacePath, testInterfaceParameter, options.files)
     .then(filterOnly.bind(this, options.disallowOnly))
     .then(filterAttributes.bind(this, options.attributeFilter))
+    .then(filterTest.bind(this, options.testFilter))
     .then(filterGrep.bind(this, options.grep, options.invertGrep))
     .then(function(tests) {
       if (options.debugPort) {

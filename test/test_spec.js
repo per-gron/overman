@@ -97,7 +97,7 @@ describe('Spec reporter', function() {
     // runs in Mocha it's not ok to pipe stdout to something else.
     var suitePromise = suiteRunner({
       files: [__dirname + '/../test/suite/' + 'suite_spec_should_print_to_stdout_by_default'],
-      timeout: 500,
+      timeout: 1000,
       reporters: new OnMessage(function(path, message) {
         if (message.type === 'finish') {
           out.end();
