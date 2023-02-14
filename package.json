@@ -1,6 +1,6 @@
 {
   "name": "overman",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "Test runner for integration tests",
   "main": "dist/overman.js",
   "types": "dist/overman.d.ts",
