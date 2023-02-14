@@ -123,6 +123,65 @@ describe('Spec progress reporter', function() {
     });
   });
 
+  describe('Test breadcrumb', function() {
+    it('should emit breadcrumbs', function() {
+      var testLineId = null;
+
+      return new Promise(function(resolve) {
+        var reporter = new SpecProgress(null, mock({
+          log: function() {},
+
+          logAfter: function(afterId, line, id) {
+            expect(stripAnsi(line)).to.contain('test');
+            testLineId = id;
+          },
+
+          replace: function(replacedId, line) {
+            expect(testLineId).to.not.be.null;
+            expect(replacedId).to.be.equal(testLineId);
+            expect(stripAnsi(line)).to.be.equal('    test  >  42');
+            resolve();
+          }
+        }));
+
+        var suitePath = { file: 'file', path: [] };
+        var testPath = { file: 'file', path: ['test'] };
+        reporter.gotMessage(null, { type: 'suiteStart', suite: suitePath });
+        reporter.gotMessage(testPath, { type: 'start' });
+        reporter.gotMessage(testPath, { type: 'breadcrumb', message: '42' });
+      });
+    });
+
+    it('should not emit breadcrumbs when disabled', function() {
+      var testLineId = null;
+
+      return new Promise(function(resolve, reject) {
+        var reporter = new SpecProgress({ disableBreadcrumbs: true }, mock({
+          log: function() {},
+
+          logAfter: function(afterId, line, id) {
+            expect(stripAnsi(line)).to.contain('test');
+            testLineId = id;
+          },
+
+          replace: function(replacedId, line) {
+            expect(testLineId).to.not.be.null;
+            expect(replacedId).to.be.equal(testLineId);
+            expect(stripAnsi(line)).to.be.equal('  ✓ test');
+            resolve();
+          }
+        }));
+
+        var suitePath = { file: 'file', path: [] };
+        var testPath = { file: 'file', path: ['test'] };
+        reporter.gotMessage(null, { type: 'suiteStart', suite: suitePath });
+        reporter.gotMessage(testPath, { type: 'start' });
+        reporter.gotMessage(testPath, { type: 'breadcrumb', message: '42' });
+        reporter.gotMessage(testPath, { type: 'finish', result: 'success' });
+      });
+    });
+  });
+
   describe('Test finish', function() {
     function verifyTestFinishLog(result, expectedOutput, extraFinishOptions) {
       var testLineId = null;

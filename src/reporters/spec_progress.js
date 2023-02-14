@@ -66,6 +66,18 @@ function color(palette, name) {
   return palette[name] || palette.defaultColor || function(x) { return x; };
 }
 
+function getLine(testPath, unstable /* : boolean */, result /* ?: string */, breadcrumb  /* ?: string */) {
+  const prefixSpace = spacesForPath(testPath);
+  const name = _.last(testPath.path) + (unstable ? ' [unstable]' : '');
+
+  const status = result ?? 'inProgress';
+  const symbolColor = color(symbolColors, status);
+  const nameColor = color(nameColors, status);
+  const sign = symbols[status] || '?';
+  breadcrumb = breadcrumb ? '  >  ' + breadcrumb : '';
+  return prefixSpace + symbolColor(sign) + ' ' + nameColor(name) + breadcrumb;
+}
+
 /**
  * SpecProgress is a reporter that emits the progress of tests while they run
  * to a given stream. It does not print any test output other than the list of
@@ -82,10 +94,18 @@ function color(palette, name) {
 function SpecProgress(streams, insertionLog) {
   this._log = new (insertionLog || InsertionLog)((streams || {}).stdout);
 
+  this._disableBreadcrumbs = (streams || {}).disableBreadcrumbs
+
   // The reporter needs to be able to insert new lines for tests and place
   // them where they belong. This is done by keeping track of ids for the
   // last line that was inserted for each test suite.
   this._lastLineIdForSuite = {};
+
+  // Key is test path, value is if test is unstable
+  this._isUnstable = {};
+
+  // Key is test path, value is most recent breadcrumb
+  this._recentBreadcrumb = {};
 
   // Key is test path, value is stream that can be written to for that test
   this._stdout = {};
@@ -126,28 +146,26 @@ SpecProgress.prototype.gotMessage = function(testPath, message) {
 
     this._log.log(spacesForPath(suitePath) + suiteName, suitePathString);
     this._lastLineIdForSuite[suitePathString] = suitePathString;
+  } else if (message.type === 'breadcrumb' && testPath && !this._disableBreadcrumbs) {
+    this._recentBreadcrumb[pathAsString] = message.message;
+    const line = getLine(testPath, this._isUnstable[pathAsString], undefined, message.message);
+    this._log.replace(pathAsString, line);
   } else if (message.type === 'stdout') {
     this._stdout[pathAsString].write(message.data);
   } else if (message.type === 'stderr') {
     this._stderr[pathAsString].write(message.data);
   } else if (message.type === 'start' || message.type === 'finish') {
     var suitePathAsString = JSON.stringify(testPathUtil.suitePathOf(testPath));
-    var prefixSpace = spacesForPath(testPath);
-    var name = _.last(testPath.path) + (message.unstable ? ' [unstable]' : '');
-
-    var status = message.type === 'start' ? 'inProgress' : message.result;
-    var symbolColor = color(symbolColors, status);
-    var nameColor = color(nameColors, status);
-    var sign = symbols[status] || '?';
-    var line = prefixSpace + symbolColor(sign) + ' ' + nameColor(name);
-
     if (message.type === 'start') {
+      const line = getLine(testPath, message.unstable);
       this._log.logAfter(this._lastLineIdForSuite[suitePathAsString], line, pathAsString);
       this._lastLineIdForSuite[suitePathAsString] = pathAsString;
 
+      this._isUnstable[pathAsString] = message.unstable;
       this._stdout[pathAsString] = this._makePipedStream(pathAsString);
       this._stderr[pathAsString] = this._makePipedStream(pathAsString);
     } else if (message.type === 'finish') {
+      let line = getLine(testPath, message.unstable, message.result);
       if (message.duration && (message.slow || message.halfSlow)) {
         var slownessColor = slownessColors[message.slow ? 'slow' : 'halfSlow'];
         line += slownessColor(' (' + Math.round(message.duration) + 'ms)');
