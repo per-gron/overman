@@ -2,8 +2,10 @@
   "compilerOptions": {
     "allowJs": true,
     "composite": true,
+    "incremental": true,
     "module": "commonjs",
     "outDir": "../dist",
-    "target": "es5"
+    "target": "es5",
+    "tsBuildInfoFile": ".tsbuildinfo"
   }
 }
