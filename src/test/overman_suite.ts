@@ -14,47 +14,45 @@
  * limitations under the License.
  */
 
-'use strict';
+import * as fs from 'fs';
+import * as path from 'path';
+import overman, { reporters as overmanReporters } from '..';
 
-var fs = require('fs');
-var path = require('path');
-var overman = require('./dist/index');
-var promiseUtil = require('./dist/promise_util');
-
-var suiteFiles = fs
+const suiteFiles = fs
   .readdirSync('dist/test')
-  .filter(function (filename) {
-    return filename.match(/^test_.*\.js$/);
-  })
-  .map(function (filename) {
-    return path.join('dist/test', filename);
-  });
+  .filter((filename) => filename.match(/^test_.*\.js$/))
+  .map((filename) => path.join('dist/test', filename));
 
 const reporters = [
-  new overman.reporters.Spec(process),
-  new overman.reporters.Summary(process.stdout),
+  // @ts-ignore temporary
+  new overmanReporters.Spec(process),
+  new overmanReporters.Summary(process.stdout),
 ];
-var suitePromise = overman.default({ files: suiteFiles, reporters });
 
-var finished = false;
-promiseUtil.finally(suitePromise, function () {
-  finished = true;
-});
+const suitePromise = overman({ files: suiteFiles, reporters });
 
-process.on('SIGINT', function () {
+let finished = false;
+
+process.on('SIGINT', () => {
   if (finished) {
     // It is possible that the test suite has finished running, but that
     // something is still left on the runloop. In that case, we shoulnd't
     // prevent the user from shutting down the process.
     process.exit(1);
   } else {
+    // @ts-ignore temporary
     suitePromise.cancel();
   }
 });
 
-suitePromise.then(
-  function () {},
-  function (err) {
+async function main() {
+  try {
+    await suitePromise;
+    finished = true;
+  } catch (_: unknown) {
+    finished = true;
     process.exit(1);
   }
-);
+}
+
+main();

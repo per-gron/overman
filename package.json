@@ -14,7 +14,7 @@
     "lint": "eslint --ext .ts src",
     "build": "tsc -b src",
     "test:mocha": "npm run build && npm run lint && mocha -r ts-node/register --timeout 5000 --slow 1000 --colors src/test",
-    "test:overman": "npm run build && FORCE_COLOR=true node test.js",
+    "test:overman": "npm run build && FORCE_COLOR=true node dist/test/overman_suite",
     "test": "npm run test:mocha"
   },
   "repository": {
