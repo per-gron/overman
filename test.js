@@ -21,8 +21,6 @@ var path = require('path');
 var overman = require('./dist/overman');
 var promiseUtil = require('./dist/promise_util');
 
-process.env['FORCE_COLOR'] = 'true';
-
 var suiteFiles = fs
   .readdirSync('dist/test')
   .filter(function (filename) {
