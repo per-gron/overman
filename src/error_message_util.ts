@@ -14,43 +14,45 @@
  * limitations under the License.
  */
 
-'use strict';
+import * as chalk from 'chalk';
+import {
+  BreadcrumbMessage,
+  ErrorMessage,
+  HookErrorMessage,
+  TestErrorMessage,
+} from './reporters/message';
 
-var chalk = require('chalk');
-
-var errorLocations = {
+const ERROR_LOCATIONS: Record<string, string | undefined> = {
   afterHook: 'after hook',
   beforeHook: 'before hook',
 };
 
-var colors = {
+const COLORS = {
   errorPlace: chalk.cyan,
   errorHeader: chalk.red,
   trace: chalk.grey,
 };
 
+export type ErrorLocation = Pick<TestErrorMessage, 'in'> | Pick<HookErrorMessage, 'in' | 'inName'>;
+
 /**
  * Generates a (non-colored) human-readable string of where an error occured.
  * The input format is designed so that you can simply pass in a message of type
  * 'error' that was passed to a reporter.
- *
- * @param errorMessage Object of the form
- *     { in: 'test|beforeHook|afterHook|uncaught', [inName: 'name'] }
  */
-function prettyErrorLocation(errorMessage) {
-  if (!errorMessage) {
+export function prettyErrorLocation(errLoc?: ErrorLocation) {
+  if (!errLoc) {
     return 'Unknown location';
-  } else if (errorMessage.in === 'uncaught') {
+  } else if (errLoc.in === 'uncaught') {
     return 'Uncaught error';
   }
 
-  var placeType = errorLocations[errorMessage.in] || errorMessage.in;
-  var placeName = errorMessage.inName ? ' "' + errorMessage.inName + '"' : '';
-  return 'In ' + placeType + placeName;
+  const placeType = ERROR_LOCATIONS[errLoc.in] ?? errLoc.in;
+  const placeName = 'inName' in errLoc && errLoc.inName ? ` "${errLoc.inName}"` : '';
+  return `In ${placeType}${placeName}`;
 }
-exports.prettyErrorLocation = prettyErrorLocation;
 
-function dedentTraceLine(line) {
+function dedentTraceLine(line: string) {
   return line.replace(/^  /, '');
 }
 
@@ -64,29 +66,25 @@ function dedentTraceLine(line) {
  *       stack: [error.stack]
  *     }
  */
-function prettyError(errorMessage) {
+export function prettyError(errorMessage?: Partial<ErrorMessage>) {
   if (!errorMessage) {
     return '[No error]';
   }
 
-  var result = '';
+  let result = '';
 
-  var errorLines = (errorMessage.stack || '').split('\n');
+  const errorLines = errorMessage.stack ? errorMessage.stack.split('\n') : [];
 
   if (errorMessage.in) {
-    result += colors.errorPlace(prettyErrorLocation(errorMessage) + ':') + ' ';
+    result += COLORS.errorPlace(`${prettyErrorLocation(errorMessage as ErrorMessage)}:`) + ' ';
   }
-  result += colors.errorHeader(errorLines[0]) + '\n';
-  errorLines
-    .splice(1)
-    .map(dedentTraceLine)
-    .forEach(function (line) {
-      result += colors.trace(line) + '\n';
-    });
+  result += COLORS.errorHeader(errorLines[0]) + '\n';
 
-  return result;
+  return errorLines
+    .slice(1)
+    .map(dedentTraceLine)
+    .reduce((result, line) => result + COLORS.trace(line) + '\n', result);
 }
-exports.prettyError = prettyError;
 
 /**
  * Generates a colored, non-indented, human readable description of a test
@@ -95,43 +93,33 @@ exports.prettyError = prettyError;
  * @param location Information about what part of the test timed out.
  *     The object should be of the form that prettyErrorLocation expects.
  */
-function prettyTimeout(location) {
+export function prettyTimeout(errLoc?: ErrorLocation) {
   return (
-    colors.errorPlace(prettyErrorLocation(location) + ':') +
+    COLORS.errorPlace(`${prettyErrorLocation(errLoc)}:`) +
     ' ' +
-    colors.errorHeader('Timed out') +
+    COLORS.errorHeader('Timed out') +
     '\n'
   );
 }
-exports.prettyTimeout = prettyTimeout;
 
-function prettyBreadcrumb(breadcrumb, place) {
-  var result = '';
-
-  result += (place ? colors.errorPlace(place + ': ') : '') + breadcrumb.message + '\n';
+export function prettyBreadcrumb(breadcrumb: BreadcrumbMessage, place?: string) {
+  const result = `${(place ? COLORS.errorPlace(`${place}: `) : '') + breadcrumb.message}\n`;
 
   if (breadcrumb.trace) {
-    breadcrumb.trace
+    return breadcrumb.trace
       .split(/\n/)
       .map(dedentTraceLine)
-      .forEach(function (line) {
-        result += colors.trace(line) + '\n';
-      });
+      .reduce((result, line) => result + COLORS.trace(line) + '\n', result);
   }
 
   return result;
 }
-exports.prettyBreadcrumb = prettyBreadcrumb;
 
-function multiplyString(str, num) {
-  if (num <= 0 || typeof num !== 'number') {
-    return '';
-  } else {
-    return str + multiplyString(str, num - 1);
-  }
+function multiplyString(str: string, num?: number): string {
+  return typeof num === 'number' && num > 0 ? str + multiplyString(str, num - 1) : '';
 }
 
-function spaces(num) {
+function spaces(num?: number) {
   return multiplyString(' ', num);
 }
 
@@ -143,17 +131,10 @@ function spaces(num) {
  * @param str The string to indent
  * @param num The number of spaces to indent with
  */
-function indent(str, num) {
-  var space = spaces(num);
+export function indent(str: string, num?: number) {
+  const space = spaces(num);
   return str
     .split('\n')
-    .map(function (line) {
-      if (line.match(/^\s*$/)) {
-        return line;
-      } else {
-        return space + line;
-      }
-    })
+    .map((line) => (line.match(/^\s*$/) ? line : space + line))
     .join('\n');
 }
-exports.indent = indent;
