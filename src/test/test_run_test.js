@@ -453,7 +453,7 @@ describe('Test runner', function () {
     it('should propagate the interface parameter', function () {
       var process = runTestWithInterfacePath(
         'suite_single_successful_test',
-        __dirname + '/../test/util/dummy_parameterized_interface',
+        __dirname + '/../../data/util/dummy_parameterized_interface',
         'interface_param'
       );
 

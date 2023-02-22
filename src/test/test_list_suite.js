@@ -278,7 +278,7 @@ describe('List suite', function () {
       return listSuite
         .listTestsOfFile(
           1000,
-          __dirname + '/../test/util/dummy_parameterized_interface',
+          __dirname + '/../../data/util/dummy_parameterized_interface',
           'test_param',
           'suite'
         )

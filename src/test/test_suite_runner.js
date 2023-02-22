@@ -880,7 +880,7 @@ describe('Suite runner', function () {
           interface_param: ['param: "interface_param"'],
         },
         {
-          interface: __dirname + '/../test/util/dummy_parameterized_interface',
+          interface: __dirname + '/../../data/util/dummy_parameterized_interface',
           interfaceParameter: 'interface_param',
         }
       );
