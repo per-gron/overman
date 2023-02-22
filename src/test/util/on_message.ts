@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
+import Reporter from '../../reporters/reporter';
+
+export type Callback = NonNullable<Reporter['gotMessage']>;
+
 /**
- * OnMessage is a reporter mainly for internal use by the tests. It forwards all
- * gotMessage calls to a callback
+ * For internal use by the tests.
  */
-function OnMessage(onMessage) {
-  this._onMessage = onMessage;
+export default class OnMessage implements Reporter {
+  constructor(public readonly gotMessage: Callback) {}
 }
-
-OnMessage.prototype.gotMessage = function () {
-  this._onMessage.apply(this, arguments);
-};
-
-module.exports = OnMessage;
