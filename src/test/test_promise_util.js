@@ -17,8 +17,8 @@
 'use strict';
 
 var expect = require('chai').expect;
+const { setTimeout } = require('timers/promises');
 var promiseUtil = require('../promise_util');
-var delay = require('./util/delay');
 
 describe('Promise utilities', function () {
   describe('finally', function () {
@@ -64,7 +64,7 @@ describe('Promise utilities', function () {
 
           return Promise.race([
             mainPromise, // Should not ever fulfill
-            delay(100),
+            setTimeout(100),
           ]);
         }
       );

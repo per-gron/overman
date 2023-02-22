@@ -19,7 +19,7 @@
 var expect = require('chai').expect;
 var TimeoutTimer = require('../timeout_timer');
 var makeFakeClock = require('./util/fake_clock');
-var delay = require('./util/delay');
+const { setTimeout } = require('timers/promises');
 
 describe('TimeoutTimer', function () {
   it('should require timeout parameter', function () {
@@ -198,7 +198,7 @@ describe('TimeoutTimer', function () {
 
     return Promise.race([
       timerPromise,
-      delay(200), // Wait for a little while to really see that the timer was cancelled
+      setTimeout(200), // Wait for a little while to really see that the timer was cancelled
     ]);
   });
 });

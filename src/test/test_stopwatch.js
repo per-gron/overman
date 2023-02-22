@@ -17,9 +17,9 @@
 'use strict';
 
 var expect = require('chai').expect;
+const { setTimeout } = require('timers/promises');
 var Stopwatch = require('../stopwatch');
 var makeFakeClock = require('./util/fake_clock');
-var delay = require('./util/delay');
 
 describe('Stopwatch', function () {
   var clock;
@@ -64,7 +64,7 @@ describe('Stopwatch', function () {
 
   it('should use wall time as default clock', function () {
     var stopwatch = new Stopwatch();
-    return delay(300).then(function () {
+    return setTimeout(300).then(function () {
       expect(stopwatch.getTimeSinceStart()).to.be.within(290, 400);
     });
   });

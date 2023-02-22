@@ -24,7 +24,7 @@ var through = require('through');
 var OnMessage = require('./util/on_message');
 var streamUtil = require('./util/stream');
 var shouldFail = require('./util/should_fail');
-var delay = require('./util/delay');
+const { setTimeout } = require('timers/promises');
 var TestFailureError = require('../test_failure_error');
 var suiteRunner = require('../suite_runner');
 var promiseUtil = require('../promise_util');
@@ -227,7 +227,7 @@ describe('Suite runner', function () {
 
   it('should not leak things to the runloop', function () {
     return Promise.race([
-      delay(2000).then(function () {
+      setTimeout(2000).then(function () {
         throw new Error('Should be done by now');
       }),
       new Promise(function (resolve, reject) {
@@ -611,7 +611,7 @@ describe('Suite runner', function () {
     it('should let the test set the timeout', function () {
       return Promise.race([
         shouldFail(runTestSuite('suite_timeout_set', [], { timeout: 2000 })),
-        delay(1500).then(function () {
+        setTimeout(1500).then(function () {
           throw new Error('Test should have finished by now');
         }),
       ]);
