@@ -5,7 +5,7 @@
     "incremental": true,
     "module": "commonjs",
     "outDir": "../dist",
-    "target": "es5",
+    "target": "es6",
     "tsBuildInfoFile": ".tsbuildinfo"
   }
 }
