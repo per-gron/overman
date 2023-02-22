@@ -21,7 +21,7 @@ var expect = require('chai').expect;
 var path = require('path');
 var through = require('through');
 var listSuite = require('../list_suite');
-var shouldFail = require('./util/should_fail');
+var shouldFail = require('./util/should_fail').default;
 
 function list(suite, timeout, childProcess) {
   return listSuite.listTestsOfFile(

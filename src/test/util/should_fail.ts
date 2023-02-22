@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-'use strict';
-
-function shouldFail(promise, errorPredicate) {
-  return promise.then(
-    function () {
-      throw new Error('Should fail');
-    },
-    function (error) {
-      if (errorPredicate && !errorPredicate(error)) {
-        throw new Error('Got unexpected error: ' + error);
-      }
+export default async function shouldFail(
+  promise: Promise<unknown>,
+  errorPredicate?: (error: unknown) => boolean
+) {
+  try {
+    await promise;
+  } catch (error) {
+    if (errorPredicate && !errorPredicate(error)) {
+      throw new Error('Got unexpected error: ' + error);
     }
-  );
+    return;
+  }
+  throw new Error('Should fail');
 }
-module.exports = shouldFail;
