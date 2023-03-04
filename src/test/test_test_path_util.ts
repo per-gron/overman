@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-'use strict';
-
-var expect = require('chai').expect;
-var testPathUtil = require('../test_path_util');
+import { expect } from 'chai';
+import { suitePathOf } from '../test_path_util';
 
 describe('Test path util', function () {
   it('should return the parent path of a test path', function () {
-    expect(testPathUtil.suitePathOf({ path: ['a'], file: 'file' })).to.be.deep.equal({
+    expect(suitePathOf({ path: ['a'], file: 'file' })).to.be.deep.equal({
       path: [],
       file: 'file',
     });
   });
 
   it('should return null for root paths', function () {
-    expect(testPathUtil.suitePathOf({ path: [], file: 'file' })).to.be.null;
+    expect(suitePathOf({ path: [], file: 'file' })).to.be.null;
   });
 });
