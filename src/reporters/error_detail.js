@@ -18,7 +18,7 @@
 
 var _ = require('lodash');
 var errorMessageUtil = require('../error_message_util');
-var MessageTracker = require('./message_tracker');
+var MessageTracker = require('./message_tracker').default;
 var PhaseTracker = require('./phase_tracker');
 
 /**

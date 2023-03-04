@@ -21,7 +21,7 @@ var teamcityServiceMessages = require('teamcity-service-messages');
 var Serializer = require('./serializer');
 var SuiteMarker = require('./suite_marker');
 var errorMessageUtil = require('../error_message_util');
-var MessageTracker = require('./message_tracker');
+var MessageTracker = require('./message_tracker').default;
 var PhaseTracker = require('./phase_tracker');
 
 teamcityServiceMessages.stdout = false; // Global yuck :-(

@@ -14,33 +14,29 @@
  * limitations under the License.
  */
 
-'use strict';
-
-var expect = require('chai').expect;
-var MessageTracker = require('../reporters/message_tracker');
+import { expect } from 'chai';
+import { ErrorMessage } from '../reporters/message';
+import MessageTracker from '../reporters/message_tracker';
 
 describe('MessageTracker', function () {
-  var tracker;
-  beforeEach(function () {
-    tracker = new MessageTracker('error');
-  });
+  const tracker = new MessageTracker<ErrorMessage>('error');
 
   it("should return empty array of failues for tests that haven't failed", function () {
-    expect(tracker.getMessages({ test: 'path' })).to.be.deep.equal([]);
+    expect(tracker.getMessages({ file: 'path', path: [] })).to.be.deep.equal([]);
   });
 
   it('should return message for a test', function () {
-    var path = { test: 'path' };
-    var errorMessage = { type: 'error', stack: 'Hey!' };
+    const path = { file: 'path', path: [] };
+    const errorMessage: ErrorMessage = { type: 'error', stack: 'Hey!', in: 'test' };
 
     tracker.gotMessage(path, errorMessage);
     expect(tracker.getMessages(path)).to.be.deep.equal([errorMessage]);
   });
 
   it('should return multiple messages for a test', function () {
-    var path = { test: 'path' };
-    var errorMessage1 = { type: 'error', stack: 'Hey! 1' };
-    var errorMessage2 = { type: 'error', stack: 'Hey! 2' };
+    const path = { file: 'path', path: [] };
+    const errorMessage1: ErrorMessage = { type: 'error', stack: 'Hey! 1', in: 'test' };
+    const errorMessage2: ErrorMessage = { type: 'error', stack: 'Hey! 2', in: 'test' };
 
     tracker.gotMessage(path, errorMessage1);
     tracker.gotMessage(path, errorMessage2);
@@ -48,10 +44,10 @@ describe('MessageTracker', function () {
   });
 
   it('should return separate messages for separate tests', function () {
-    var path1 = { test: 'path1' };
-    var path2 = { test: 'path2' };
-    var errorMessage1 = { type: 'error', stack: 'Hey! 1' };
-    var errorMessage2 = { type: 'error', stack: 'Hey! 2' };
+    const path1 = { file: 'path1', path: [] };
+    const path2 = { file: 'path2', path: [] };
+    const errorMessage1: ErrorMessage = { type: 'error', stack: 'Hey! 1', in: 'test' };
+    const errorMessage2: ErrorMessage = { type: 'error', stack: 'Hey! 2', in: 'test' };
 
     tracker.gotMessage(path1, errorMessage1);
     tracker.gotMessage(path2, errorMessage2);
@@ -59,17 +55,17 @@ describe('MessageTracker', function () {
   });
 
   it('should reset the messages on retry', function () {
-    var path = { test: 'path' };
-    var errorMessage = { type: 'error', stack: 'Hey!' };
+    const path = { file: 'path', path: [] };
+    const errorMessage: ErrorMessage = { type: 'error', stack: 'Hey!', in: 'test' };
 
     tracker.gotMessage(path, errorMessage);
-    tracker.gotMessage(path, { type: 'retry' });
+    tracker.gotMessage(path, { type: 'retry', result: 'failure', unstable: false });
     expect(tracker.getMessages(path)).to.be.empty;
   });
 
   it('should cease to collect messages on timeout', function () {
-    var path = { test: 'path' };
-    var errorMessage = { type: 'error', stack: 'Hey!' };
+    const path = { file: 'path', path: [] };
+    const errorMessage: ErrorMessage = { type: 'error', stack: 'Hey!', in: 'test' };
 
     tracker.gotMessage(path, errorMessage);
     tracker.gotMessage(path, { type: 'timeout' });
@@ -78,13 +74,13 @@ describe('MessageTracker', function () {
   });
 
   it('should collect messages after timeout + retry', function () {
-    var path = { test: 'path' };
-    var errorMessage1 = { type: 'error', stack: 'Hey 1!' };
-    var errorMessage2 = { type: 'error', stack: 'Hey 2!' };
+    const path = { file: 'path', path: [] };
+    const errorMessage1: ErrorMessage = { type: 'error', stack: 'Hey 1!', in: 'test' };
+    const errorMessage2: ErrorMessage = { type: 'error', stack: 'Hey 2!', in: 'test' };
 
     tracker.gotMessage(path, errorMessage1);
     tracker.gotMessage(path, { type: 'timeout' });
-    tracker.gotMessage(path, { type: 'retry' });
+    tracker.gotMessage(path, { type: 'retry', result: 'timeout', unstable: false });
     tracker.gotMessage(path, errorMessage2);
     expect(tracker.getMessages(path)).to.be.deep.equal([errorMessage2]);
   });

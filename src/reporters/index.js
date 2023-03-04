@@ -22,7 +22,7 @@
 exports.Combined = require('./combined').default;
 exports.ErrorDetail = require('./error_detail');
 exports.ErrorDetector = require('./error_detector').default;
-exports.MessageTracker = require('./message_tracker');
+exports.MessageTracker = require('./message_tracker').default;
 exports.Serializer = require('./serializer');
 exports.Spec = require('./spec');
 exports.SuiteMarker = require('./suite_marker');
