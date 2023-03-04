@@ -13,17 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-'use strict';
-
-function makeFakeClock() {
-  var time = Math.floor(Math.random() * 1000);
-  var clock = function () {
-    return new Date(time);
-  };
-  clock.step = function (steps) {
-    time += steps;
-  };
-  return clock;
-}
-module.exports = makeFakeClock;
+export default () => {
+  let time = Math.floor(Math.random() * 1000);
+  return { clock: () => new Date(time), step: (steps: number) => (time += steps) };
+};

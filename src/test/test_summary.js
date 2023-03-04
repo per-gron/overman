@@ -19,7 +19,7 @@
 var through = require('through');
 var chalk = require('chalk');
 var Summary = require('../reporters/summary');
-var makeFakeClock = require('./util/fake_clock');
+var makeFakeClock = require('./util/fake_clock').default;
 var streamUtil = require('./util/stream');
 
 function performActionsAndCheckOutput(actions, output, options) {
@@ -49,8 +49,8 @@ describe('Summary reporter', function () {
   it('should always report passing tests, even when no tests pass', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
-        summary.done(clock());
+        summary.registerTests([], {}, clock.clock());
+        summary.done(clock.clock());
       },
       ['', /0 passing/, '']
     );
@@ -59,9 +59,9 @@ describe('Summary reporter', function () {
   it('should report number of passed tests', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'success' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /1 passing/, '']
     );
@@ -70,9 +70,9 @@ describe('Summary reporter', function () {
   it('should report total time it took for tests to run', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         clock.step(4000);
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /(4s)/, '']
     );
@@ -81,9 +81,9 @@ describe('Summary reporter', function () {
   it('should report number of skipped tests', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'skipped' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /0 passing/, /1 skipped/, '']
     );
@@ -92,9 +92,9 @@ describe('Summary reporter', function () {
   it('should report number of aborted tests', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'aborted' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /0 passing/, /1 aborted/, '']
     );
@@ -103,9 +103,9 @@ describe('Summary reporter', function () {
   it('should report number of failing tests', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'failure' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /0 passing/, /1 failing/, '']
     );
@@ -114,9 +114,9 @@ describe('Summary reporter', function () {
   it('should report number of tests that time out', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'timeout' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /0 passing/, /1 failing/, '']
     );
@@ -125,11 +125,11 @@ describe('Summary reporter', function () {
   it('should report number of skipped, timed out and number of failing tests', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'failure' });
         summary.gotMessage(null, { type: 'finish', result: 'skipped' });
         summary.gotMessage(null, { type: 'finish', result: 'timeout' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /0 passing/, /1 skipped/, /2 failing/, '']
     );
@@ -138,12 +138,12 @@ describe('Summary reporter', function () {
   it('should report number of skipped, aborted, timed out and number of failing tests', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'failure' });
         summary.gotMessage(null, { type: 'finish', result: 'skipped' });
         summary.gotMessage(null, { type: 'finish', result: 'aborted' });
         summary.gotMessage(null, { type: 'finish', result: 'timeout' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /0 passing/, /1 skipped/, /2 failing/, /1 aborted/, '']
     );
@@ -152,8 +152,8 @@ describe('Summary reporter', function () {
   it('should color the passing tests text', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
-        summary.done(clock());
+        summary.registerTests([], {}, clock.clock());
+        summary.done(clock.clock());
       },
       ['', new RegExp('\u001b\\[32m0 passing\u001b\\[39m'), ''],
       { dontStrip: true }
@@ -163,8 +163,8 @@ describe('Summary reporter', function () {
   it('should color the test time text', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
-        summary.done(clock());
+        summary.registerTests([], {}, clock.clock());
+        summary.done(clock.clock());
       },
       ['', new RegExp('\u001b\\[90m\\(0s\\)\u001b\\[39m'), ''],
       { dontStrip: true }
@@ -174,9 +174,9 @@ describe('Summary reporter', function () {
   it('should color the skipped tests text', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'skipped' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /passing/, new RegExp('\u001b\\[36m1 skipped\u001b\\[39m'), ''],
       { dontStrip: true }
@@ -186,9 +186,9 @@ describe('Summary reporter', function () {
   it('should color the aborted tests text', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'aborted' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /passing/, new RegExp('\u001b\\[33m1 aborted\u001b\\[39m'), ''],
       { dontStrip: true }
@@ -198,9 +198,9 @@ describe('Summary reporter', function () {
   it('should color the failing tests text', function () {
     return performActionsAndCheckOutput(
       function (summary) {
-        summary.registerTests([], {}, clock());
+        summary.registerTests([], {}, clock.clock());
         summary.gotMessage(null, { type: 'finish', result: 'failure' });
-        summary.done(clock());
+        summary.done(clock.clock());
       },
       ['', /passing/, new RegExp('\u001b\\[31m1 failing\u001b\\[39m'), ''],
       { dontStrip: true }

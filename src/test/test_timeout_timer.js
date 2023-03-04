@@ -18,7 +18,7 @@
 
 var expect = require('chai').expect;
 var TimeoutTimer = require('../timeout_timer');
-var makeFakeClock = require('./util/fake_clock');
+var makeFakeClock = require('./util/fake_clock').default;
 const { setTimeout } = require('timers/promises');
 
 describe('TimeoutTimer', function () {
@@ -96,7 +96,7 @@ describe('TimeoutTimer', function () {
     var clock = makeFakeClock();
 
     var timer = new TimeoutTimer(123, {
-      clock: clock,
+      clock: clock.clock,
       setTimeout: function (callback, time) {
         if (!gotInitialTimeoutCall) {
           gotInitialTimeoutCall = true;

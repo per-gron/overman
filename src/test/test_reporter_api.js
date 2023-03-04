@@ -27,7 +27,7 @@ var expect = require('chai').expect;
 var path = require('path');
 var OnMessage = require('./util/on_message');
 var shouldFail = require('./util/should_fail').default;
-var makeFakeClock = require('./util/fake_clock');
+var makeFakeClock = require('./util/fake_clock').default;
 var TestFailureError = require('../test_failure_error');
 var suiteRunner = require('../suite_runner');
 
@@ -203,7 +203,7 @@ describe('Reporter API', async function () {
   });
 
   it('should invoke registerTests with current time', function () {
-    var clock = makeFakeClock();
+    var { clock } = makeFakeClock();
     let deferredResolve;
     const deferredPromise = new Promise((resolve) => (deferredResolve = resolve));
 
@@ -221,13 +221,13 @@ describe('Reporter API', async function () {
   });
 
   it('should emit messages with current time', function () {
-    var clock = makeFakeClock();
+    var { clock, step } = makeFakeClock();
 
     return ensureAllMessages(
       'suite_various_tests',
       function (testPath, message, time) {
         expect(time).to.be.deep.equal(clock());
-        clock.step(1);
+        step(1);
         return true;
       },
       { clock: clock, shouldFail: true }
@@ -658,12 +658,12 @@ describe('Reporter API', async function () {
   it('should emit done messages with the current time as parameter', function () {
     let deferredResolve;
     const deferredPromise = new Promise((resolve) => (deferredResolve = resolve));
-    var clock = makeFakeClock();
+    var { clock, step } = makeFakeClock();
     var suitePromise = runTestSuite(
       'suite_single_successful_test',
       {
         gotMessage: function () {
-          clock.step(1); // Step the clock just to be sure that we don't get a stale timestamp
+          step(1); // Step the clock just to be sure that we don't get a stale timestamp
         },
         done: function (time) {
           expect(time).to.be.deep.equal(clock());

@@ -18,7 +18,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
-var makeFakeClock = require('./util/fake_clock');
+var makeFakeClock = require('./util/fake_clock').default;
 var OnMessage = require('./util/on_message');
 var Timer = require('../reporters/timer');
 
@@ -42,12 +42,12 @@ describe('Timer reporter', function () {
         reporter[message] = function (arg1, arg2, arg3) {
           expect(arg1).to.be.equal('arg1');
           expect(arg2).to.be.equal('arg2');
-          expect(arg3).to.be.deep.equal(clock());
+          expect(arg3).to.be.deep.equal(clock.clock());
           done();
         };
 
         var timer = new Timer(reporter);
-        timer[message]('arg1', 'arg2', clock());
+        timer[message]('arg1', 'arg2', clock.clock());
       });
     });
   });
@@ -61,13 +61,13 @@ describe('Timer reporter', function () {
         }
       });
 
-      timer.gotMessage('test', { type: 'start' }, clock());
+      timer.gotMessage('test', { type: 'start' }, clock.clock());
       clock.step(10);
-      timer.gotMessage('test', { type: 'startedTest' }, clock());
+      timer.gotMessage('test', { type: 'startedTest' }, clock.clock());
       clock.step(100);
-      timer.gotMessage('test', { type: 'startedAfterHooks' }, clock());
+      timer.gotMessage('test', { type: 'startedAfterHooks' }, clock.clock());
       clock.step(1000);
-      timer.gotMessage('test', { type: 'finish' }, clock());
+      timer.gotMessage('test', { type: 'finish' }, clock.clock());
     });
 
     it('should not crash when receiving mismatched finish message', function (done) {
@@ -77,7 +77,7 @@ describe('Timer reporter', function () {
         }
       });
 
-      timer.gotMessage('test', { type: 'finish' }, clock());
+      timer.gotMessage('test', { type: 'finish' }, clock.clock());
     });
   });
 
@@ -95,14 +95,14 @@ describe('Timer reporter', function () {
             }
           });
 
-          timer.gotMessage('test', { type: 'start' }, clock());
+          timer.gotMessage('test', { type: 'start' }, clock.clock());
           if (shouldEmitSetSlowThresholdMessage) {
-            timer.gotMessage('test', { type: 'setSlowThreshold', value: 2000 }, clock());
+            timer.gotMessage('test', { type: 'setSlowThreshold', value: 2000 }, clock.clock());
           }
-          timer.gotMessage('test', { type: 'startedTest' }, clock());
+          timer.gotMessage('test', { type: 'startedTest' }, clock.clock());
           clock.step(shouldEmitSetSlowThresholdMessage ? 999 : 499);
-          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock());
-          timer.gotMessage('test', { type: 'finish' }, clock());
+          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock.clock());
+          timer.gotMessage('test', { type: 'finish' }, clock.clock());
         }
       );
 
@@ -118,14 +118,14 @@ describe('Timer reporter', function () {
             }
           });
 
-          timer.gotMessage('test', { type: 'start' }, clock());
-          timer.gotMessage('test', { type: 'startedTest' }, clock());
+          timer.gotMessage('test', { type: 'start' }, clock.clock());
+          timer.gotMessage('test', { type: 'startedTest' }, clock.clock());
           if (shouldEmitSetSlowThresholdMessage) {
-            timer.gotMessage('test', { type: 'setSlowThreshold', value: 500 }, clock());
+            timer.gotMessage('test', { type: 'setSlowThreshold', value: 500 }, clock.clock());
           }
           clock.step(shouldEmitSetSlowThresholdMessage ? 250 : 500);
-          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock());
-          timer.gotMessage('test', { type: 'finish' }, clock());
+          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock.clock());
+          timer.gotMessage('test', { type: 'finish' }, clock.clock());
         }
       );
 
@@ -141,14 +141,14 @@ describe('Timer reporter', function () {
             }
           });
 
-          timer.gotMessage('test', { type: 'start' }, clock());
+          timer.gotMessage('test', { type: 'start' }, clock.clock());
           if (shouldEmitSetSlowThresholdMessage) {
-            timer.gotMessage('test', { type: 'setSlowThreshold', value: 2000 }, clock());
+            timer.gotMessage('test', { type: 'setSlowThreshold', value: 2000 }, clock.clock());
           }
-          timer.gotMessage('test', { type: 'startedTest' }, clock());
+          timer.gotMessage('test', { type: 'startedTest' }, clock.clock());
           clock.step(shouldEmitSetSlowThresholdMessage ? 2000 : 1000);
-          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock());
-          timer.gotMessage('test', { type: 'finish' }, clock());
+          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock.clock());
+          timer.gotMessage('test', { type: 'finish' }, clock.clock());
         }
       );
     });

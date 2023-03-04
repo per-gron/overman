@@ -19,14 +19,14 @@
 var expect = require('chai').expect;
 const { setTimeout } = require('timers/promises');
 var Stopwatch = require('../stopwatch');
-var makeFakeClock = require('./util/fake_clock');
+var makeFakeClock = require('./util/fake_clock').default;
 
 describe('Stopwatch', function () {
   var clock;
   var stopwatch;
   beforeEach(function () {
     clock = makeFakeClock();
-    stopwatch = new Stopwatch(clock);
+    stopwatch = new Stopwatch(clock.clock);
   });
 
   it('should report time since start', function () {
