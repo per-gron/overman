@@ -26,6 +26,6 @@ exports.MessageTracker = require('./message_tracker').default;
 exports.Serializer = require('./serializer').default;
 exports.Spec = require('./spec');
 exports.SuiteMarker = require('./suite_marker').default;
-exports.Summary = require('./summary');
+exports.Summary = require('./summary').default;
 exports.Teamcity = require('./teamcity');
 exports.Timer = require('./timer');
