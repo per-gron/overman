@@ -18,8 +18,8 @@
 
 var Spec = require('../../dist/reporters/spec');
 
-describe('Spec reporter', function() {
-  it('should print to stdout by default', function() {
+describe('Spec reporter', function () {
+  it('should print to stdout by default', function () {
     var spec = new Spec();
 
     var path = { file: 'file', path: ['suite_name', 'test'] };

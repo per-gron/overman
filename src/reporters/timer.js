@@ -28,29 +28,29 @@ var Combined = require('./combined');
 function Timer(reporter) {
   Combined.call(this, [reporter]);
   this._reporter = reporter;
-  this._defaultSlowThreshold = null;  // Is set in registerTests
-  this._slowThresholdOverrides = {};  // Hash from test path JSON to overriden slow threshold
-  this._testStartTimes = {};  // Hash from test path JSON to test start times
-  this._testDoneTimes = {};  // Hash from test path JSON to test done times
+  this._defaultSlowThreshold = null; // Is set in registerTests
+  this._slowThresholdOverrides = {}; // Hash from test path JSON to overriden slow threshold
+  this._testStartTimes = {}; // Hash from test path JSON to test start times
+  this._testDoneTimes = {}; // Hash from test path JSON to test done times
 }
 Timer.prototype = Object.create(Combined.prototype);
 
-Timer.prototype._getSlowThresholdForTest = function(key) {
-  return key in this._slowThresholdOverrides ?
-    this._slowThresholdOverrides[key] :
-    this._defaultSlowThreshold;
+Timer.prototype._getSlowThresholdForTest = function (key) {
+  return key in this._slowThresholdOverrides
+    ? this._slowThresholdOverrides[key]
+    : this._defaultSlowThreshold;
 };
 
-Timer.prototype._setSlowThresholdForTest = function(key, value) {
+Timer.prototype._setSlowThresholdForTest = function (key, value) {
   this._slowThresholdOverrides[key] = value;
 };
 
-Timer.prototype.registerTests = function(tests, options) {
+Timer.prototype.registerTests = function (tests, options) {
   Combined.prototype.registerTests.apply(this, arguments);
   this._defaultSlowThreshold = options.slowThreshold;
 };
 
-Timer.prototype.gotMessage = function(testPath, message, time) {
+Timer.prototype.gotMessage = function (testPath, message, time) {
   var key = JSON.stringify(testPath);
   if (message.type === 'startedTest') {
     this._testStartTimes[key] = time.getTime();

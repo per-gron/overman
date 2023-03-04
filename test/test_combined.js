@@ -20,45 +20,45 @@ var _ = require('lodash');
 var expect = require('chai').expect;
 var Combined = require('../dist/reporters/combined');
 
-describe('Combined reporter', function() {
-  ['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function(message) {
-    describe(message, function() {
-      it('should not forward ' + message + ' calls when it has no reporters', function() {
-        (new Combined([]))[message]('a');
+describe('Combined reporter', function () {
+  ['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function (message) {
+    describe(message, function () {
+      it('should not forward ' + message + ' calls when it has no reporters', function () {
+        new Combined([])[message]('a');
       });
 
-      it('should forward ' + message + 'calls', function(done) {
+      it('should forward ' + message + 'calls', function (done) {
         var reporter = {};
-        reporter[message] = function() {
+        reporter[message] = function () {
           expect(_.toArray(arguments)).to.be.deep.equal([1, 2, 3]);
           done();
         };
 
-        (new Combined([reporter]))[message](1, 2, 3);
+        new Combined([reporter])[message](1, 2, 3);
       });
 
-      it('should not forward ' + message + 'calls when reporter doesn\'t implement it', function() {
-        (new Combined([{}]))[message]();
+      it('should not forward ' + message + "calls when reporter doesn't implement it", function () {
+        new Combined([{}])[message]();
       });
 
-      it('should forward ' + message + 'calls to multiple reporters', function() {
+      it('should forward ' + message + 'calls to multiple reporters', function () {
         var reporter1 = {};
-        var reporter1Promise = new Promise(function(resolve) {
-          reporter1[message] = function() {
+        var reporter1Promise = new Promise(function (resolve) {
+          reporter1[message] = function () {
             expect(_.toArray(arguments)).to.be.deep.equal([1, 2, 3]);
             resolve();
           };
         });
 
         var reporter2 = {};
-        var reporter2Promise = new Promise(function(resolve) {
-          reporter2[message] = function() {
+        var reporter2Promise = new Promise(function (resolve) {
+          reporter2[message] = function () {
             expect(_.toArray(arguments)).to.be.deep.equal([1, 2, 3]);
             resolve();
           };
         });
 
-        (new Combined([reporter1, reporter2]))[message](1, 2, 3);
+        new Combined([reporter1, reporter2])[message](1, 2, 3);
 
         return Promise.all([reporter1Promise, reporter2Promise]);
       });

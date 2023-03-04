@@ -28,7 +28,7 @@ function setIfDefined(object, key, value) {
 function newSuite(skipped, only, unstable, name) {
   var suite = {
     type: 'suite',
-    contents: []
+    contents: [],
   };
 
   setIfDefined(suite, 'only', only);
@@ -45,18 +45,17 @@ function skipFirstNLines(string, n) {
 
 var moduleCache = {};
 
-
 function SuiteContext(parentContext) {
   this._parentContext = parentContext;
   this._parameters = {};
 }
 
-SuiteContext.prototype.getParameters = function() {
+SuiteContext.prototype.getParameters = function () {
   return this._parameters;
 };
 
-['timeout', 'slow'].forEach(function(parameter) {
-  SuiteContext.prototype[parameter] = function(newValue) {
+['timeout', 'slow'].forEach(function (parameter) {
+  SuiteContext.prototype[parameter] = function (newValue) {
     if (_.isUndefined(newValue)) {
       if (parameter in this._parameters) {
         return this._parameters[parameter];
@@ -71,16 +70,18 @@ SuiteContext.prototype.getParameters = function() {
   };
 });
 
-
 function Context(runtimeContext) {
   this._runtimeContext = runtimeContext;
   this.currentTest = this;
-  this.currentTest.title = (runtimeContext && runtimeContext.getTitle)? runtimeContext.getTitle().slice(-1)[0]: '';
-  this.fullTitle = function() { return (runtimeContext && runtimeContext.getTitle)? runtimeContext.getTitle().join(':'): ''; };
-  this.attributes = (runtimeContext && runtimeContext.attributes);
+  this.currentTest.title =
+    runtimeContext && runtimeContext.getTitle ? runtimeContext.getTitle().slice(-1)[0] : '';
+  this.fullTitle = function () {
+    return runtimeContext && runtimeContext.getTitle ? runtimeContext.getTitle().join(':') : '';
+  };
+  this.attributes = runtimeContext && runtimeContext.attributes;
 }
 
-Context.prototype.timeout = function(newTimeout) {
+Context.prototype.timeout = function (newTimeout) {
   if (_.isUndefined(newTimeout)) {
     return this._runtimeContext.getTimeout();
   } else {
@@ -88,7 +89,7 @@ Context.prototype.timeout = function(newTimeout) {
   }
 };
 
-Context.prototype.slow = function(newSlowThreshold) {
+Context.prototype.slow = function (newSlowThreshold) {
   if (_.isUndefined(newSlowThreshold)) {
     return this._runtimeContext.getSlowThreshold();
   } else {
@@ -96,24 +97,23 @@ Context.prototype.slow = function(newSlowThreshold) {
   }
 };
 
-Context.prototype.breadcrumb = function(messageOrError) {
+Context.prototype.breadcrumb = function (messageOrError) {
   var message, trace;
   if (messageOrError instanceof Error) {
     message = messageOrError.message;
     trace = skipFirstNLines(messageOrError.stack, 1);
   } else {
     message = messageOrError;
-    trace = skipFirstNLines((new Error()).stack, 2);
+    trace = skipFirstNLines(new Error().stack, 2);
   }
   this._runtimeContext.leaveBreadcrumb(message, trace);
 };
 
-Context.prototype.debugInfo = function(name, value) {
+Context.prototype.debugInfo = function (name, value) {
   this._runtimeContext.emitDebugInfo(name, value);
 };
 
-
-module.exports = function(parameter, file, runtimeContext) {
+module.exports = function (parameter, file, runtimeContext) {
   var absoluteFile = path.resolve(file);
 
   if (absoluteFile in moduleCache) {
@@ -127,7 +127,7 @@ module.exports = function(parameter, file, runtimeContext) {
   var suite = newSuite();
 
   function hookHandler(type) {
-    return function() {
+    return function () {
       var args = _.toArray(arguments);
       var name;
       var fn;
@@ -156,7 +156,11 @@ module.exports = function(parameter, file, runtimeContext) {
   }
 
   function testForDuplicate(type, name) {
-    if (_.find(suite.contents, function(test) { return test.name === name; })) {
+    if (
+      _.find(suite.contents, function (test) {
+        return test.name === name;
+      })
+    ) {
       throw new Error('Redefining ' + type + ' "' + name + '"');
     }
   }
@@ -219,7 +223,7 @@ module.exports = function(parameter, file, runtimeContext) {
     }
     var test = {
       type: 'test',
-      name: name
+      name: name,
     };
 
     setIfDefined(test, 'skipped', fn ? options.skipped : true);

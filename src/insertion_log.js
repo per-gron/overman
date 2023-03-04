@@ -28,34 +28,34 @@
  */
 function InsertionLog(stream) {
   this._stream = stream;
-  this._messages = [];  // Array of { id: [message id], contents: [message contents] }
+  this._messages = []; // Array of { id: [message id], contents: [message contents] }
 }
 
-InsertionLog.prototype._cursorUp = function(n) {
+InsertionLog.prototype._cursorUp = function (n) {
   if (n > 0) {
     this._stream.write('\u001b[' + n + 'A');
   }
 };
 
-InsertionLog.prototype._deleteLineAndGoToBeginning = function() {
+InsertionLog.prototype._deleteLineAndGoToBeginning = function () {
   this._stream.write('\u001b[2K' + '\u001b[0G');
 };
 
-InsertionLog.prototype._getLastMessages = function(numMessages) {
+InsertionLog.prototype._getLastMessages = function (numMessages) {
   return this._messages.slice(this._messages.length - numMessages);
 };
 
-InsertionLog.prototype._rewindMessages = function(numMessages) {
-  var numLines = this._getLastMessages(numMessages).reduce(function(value, message) {
+InsertionLog.prototype._rewindMessages = function (numMessages) {
+  var numLines = this._getLastMessages(numMessages).reduce(function (value, message) {
     return value + 1 + (message.contents.match(/\n/g) || []).length;
   }, 0);
   this._cursorUp(numLines);
 };
 
-InsertionLog.prototype._printMessages = function(numMessages) {
+InsertionLog.prototype._printMessages = function (numMessages) {
   var self = this;
-  this._getLastMessages(numMessages).forEach(function(message) {
-    message.contents.split(/\n/).forEach(function(line) {
+  this._getLastMessages(numMessages).forEach(function (message) {
+    message.contents.split(/\n/).forEach(function (line) {
       // We need to make sure to clear every line that we write to, otherwise
       // there may be traces left of what was there before.
       self._deleteLineAndGoToBeginning();
@@ -64,8 +64,8 @@ InsertionLog.prototype._printMessages = function(numMessages) {
   });
 };
 
-InsertionLog.prototype._indexOfMessage = function(messageId) {
-  var idx = this._messages.reduce(function(foundIdx, message, idx) {
+InsertionLog.prototype._indexOfMessage = function (messageId) {
+  var idx = this._messages.reduce(function (foundIdx, message, idx) {
     return message.id === messageId ? idx : foundIdx;
   }, null);
 
@@ -85,12 +85,15 @@ InsertionLog.prototype._indexOfMessage = function(messageId) {
  *     write. If you want to be able to overwrite it or insert messages before
  *     or after this message you need to assign an id to it.
  */
-InsertionLog.prototype.log = function(message, messageId) {
-  this._messages.push({ id: typeof messageId === 'undefined' ? null : messageId, contents: message });
+InsertionLog.prototype.log = function (message, messageId) {
+  this._messages.push({
+    id: typeof messageId === 'undefined' ? null : messageId,
+    contents: message,
+  });
   this._printMessages(1);
 };
 
-InsertionLog.prototype._logAt = function(messageIdx, message, messageId) {
+InsertionLog.prototype._logAt = function (messageIdx, message, messageId) {
   this._messages = [].concat(
     this._messages.slice(0, messageIdx),
     [{ contents: message, id: messageId }],
@@ -113,7 +116,7 @@ InsertionLog.prototype._logAt = function(messageIdx, message, messageId) {
  *     write. If you want to be able to overwrite it or insert messages before
  *     or after this message you need to assign an id to it.
  */
-InsertionLog.prototype.logAfter = function(afterMessageId, message, messageId) {
+InsertionLog.prototype.logAfter = function (afterMessageId, message, messageId) {
   var messageIdx = this._indexOfMessage(afterMessageId);
   this._logAt(messageIdx + 1, message, messageId);
 };
@@ -129,7 +132,7 @@ InsertionLog.prototype.logAfter = function(afterMessageId, message, messageId) {
  *     write. If you want to be able to overwrite it or insert messages before
  *     or after this message you need to assign an id to it.
  */
-InsertionLog.prototype.logBefore = function(beforeMessageId, message, messageId) {
+InsertionLog.prototype.logBefore = function (beforeMessageId, message, messageId) {
   var messageIdx = this._indexOfMessage(beforeMessageId);
   this._logAt(messageIdx, message, messageId);
 };
@@ -145,7 +148,7 @@ InsertionLog.prototype.logBefore = function(beforeMessageId, message, messageId)
  * @param message String. The message to insert (should not contain a newline
  *     char)
  */
-InsertionLog.prototype.replace = function(replacedMessageId, message) {
+InsertionLog.prototype.replace = function (replacedMessageId, message) {
   var messageIdx = this._indexOfMessage(replacedMessageId);
   var messagesBack = this._messages.length - messageIdx;
   this._rewindMessages(messagesBack);

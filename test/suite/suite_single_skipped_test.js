@@ -16,5 +16,4 @@
 
 'use strict';
 
-it.skip('should be skipped', function() {
-});
+it.skip('should be skipped', function () {});

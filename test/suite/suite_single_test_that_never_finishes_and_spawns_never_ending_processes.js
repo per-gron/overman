@@ -18,10 +18,13 @@
 
 var childProcess = require('child_process');
 
-it('should spawn child processes and never finish', function() {
-  var child = childProcess.fork(__dirname + '/../util/never_ending_program_that_may_fork_subprocess.js', ['fork']);
-  child.on('message', function(data) {
+it('should spawn child processes and never finish', function () {
+  var child = childProcess.fork(
+    __dirname + '/../util/never_ending_program_that_may_fork_subprocess.js',
+    ['fork']
+  );
+  child.on('message', function (data) {
     process.send(data);
   });
-  return new Promise(function() {});
+  return new Promise(function () {});
 });

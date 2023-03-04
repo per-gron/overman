@@ -3,10 +3,8 @@
     "module": "commonjs",
     "outDir": "../build",
     "allowJs": true,
-    "target": "es5",
+    "target": "es5"
   },
   "include": ["./test_*"],
-  "references": [
-    { "path": "../src" }
-  ]
+  "references": [{ "path": "../src" }]
 }

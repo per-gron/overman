@@ -16,34 +16,30 @@
 
 'use strict';
 
-it('should be awesome', function() {
-});
+it('should be awesome', function () {});
 
-describe('Something', function() {
-  before(function beforeHook() {
-  });
+describe('Something', function () {
+  before(function beforeHook() {});
 
-  it('should work', function() {
+  it('should work', function () {
     console.log('should_work');
   });
 
-  it('should really work', function() {
+  it('should really work', function () {
     console.log('should_really_work');
   });
 
-  describe('#great', function() {
-    it('should do its thing', function() {
-    });
+  describe('#great', function () {
+    it('should do its thing', function () {});
 
-    it('should fail', function() {
+    it('should fail', function () {
       throw new Error('No!');
     });
 
-    it('should never finish', function() {
-      return new Promise(function() {});
+    it('should never finish', function () {
+      return new Promise(function () {});
     });
 
-    after(function afterHook() {
-    });
+    after(function afterHook() {});
   });
 });

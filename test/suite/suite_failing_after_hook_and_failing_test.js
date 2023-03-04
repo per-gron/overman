@@ -16,10 +16,10 @@
 
 'use strict';
 
-it('should succeed', function() {
+it('should succeed', function () {
   throw new Error('test fail');
 });
 
-after('after hook', function() {
+after('after hook', function () {
   throw new Error('after fail');
 });

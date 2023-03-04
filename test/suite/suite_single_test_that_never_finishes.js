@@ -16,6 +16,6 @@
 
 'use strict';
 
-it('should never finish', function() {
-  return new Promise(function() {});
+it('should never finish', function () {
+  return new Promise(function () {});
 });

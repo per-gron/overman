@@ -28,45 +28,53 @@ var PhaseTracker = require('./phase_tracker');
  */
 function ErrorDetail(stream) {
   this._stream = stream;
-  this._failures = [];  // Array of { test: [testPath], message: [finish message] }
+  this._failures = []; // Array of { test: [testPath], message: [finish message] }
   this._errorTracker = new MessageTracker('error');
   this._breadcrumbTracker = new MessageTracker('breadcrumb');
   this._phaseTracker = new PhaseTracker();
 }
 
-ErrorDetail.prototype.registrationFailed = function(error) {
+ErrorDetail.prototype.registrationFailed = function (error) {
   this._stream.write(errorMessageUtil.prettyError(error));
 };
 
-ErrorDetail.prototype.gotMessage = function(testPath, message) {
+ErrorDetail.prototype.gotMessage = function (testPath, message) {
   this._phaseTracker.gotMessage(testPath, message);
   this._errorTracker.gotMessage(testPath, message);
   this._breadcrumbTracker.gotMessage(testPath, message);
 
-  if (message.type === 'finish' && message.result && !message.result.match(/^(success)|(skipped)|(aborted)$/)) {
+  if (
+    message.type === 'finish' &&
+    message.result &&
+    !message.result.match(/^(success)|(skipped)|(aborted)$/)
+  ) {
     this._failures.push({
       test: testPath,
-      message: message
+      message: message,
     });
   }
 };
 
-ErrorDetail.prototype.done = function() {
+ErrorDetail.prototype.done = function () {
   var self = this;
 
-  this._failures.forEach(function(failure, idx) {
+  this._failures.forEach(function (failure, idx) {
     var errorNumber = idx + 1;
     self._stream.write('  ' + errorNumber + ') ' + failure.test.path.join(' ') + ':\n');
     var indentation = errorNumber.toString().length + 4;
 
     var errors = self._errorTracker.getMessages(failure.test);
-    errors.forEach(function(error) {
-      self._stream.write(errorMessageUtil.indent(errorMessageUtil.prettyError(error), indentation) + '\n');
+    errors.forEach(function (error) {
+      self._stream.write(
+        errorMessageUtil.indent(errorMessageUtil.prettyError(error), indentation) + '\n'
+      );
     });
 
     if (failure.message.result === 'timeout') {
       var lastPhase = self._phaseTracker.getLastPhase(failure.test);
-      self._stream.write(errorMessageUtil.indent(errorMessageUtil.prettyTimeout(lastPhase), indentation));
+      self._stream.write(
+        errorMessageUtil.indent(errorMessageUtil.prettyTimeout(lastPhase), indentation)
+      );
       self._stream.write('\n');
     }
 
@@ -76,9 +84,9 @@ ErrorDetail.prototype.done = function() {
     // make after hooks and so on to run, and in that case it's quite confusing
     // to show the last breadcrumb of a test. That breadcrumb is likely
     // something that happened *after* the error that caused the test to fail.
-    var shouldShowBreadcrumb = (
+    var shouldShowBreadcrumb =
       failure.message.result === 'timeout' ||
-      errors.length !== 0 && _.last(errors).in === 'uncaught');
+      (errors.length !== 0 && _.last(errors).in === 'uncaught');
 
     var breadcrumb = _.last(self._breadcrumbTracker.getMessages(failure.test));
     if (breadcrumb && shouldShowBreadcrumb) {

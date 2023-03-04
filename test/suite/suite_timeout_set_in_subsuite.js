@@ -18,27 +18,27 @@
 
 var expect = require('chai').expect;
 
-describe('A suite', function() {
+describe('A suite', function () {
   this.timeout(1234);
 
-  it('should have the timeout set', function() {
+  it('should have the timeout set', function () {
     expect(this.timeout()).to.be.equal(1234);
   });
 
-  describe('A subsuite', function() {
+  describe('A subsuite', function () {
     this.timeout(2345);
 
-    it('should have the timeout set', function() {
+    it('should have the timeout set', function () {
       expect(this.timeout()).to.be.equal(2345);
     });
   });
 
-  it('should not have the subsuite\'s timeout set', function() {
+  it("should not have the subsuite's timeout set", function () {
     expect(this.timeout()).to.be.equal(1234);
   });
 });
 
-it('should not have the timeout overridden', function() {
+it('should not have the timeout overridden', function () {
   expect(this.timeout()).to.not.be.equal(1234);
   expect(this.timeout()).to.not.be.equal(2345);
 });

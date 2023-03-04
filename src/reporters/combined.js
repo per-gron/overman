@@ -24,16 +24,16 @@ function Combined(reporters) {
   this._reporters = reporters;
 }
 
-Combined.prototype._forwardCall = function(message, args) {
-  this._reporters.forEach(function(reporter) {
+Combined.prototype._forwardCall = function (message, args) {
+  this._reporters.forEach(function (reporter) {
     if (reporter[message]) {
       reporter[message].apply(reporter, args);
     }
   });
 };
 
-['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function(message) {
-  Combined.prototype[message] = function() {
+['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function (message) {
+  Combined.prototype[message] = function () {
     this._forwardCall(message, arguments);
   };
 });

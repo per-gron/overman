@@ -16,7 +16,7 @@
 
 'use strict';
 
-it('should set the timeout', function() {
+it('should set the timeout', function () {
   this.timeout(10);
-  return new Promise(function() {});  // Never complete the test
+  return new Promise(function () {}); // Never complete the test
 });

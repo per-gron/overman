@@ -31,15 +31,15 @@ function Timestamper(reporter, clock) {
   this._clock = clock;
 }
 
-Timestamper.prototype._forwardCall = function(message, args) {
+Timestamper.prototype._forwardCall = function (message, args) {
   var reporter = this._reporter;
   if (reporter[message]) {
     reporter[message].apply(reporter, args.concat([this._clock()]));
   }
 };
 
-['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function(message) {
-  Timestamper.prototype[message] = function() {
+['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function (message) {
+  Timestamper.prototype[message] = function () {
     this._forwardCall(message, _.toArray(arguments));
   };
 });

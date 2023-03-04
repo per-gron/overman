@@ -17,13 +17,15 @@
 'use strict';
 
 function shouldFail(promise, errorPredicate) {
-  return promise
-      .then(function() {
-        throw new Error('Should fail');
-      }, function(error) {
-        if (errorPredicate && !errorPredicate(error)) {
-          throw new Error('Got unexpected error: ' + error);
-        }
-      });
+  return promise.then(
+    function () {
+      throw new Error('Should fail');
+    },
+    function (error) {
+      if (errorPredicate && !errorPredicate(error)) {
+        throw new Error('Got unexpected error: ' + error);
+      }
+    }
+  );
 }
 module.exports = shouldFail;

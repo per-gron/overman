@@ -25,7 +25,7 @@ function suitePathOf(testPath) {
   } else {
     return {
       file: testPath.file,
-      path: testPath.path.slice(0, -1)
+      path: testPath.path.slice(0, -1),
     };
   }
 }

@@ -16,9 +16,9 @@
 
 'use strict';
 
-describe('A suite', function() {
+describe('A suite', function () {
   this.timeout(1234);
-  it('should print its timeout', function() {
+  it('should print its timeout', function () {
     console.log(this.timeout());
   });
 });

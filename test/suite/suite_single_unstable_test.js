@@ -16,5 +16,4 @@
 
 'use strict';
 
-it.unstable('should be run if unstable', function() {
-});
+it.unstable('should be run if unstable', function () {});

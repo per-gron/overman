@@ -18,10 +18,10 @@
 
 var gotTimeout = null;
 
-before(function() {
+before(function () {
   gotTimeout = this.timeout();
 });
 
-it('should do nothing', function() {
+it('should do nothing', function () {
   return gotTimeout;
 });

@@ -21,80 +21,86 @@ var TimeoutTimer = require('../dist/timeout_timer');
 var makeFakeClock = require('./util/fake_clock');
 var delay = require('./util/delay');
 
-describe('TimeoutTimer', function() {
-  it('should require timeout parameter', function() {
-    expect(function() {
+describe('TimeoutTimer', function () {
+  it('should require timeout parameter', function () {
+    expect(function () {
       new TimeoutTimer();
     }).to.throw('missing timeout parameter');
   });
 
-  it('should require numeric timeout parameter', function() {
-    expect(function() {
+  it('should require numeric timeout parameter', function () {
+    expect(function () {
       new TimeoutTimer('123');
     }).to.throw('missing timeout parameter');
   });
 
-  it('should support being created without options parameter', function() {
-    new TimeoutTimer(100, { setTimeout: function() {} });
+  it('should support being created without options parameter', function () {
+    new TimeoutTimer(100, { setTimeout: function () {} });
   });
 
-  it('should emit "timeout" event when time is up', function(done) {
+  it('should emit "timeout" event when time is up', function (done) {
     var timeoutFn;
     var timer = new TimeoutTimer(100, {
-      setTimeout: function(fn) { timeoutFn = fn; }
+      setTimeout: function (fn) {
+        timeoutFn = fn;
+      },
     });
     expect(timeoutFn).to.be.a('function');
 
-    timer.on('timeout', function() {
+    timer.on('timeout', function () {
       done();
     });
 
     timeoutFn();
   });
 
-  it('should not immediately clear the not-yet-armed timeout', function() {
+  it('should not immediately clear the not-yet-armed timeout', function () {
     new TimeoutTimer(100, {
-      setTimeout: function() {},
-      clearTimeout: function() {
+      setTimeout: function () {},
+      clearTimeout: function () {
         throw new Error('Should not be called');
-      }
+      },
     });
   });
 
-  it('should clear the timeout on cancel', function(done) {
+  it('should clear the timeout on cancel', function (done) {
     var timeoutToken = ['timeouttoken'];
 
     var timer = new TimeoutTimer(100, {
-      setTimeout: function() { return timeoutToken; },
-      clearTimeout: function(token) {
+      setTimeout: function () {
+        return timeoutToken;
+      },
+      clearTimeout: function (token) {
         expect(token).to.be.equal(timeoutToken);
         done();
-      }
+      },
     });
 
     timer.cancel();
   });
 
-  it('should set a timeout with the proper time', function(done) {
+  it('should set a timeout with the proper time', function (done) {
     new TimeoutTimer(100, {
-      clock: function() { return new Date(12345); },
-      setTimeout: function(callback, time) {
+      clock: function () {
+        return new Date(12345);
+      },
+      setTimeout: function (callback, time) {
         expect(time).to.be.equal(100);
         done();
-      }
+      },
     });
   });
 
-  it('should update the timeout on updateTimeout', function(done) {
+  it('should update the timeout on updateTimeout', function (done) {
     var gotInitialTimeoutCall = false;
     var clock = makeFakeClock();
 
     var timer = new TimeoutTimer(123, {
       clock: clock,
-      setTimeout: function(callback, time) {
+      setTimeout: function (callback, time) {
         if (!gotInitialTimeoutCall) {
           gotInitialTimeoutCall = true;
-          process.nextTick(function() {
+          process.nextTick(function () {
             clock.step(111);
             timer.updateTimeout(456);
             callback();
@@ -103,76 +109,87 @@ describe('TimeoutTimer', function() {
           expect(time).to.be.equal(345);
           done();
         }
-      }
+      },
     });
   });
 
-  it('should refuse to updateTimeout on an elapsed timer', function() {
+  it('should refuse to updateTimeout on an elapsed timer', function () {
     var timer = new TimeoutTimer(80, {
-      clock: function() { return new Date(321); },
-      setTimeout: function(callback) {
-        process.nextTick(function() {
+      clock: function () {
+        return new Date(321);
+      },
+      setTimeout: function (callback) {
+        process.nextTick(function () {
           callback();
-          expect(function() {
+          expect(function () {
             timer.updateTimeout(654);
           }).to.throw('timer that has elapsed');
         });
-      }
+      },
     });
   });
 
-  it('should refuse to updateTimeout on a cancelled timer', function() {
+  it('should refuse to updateTimeout on a cancelled timer', function () {
     var timer = new TimeoutTimer(80, {
-      setTimeout: function() {}
+      setTimeout: function () {},
     });
 
     timer.cancel();
-    expect(function() {
-      timer.updateTimeout(654);  
+    expect(function () {
+      timer.updateTimeout(654);
     }).to.throw('timer that has elapsed');
   });
 
-  it('should invoke the callback on the next tick when timeout is updated to a time that\'s already passed', function(done) {
+  it("should invoke the callback on the next tick when timeout is updated to a time that's already passed", function (done) {
     var onTickAfterTimerCreation = false;
     var onInitialTick = true;
-    process.nextTick(function() { onInitialTick = false; });
+    process.nextTick(function () {
+      onInitialTick = false;
+    });
 
     var timer = new TimeoutTimer(10);
-    timer.on('timeout', function() {
+    timer.on('timeout', function () {
       expect(onInitialTick, 'should not be on the initial tick').to.be.false;
       expect(onTickAfterTimerCreation, 'should not have waited longer than one tick').to.be.false;
       done();
     });
     timer.updateTimeout(-10);
 
-    process.nextTick(function() { onTickAfterTimerCreation = true; });
+    process.nextTick(function () {
+      onTickAfterTimerCreation = true;
+    });
   });
 
-  it('should invoke callback on a separate tick even when the timer is updated to a time in the past', function(done) {
+  it('should invoke callback on a separate tick even when the timer is updated to a time in the past', function (done) {
     var onInitialTick = true;
-    process.nextTick(function() { onInitialTick = false; });
+    process.nextTick(function () {
+      onInitialTick = false;
+    });
 
     var timer = new TimeoutTimer(10);
-    timer.on('timeout', function() {
+    timer.on('timeout', function () {
       expect(onInitialTick, 'should not be on the initial tick').to.be.false;
       done();
     });
     timer.updateTimeout(-10);
   });
 
-  it('should use wall time if no options are specified', function(done) {
+  it('should use wall time if no options are specified', function (done) {
     var startTime = new Date();
     var timer = new TimeoutTimer(50);
-    timer.on('timeout', function() {
-      expect(new Date() - startTime, 'timer should wait for the correct amount of time').to.be.within(30, 70);
+    timer.on('timeout', function () {
+      expect(
+        new Date() - startTime,
+        'timer should wait for the correct amount of time'
+      ).to.be.within(30, 70);
       done();
     });
   });
 
-  it('should support cancellation when no options are specified', function() {
+  it('should support cancellation when no options are specified', function () {
     var timer = new TimeoutTimer(50);
-    var timerPromise = new Promise(function(resolve, reject) {
-      timer.on('timeout', function() {
+    var timerPromise = new Promise(function (resolve, reject) {
+      timer.on('timeout', function () {
         reject(new Error('Should have been cancelled by now'));
       });
     });
@@ -181,7 +198,7 @@ describe('TimeoutTimer', function() {
 
     return Promise.race([
       timerPromise,
-      delay(200)  // Wait for a little while to really see that the timer was cancelled
+      delay(200), // Wait for a little while to really see that the timer was cancelled
     ]);
   });
 });

@@ -16,4 +16,4 @@
 
 'use strict';
 
-before('before hook name', function() {});
+before('before hook name', function () {});

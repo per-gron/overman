@@ -16,5 +16,4 @@
 
 'use strict';
 
-describe('Empty', function() {
-});
+describe('Empty', function () {});

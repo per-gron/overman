@@ -25,5 +25,5 @@ var suiteRunner = require('../../dist/suite_runner');
 suiteRunner({
   files: [__dirname + '/../../test/suite/suite_single_test_that_never_finishes'],
   reporters: [],
-  timeout: 50000
+  timeout: 50000,
 });

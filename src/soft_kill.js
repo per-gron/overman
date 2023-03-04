@@ -27,11 +27,11 @@ function softKill(process, timeout, timeoutTimer) {
     process.kill('SIGKILL');
   } else {
     var timer = new (timeoutTimer || TimeoutTimer)(timeout);
-    timer.on('timeout', function() {
+    timer.on('timeout', function () {
       process.kill('SIGKILL');
     });
 
-    process.on('exit', function() {
+    process.on('exit', function () {
       timer.cancel();
     });
     // Instead of sending a real SIGINT, send a message to the sub-process and

@@ -16,14 +16,17 @@
 
 'use strict';
 
-exports['finally'] = function(promise, f) {
-  return promise.then(function(value) {
-    return Promise.resolve(f()).then(function() {
-      return value;
-    });
-  }, function (err) {
-    return Promise.resolve(f()).then(function() {
-      throw err;
-    });
-  });
+exports['finally'] = function (promise, f) {
+  return promise.then(
+    function (value) {
+      return Promise.resolve(f()).then(function () {
+        return value;
+      });
+    },
+    function (err) {
+      return Promise.resolve(f()).then(function () {
+        throw err;
+      });
+    }
+  );
 };

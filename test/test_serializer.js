@@ -23,7 +23,7 @@ function getTestPathsFromMessages(messages) {
   var paths = [];
   var pathsDict = {};
 
-  messages.forEach(function(message) {
+  messages.forEach(function (message) {
     var path = message[0];
     var pathAsString = JSON.stringify(path);
     if (!(pathAsString in pathsDict)) {
@@ -61,15 +61,15 @@ function processMessages(messages, options) {
   var output = [];
 
   var serializer = new Serializer({
-    registerTests: function() {},
-    gotMessage: function(testPath, message) {
+    registerTests: function () {},
+    gotMessage: function (testPath, message) {
       output.push([testPath, message]);
     },
-    done: function() {}
+    done: function () {},
   });
 
   serializer.registerTests((options || {}).testPaths || getTestPathsFromMessages(messages));
-  messages.forEach(function(message) {
+  messages.forEach(function (message) {
     serializer.gotMessage(message[0], message[1]);
   });
   if (!(options || {}).dontSendDone) {
@@ -79,35 +79,35 @@ function processMessages(messages, options) {
   return output;
 }
 
-describe('Serializer reporter', function() {
-  it('should forward registerTests calls', function(done) {
+describe('Serializer reporter', function () {
+  it('should forward registerTests calls', function (done) {
     var serializer = new Serializer({
-      registerTests: function(testPaths) {
+      registerTests: function (testPaths) {
         expect(testPaths).to.be.deep.equal([]);
         done();
-      }
+      },
     });
 
     serializer.registerTests([]);
   });
 
-  it('should forward registrationFailed calls', function(done) {
+  it('should forward registrationFailed calls', function (done) {
     var serializer = new Serializer({
-      registrationFailed: function(error) {
+      registrationFailed: function (error) {
         expect(error).property('message').to.be.equal('hello');
         done();
-      }
+      },
     });
 
     serializer.registrationFailed(new Error('hello'));
   });
 
-  it('should handle reporters that don\'t implement registerTests', function() {
+  it("should handle reporters that don't implement registerTests", function () {
     var serializer = new Serializer({});
     serializer.registerTests([]);
   });
 
-  it('should handle reporters that don\'t implement gotMessage', function() {
+  it("should handle reporters that don't implement gotMessage", function () {
     var theTestPath = { file: 'file', path: ['test'] };
     var serializer = new Serializer({});
 
@@ -117,36 +117,36 @@ describe('Serializer reporter', function() {
     serializer.done();
   });
 
-  it('should forward done calls', function(done) {
+  it('should forward done calls', function (done) {
     var serializer = new Serializer({
-      registerTests: function() {},
-      done: done
+      registerTests: function () {},
+      done: done,
     });
 
     serializer.registerTests([]);
     serializer.done();
   });
 
-  it('should immediately forward the first message it gets', function() {
+  it('should immediately forward the first message it gets', function () {
     var theTestPath = { file: 'file', path: ['test'] };
 
-    expect(processMessages([
-      [theTestPath, { type: 'start' }]
-    ], { dontSendDone: true })).to.be.deep.equal([
-      [theTestPath, { type: 'start' }]
-    ]);
+    expect(
+      processMessages([[theTestPath, { type: 'start' }]], { dontSendDone: true })
+    ).to.be.deep.equal([[theTestPath, { type: 'start' }]]);
   });
 
-  it('should emit messages for two parallel tests as if they were run sequentially', function() {
+  it('should emit messages for two parallel tests as if they were run sequentially', function () {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
 
-    expect(processMessages([
-      [test1Path, { type: 'start' }],
-      [test2Path, { type: 'start' }],
-      [test1Path, { type: 'finish' }],
-      [test2Path, { type: 'finish' }],
-    ])).to.be.deep.equal([
+    expect(
+      processMessages([
+        [test1Path, { type: 'start' }],
+        [test2Path, { type: 'start' }],
+        [test1Path, { type: 'finish' }],
+        [test2Path, { type: 'finish' }],
+      ])
+    ).to.be.deep.equal([
       [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       [test2Path, { type: 'start' }],
@@ -154,16 +154,14 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should complain when getting mismatched starts', function() {
-    expect(function() {
-      processMessages([
-        [{ file: 'file', path: ['test'] }, { type: 'start' }],
-      ]);
+  it('should complain when getting mismatched starts', function () {
+    expect(function () {
+      processMessages([[{ file: 'file', path: ['test'] }, { type: 'start' }]]);
     }).to.throw(Error);
   });
 
-  it('should complain when getting mismatched pending starts', function() {
-    expect(function() {
+  it('should complain when getting mismatched pending starts', function () {
+    expect(function () {
       processMessages([
         [{ file: 'file', path: ['test'] }, { type: 'start' }],
         [{ file: 'file', path: ['test2'] }, { type: 'start' }],
@@ -171,17 +169,19 @@ describe('Serializer reporter', function() {
     }).to.throw(Error);
   });
 
-  it('should complain when getting messages from tests that have finished', function() {
-    expect(function() {
+  it('should complain when getting messages from tests that have finished', function () {
+    expect(function () {
       processMessages([
         [{ file: 'file', path: ['test'] }, { type: 'start' }],
         [{ file: 'file', path: ['test'] }, { type: 'finish' }],
         [{ file: 'file', path: ['test'] }, { type: 'start' }],
       ]);
-    }).to.throw('Got message (type start) for test that has already finished: {"file":"file","path":["test"]}');
+    }).to.throw(
+      'Got message (type start) for test that has already finished: {"file":"file","path":["test"]}'
+    );
   });
 
-  it('should handle done calls when there are outstanding tests', function() {
+  it('should handle done calls when there are outstanding tests', function () {
     // When the suite runner is cancelled (for example by the user pressing
     // Ctrl-C), not all tests will be run. Serializer needs to handle this.
     // Note that, even when the suite runner is cancelled, all the tests that
@@ -191,12 +191,17 @@ describe('Serializer reporter', function() {
     var test2Path = { file: 'file', path: ['suite2', 'test2'] };
     var test3Path = { file: 'file', path: ['suite3', 'test3'] };
 
-    expect(processMessages([
-      [test1Path, { type: 'start' }],
-      [test2Path, { type: 'start' }],
-      [test1Path, { type: 'finish' }],
-      [test2Path, { type: 'finish' }],
-    ], { testPaths: [ test1Path, test2Path, test3Path ] })).to.be.deep.equal([
+    expect(
+      processMessages(
+        [
+          [test1Path, { type: 'start' }],
+          [test2Path, { type: 'start' }],
+          [test1Path, { type: 'finish' }],
+          [test2Path, { type: 'finish' }],
+        ],
+        { testPaths: [test1Path, test2Path, test3Path] }
+      )
+    ).to.be.deep.equal([
       [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       [test2Path, { type: 'start' }],
@@ -204,17 +209,22 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should emit start message for a test as soon as it can', function() {
+  it('should emit start message for a test as soon as it can', function () {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
     var test3Path = { file: 'file', path: ['test3'] };
 
-    expect(processMessages([
-      [test1Path, { type: 'start' }],
-      [test2Path, { type: 'start' }],
-      [test3Path, { type: 'start' }],
-      [test1Path, { type: 'finish' }],
-    ], { dontSendDone: true })).to.be.deep.equal([
+    expect(
+      processMessages(
+        [
+          [test1Path, { type: 'start' }],
+          [test2Path, { type: 'start' }],
+          [test3Path, { type: 'start' }],
+          [test1Path, { type: 'finish' }],
+        ],
+        { dontSendDone: true }
+      )
+    ).to.be.deep.equal([
       [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       // Here, the second test should be chosen to begin, even though it doens't know
@@ -228,19 +238,24 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should emit multiple finished tests if it can', function() {
+  it('should emit multiple finished tests if it can', function () {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
     var test3Path = { file: 'file', path: ['test3'] };
 
-    expect(processMessages([
-      [test1Path, { type: 'start' }],
-      [test2Path, { type: 'start' }],
-      [test2Path, { type: 'finish' }],
-      [test3Path, { type: 'start' }],
-      [test3Path, { type: 'finish' }],
-      [test1Path, { type: 'finish' }],
-    ], { dontSendDone: true })).to.be.deep.equal([
+    expect(
+      processMessages(
+        [
+          [test1Path, { type: 'start' }],
+          [test2Path, { type: 'start' }],
+          [test2Path, { type: 'finish' }],
+          [test3Path, { type: 'start' }],
+          [test3Path, { type: 'finish' }],
+          [test1Path, { type: 'finish' }],
+        ],
+        { dontSendDone: true }
+      )
+    ).to.be.deep.equal([
       [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       [test2Path, { type: 'start' }],
@@ -250,19 +265,21 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should emit messages for finished tests as soon as possible', function() {
+  it('should emit messages for finished tests as soon as possible', function () {
     var test1Path = { file: 'file', path: ['test1'] };
     var test2Path = { file: 'file', path: ['test2'] };
     var test3Path = { file: 'file', path: ['test3'] };
 
-    expect(processMessages([
-      [test1Path, { type: 'start' }],
-      [test2Path, { type: 'start' }],
-      [test3Path, { type: 'start' }],
-      [test3Path, { type: 'finish' }],
-      [test1Path, { type: 'finish' }],
-      [test2Path, { type: 'finish' }],
-    ])).to.be.deep.equal([
+    expect(
+      processMessages([
+        [test1Path, { type: 'start' }],
+        [test2Path, { type: 'start' }],
+        [test3Path, { type: 'start' }],
+        [test3Path, { type: 'finish' }],
+        [test1Path, { type: 'finish' }],
+        [test2Path, { type: 'finish' }],
+      ])
+    ).to.be.deep.equal([
       [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       [test3Path, { type: 'start' }],
@@ -272,19 +289,22 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should not serialize tests from within a test file', function() {  // Only suites are serialized, and files don't count as suites
+  it('should not serialize tests from within a test file', function () {
+    // Only suites are serialized, and files don't count as suites
     var test11Path = { file: 'file1', path: ['test1'] };
     var test12Path = { file: 'file1', path: ['test2'] };
     var test2Path = { file: 'file2', path: ['test3'] };
 
-    expect(processMessages([
-      [test11Path, { type: 'start' }],
-      [test11Path, { type: 'finish' }],
-      [test2Path, { type: 'start' }],
-      [test2Path, { type: 'finish' }],
-      [test12Path, { type: 'start' }],
-      [test12Path, { type: 'finish' }],
-    ])).to.be.deep.equal([
+    expect(
+      processMessages([
+        [test11Path, { type: 'start' }],
+        [test11Path, { type: 'finish' }],
+        [test2Path, { type: 'start' }],
+        [test2Path, { type: 'finish' }],
+        [test12Path, { type: 'start' }],
+        [test12Path, { type: 'finish' }],
+      ])
+    ).to.be.deep.equal([
       [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
       [test2Path, { type: 'start' }],
@@ -294,36 +314,43 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should not pick a test from another suite unless the current suite is done', function() {
+  it('should not pick a test from another suite unless the current suite is done', function () {
     var test11Path = { file: 'file', path: ['suite', 'test1'] };
     var test12Path = { file: 'file', path: ['suite', 'test2'] };
     var test2Path = { file: 'file', path: ['test3'] };
 
-    expect(processMessages([
-      [test11Path, { type: 'start' }],
-      [test11Path, { type: 'finish' }],
-      [test2Path, { type: 'start' }],
-      [test12Path, { type: 'start' }],
-    ], { dontSendDone: true })).to.be.deep.equal([
+    expect(
+      processMessages(
+        [
+          [test11Path, { type: 'start' }],
+          [test11Path, { type: 'finish' }],
+          [test2Path, { type: 'start' }],
+          [test12Path, { type: 'start' }],
+        ],
+        { dontSendDone: true }
+      )
+    ).to.be.deep.equal([
       [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
       [test12Path, { type: 'start' }],
     ]);
   });
 
-  it('should suppress messages from a different suite until the current one is done', function() {
+  it('should suppress messages from a different suite until the current one is done', function () {
     var test11Path = { file: 'file', path: ['suite', 'test1'] };
     var test12Path = { file: 'file', path: ['suite', 'test2'] };
     var test2Path = { file: 'file', path: ['test3'] };
 
-    expect(processMessages([
-      [test11Path, { type: 'start' }],
-      [test2Path, { type: 'start' }],
-      [test2Path, { type: 'finish' }],
-      [test12Path, { type: 'start' }],
-      [test11Path, { type: 'finish' }],
-      [test12Path, { type: 'finish' }],
-    ])).to.be.deep.equal([
+    expect(
+      processMessages([
+        [test11Path, { type: 'start' }],
+        [test2Path, { type: 'start' }],
+        [test2Path, { type: 'finish' }],
+        [test12Path, { type: 'start' }],
+        [test11Path, { type: 'finish' }],
+        [test12Path, { type: 'finish' }],
+      ])
+    ).to.be.deep.equal([
       [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
       [test12Path, { type: 'start' }],
@@ -333,19 +360,21 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should suppress messages from a suite until all tests in a subsuite is done', function() {
+  it('should suppress messages from a suite until all tests in a subsuite is done', function () {
     var test11Path = { file: 'file', path: ['suite', 'subsuite', 'test1'] };
     var test12Path = { file: 'file', path: ['suite', 'subsuite', 'test2'] };
     var test2Path = { file: 'file', path: ['suite', 'test3'] };
 
-    expect(processMessages([
-      [test11Path, { type: 'start' }],
-      [test2Path, { type: 'start' }],
-      [test2Path, { type: 'finish' }],
-      [test12Path, { type: 'start' }],
-      [test11Path, { type: 'finish' }],
-      [test12Path, { type: 'finish' }],
-    ])).to.be.deep.equal([
+    expect(
+      processMessages([
+        [test11Path, { type: 'start' }],
+        [test2Path, { type: 'start' }],
+        [test2Path, { type: 'finish' }],
+        [test12Path, { type: 'start' }],
+        [test11Path, { type: 'finish' }],
+        [test12Path, { type: 'finish' }],
+      ])
+    ).to.be.deep.equal([
       [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
       [test12Path, { type: 'start' }],
@@ -355,7 +384,7 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should move from one suite to another', function() {
+  it('should move from one suite to another', function () {
     var test1Path = { file: 'file', path: ['suite1', 'test'] };
     var test2Path = { file: 'file', path: ['suite2', 'test'] };
 
@@ -368,16 +397,18 @@ describe('Serializer reporter', function() {
     expect(processMessages(messages)).to.be.deep.equal(messages);
   });
 
-  it('should move from one suite to another, with overlap', function() {
+  it('should move from one suite to another, with overlap', function () {
     var test1Path = { file: 'file', path: ['suite1', 'test'] };
     var test2Path = { file: 'file', path: ['suite2', 'test'] };
 
-    expect(processMessages([
-      [test1Path, { type: 'start' }],
-      [test2Path, { type: 'start' }],
-      [test1Path, { type: 'finish' }],
-      [test2Path, { type: 'finish' }],
-    ])).to.be.deep.equal([
+    expect(
+      processMessages([
+        [test1Path, { type: 'start' }],
+        [test2Path, { type: 'start' }],
+        [test1Path, { type: 'finish' }],
+        [test2Path, { type: 'finish' }],
+      ])
+    ).to.be.deep.equal([
       [test1Path, { type: 'start' }],
       [test1Path, { type: 'finish' }],
       [test2Path, { type: 'start' }],
@@ -385,41 +416,45 @@ describe('Serializer reporter', function() {
     ]);
   });
 
-  it('should move from one suite to another, after overlap', function() {
+  it('should move from one suite to another, after overlap', function () {
     var test1Path = { file: 'file', path: ['suite1', 'test1'] };
     var test2Path = { file: 'file', path: ['suite1', 'test2'] };
     var test3Path = { file: 'file', path: ['suite2', 'test3'] };
 
-    expect(processMessages([
-      [ test1Path, { 'type': 'start' } ],
-      [ test2Path, { 'type': 'start' } ],
-      [ test2Path, { 'type': 'finish' } ],
-      [ test1Path, { 'type': 'finish' } ],
-      [ test3Path, { 'type': 'start' } ],
-      [ test3Path, { 'type': 'finish' } ]
-    ])).to.be.deep.equal([
-      [ test1Path, { 'type': 'start' } ],
-      [ test1Path, { 'type': 'finish' } ],
-      [ test2Path, { 'type': 'start' } ],
-      [ test2Path, { 'type': 'finish' } ],
-      [ test3Path, { 'type': 'start' } ],
-      [ test3Path, { 'type': 'finish' } ]
+    expect(
+      processMessages([
+        [test1Path, { type: 'start' }],
+        [test2Path, { type: 'start' }],
+        [test2Path, { type: 'finish' }],
+        [test1Path, { type: 'finish' }],
+        [test3Path, { type: 'start' }],
+        [test3Path, { type: 'finish' }],
+      ])
+    ).to.be.deep.equal([
+      [test1Path, { type: 'start' }],
+      [test1Path, { type: 'finish' }],
+      [test2Path, { type: 'start' }],
+      [test2Path, { type: 'finish' }],
+      [test3Path, { type: 'start' }],
+      [test3Path, { type: 'finish' }],
     ]);
   });
 
-  it('should allow tests in subsuites to run while there are pending tests in that suite', function() {
+  it('should allow tests in subsuites to run while there are pending tests in that suite', function () {
     var test11Path = { file: 'file', path: ['suite', 'test1'] };
     var test12Path = { file: 'file', path: ['suite', 'subsuite', 'test2'] };
     var test2Path = { file: 'file', path: ['suite', 'test3'] };
 
-    expect(processMessages([
-      [test11Path, { type: 'start' }],
-      [test12Path, { type: 'start' }],
-      [test11Path, { type: 'finish' }],
-      [test2Path, { type: 'start' }],
-      [test2Path, { type: 'finish' }],
-      [test12Path, { type: 'finish' }],
-    ])).to.be.deep.equal([
+    expect(
+      processMessages([
+        [test11Path, { type: 'start' }],
+        [test12Path, { type: 'start' }],
+        [test11Path, { type: 'finish' }],
+        [test2Path, { type: 'start' }],
+        [test2Path, { type: 'finish' }],
+        [test12Path, { type: 'finish' }],
+      ])
+    ).to.be.deep.equal([
       [test11Path, { type: 'start' }],
       [test11Path, { type: 'finish' }],
       [test12Path, { type: 'start' }],

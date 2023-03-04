@@ -16,6 +16,6 @@
 
 'use strict';
 
-it('should leave breadcrumb', function() {
+it('should leave breadcrumb', function () {
   this.breadcrumb('A breadcrumb');
 });

@@ -18,15 +18,18 @@
 
 var childProcess = require('child_process');
 
-it('should spawn child processes', function() {
-  return new Promise(function(resolve) {
-  var proc = childProcess.fork(__dirname + '/../util/never_ending_program_that_may_fork_subprocess.js', ['fork']);
+it('should spawn child processes', function () {
+  return new Promise(function (resolve) {
+    var proc = childProcess.fork(
+      __dirname + '/../util/never_ending_program_that_may_fork_subprocess.js',
+      ['fork']
+    );
 
-  process.on('message', function(data) {
-    (data.state === 'killme') && resolve();
-  });
-  proc.on('message', function(data) {
-    process.send(data);
-  });
+    process.on('message', function (data) {
+      data.state === 'killme' && resolve();
+    });
+    proc.on('message', function (data) {
+      process.send(data);
+    });
   });
 });

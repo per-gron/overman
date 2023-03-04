@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-it('should succeed', function() {
-  setInterval(function() {}, 1000);
+it('should succeed', function () {
+  setInterval(function () {}, 1000);
 });

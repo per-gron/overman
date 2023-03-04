@@ -43,7 +43,10 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    <U>(title: string, fn: (this: SuiteContext<T extends null | undefined ? U : T & U>) => void): void;
+    <U>(
+      title: string,
+      fn: (this: SuiteContext<T extends null | undefined ? U : T & U>) => void
+    ): void;
 
     /**
      * [qunit] Describe a "suite" with the given `title`.
@@ -58,7 +61,11 @@ declare namespace Overman {
      *
      * - _Only available when invoked via Overman._
      */
-    <U>(title: string, attributes: U, fn: (this: SuiteContext<T extends null | undefined ? U : T & U>) => void): void;
+    <U>(
+      title: string,
+      attributes: U,
+      fn: (this: SuiteContext<T extends null | undefined ? U : T & U>) => void
+    ): void;
 
     /**
      * Describe a specification or test-case with the given `title`, `attributes` and callback
@@ -92,11 +99,11 @@ declare namespace Overman {
     unstable: PendingSuiteFunction<T>;
   }
 
-  interface ExclusiveSuiteFunction<T> extends BaseSuiteFunction<T> { }
+  interface ExclusiveSuiteFunction<T> extends BaseSuiteFunction<T> {}
 
-  interface PendingSuiteFunction<T> extends BaseSuiteFunction<T> { }
+  interface PendingSuiteFunction<T> extends BaseSuiteFunction<T> {}
 
-  interface UnstableSuiteFunction<T> extends BaseSuiteFunction<T> { }
+  interface UnstableSuiteFunction<T> extends BaseSuiteFunction<T> {}
 
   interface BaseTestFunction<T> {
     /**
@@ -171,11 +178,11 @@ declare namespace Overman {
     unstable: UnstableTestFunction<T>;
   }
 
-  interface ExclusiveTestFunction<T> extends BaseTestFunction<T> { }
+  interface ExclusiveTestFunction<T> extends BaseTestFunction<T> {}
 
-  interface PendingTestFunction<T> extends BaseTestFunction<T> { }
+  interface PendingTestFunction<T> extends BaseTestFunction<T> {}
 
-  interface UnstableTestFunction<T> extends BaseTestFunction<T> { }
+  interface UnstableTestFunction<T> extends BaseTestFunction<T> {}
 
   /**
    * Execute after each test case.
@@ -230,7 +237,7 @@ declare namespace Overman {
     /**
      * Get timeout & slow.
      */
-    getParameters(): { timeout: number, slow: number };
+    getParameters(): { timeout: number; slow: number };
 
     /**
      * Get test timeout.
@@ -461,7 +468,7 @@ declare var it: Overman.TestFunction<undefined>;
 declare namespace NodeJS {
   // Augments NodeJS's `global` object when node.d.ts is loaded
   // tslint:disable-next-line no-empty-interface
-  interface Global extends Overman.OvermanGlobals { }
+  interface Global extends Overman.OvermanGlobals {}
 }
 
 // #endregion Global augmentations

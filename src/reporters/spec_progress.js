@@ -37,7 +37,7 @@ var symbols = {
   failure: '✖',
   timeout: '⧖',
   skipped: '-',
-  aborted: '-'
+  aborted: '-',
 };
 
 var symbolColors = {
@@ -46,7 +46,7 @@ var symbolColors = {
   failure: chalk.red,
   timeout: chalk.red,
   skipped: chalk.cyan,
-  aborted: chalk.yellow
+  aborted: chalk.yellow,
 };
 
 var nameColors = {
@@ -54,19 +54,30 @@ var nameColors = {
   failure: chalk.red,
   timeout: chalk.red,
   aborted: chalk.yellow,
-  defaultColor: chalk.grey
+  defaultColor: chalk.grey,
 };
 
 var slownessColors = {
   slow: chalk.red,
-  halfSlow: chalk.yellow
+  halfSlow: chalk.yellow,
 };
 
 function color(palette, name) {
-  return palette[name] || palette.defaultColor || function(x) { return x; };
+  return (
+    palette[name] ||
+    palette.defaultColor ||
+    function (x) {
+      return x;
+    }
+  );
 }
 
-function getLine(testPath, unstable /* : boolean */, result /* ?: string */, breadcrumb  /* ?: string */) {
+function getLine(
+  testPath,
+  unstable /* : boolean */,
+  result /* ?: string */,
+  breadcrumb /* ?: string */
+) {
   const prefixSpace = spacesForPath(testPath);
   const name = _.last(testPath.path) + (unstable ? ' [unstable]' : '');
 
@@ -94,7 +105,7 @@ function getLine(testPath, unstable /* : boolean */, result /* ?: string */, bre
 function SpecProgress(streams, insertionLog) {
   this._log = new (insertionLog || InsertionLog)((streams || {}).stdout);
 
-  this._disableBreadcrumbs = (streams || {}).disableBreadcrumbs
+  this._disableBreadcrumbs = (streams || {}).disableBreadcrumbs;
 
   // The reporter needs to be able to insert new lines for tests and place
   // them where they belong. This is done by keeping track of ids for the
@@ -113,13 +124,13 @@ function SpecProgress(streams, insertionLog) {
   this._stderr = {};
 }
 
-SpecProgress.prototype._makePipedStream = function(id) {
+SpecProgress.prototype._makePipedStream = function (id) {
   var self = this;
 
   var streamToWriteTo = through();
   var lines = readline.createInterface({
     input: streamToWriteTo,
-    output: through()
+    output: through(),
   });
 
   function idForCounter(counter) {
@@ -128,7 +139,7 @@ SpecProgress.prototype._makePipedStream = function(id) {
 
   var counter = 0;
 
-  lines.on('line', function(line) {
+  lines.on('line', function (line) {
     self._log.logAfter(idForCounter(counter), line, idForCounter(counter + 1));
     counter++;
   });
@@ -136,7 +147,7 @@ SpecProgress.prototype._makePipedStream = function(id) {
   return streamToWriteTo;
 };
 
-SpecProgress.prototype.gotMessage = function(testPath, message) {
+SpecProgress.prototype.gotMessage = function (testPath, message) {
   var pathAsString = JSON.stringify(testPath);
 
   if (message.type === 'suiteStart') {

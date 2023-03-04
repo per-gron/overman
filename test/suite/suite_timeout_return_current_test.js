@@ -16,6 +16,6 @@
 
 'use strict';
 
-it('should return the current test\'s timeout', function() {
+it("should return the current test's timeout", function () {
   return this.currentTest.timeout();
 });

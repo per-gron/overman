@@ -35,196 +35,175 @@ function performActionsAndCheckOutput(actions, output, options) {
   return promise;
 }
 
-describe('Summary reporter', function() {
+describe('Summary reporter', function () {
   var clock;
 
-  beforeEach(function() {
+  beforeEach(function () {
     clock = makeFakeClock();
   });
 
-  before(function() {
+  before(function () {
     chalk.enabled = true;
   });
 
-  it('should always report passing tests, even when no tests pass', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.done(clock());
-    }, [
-      '',
-      /0 passing/,
-      ''
-    ]);
+  it('should always report passing tests, even when no tests pass', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.done(clock());
+      },
+      ['', /0 passing/, '']
+    );
   });
 
-  it('should report number of passed tests', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'success' });
-      summary.done(clock());
-    }, [
-      '',
-      /1 passing/,
-      ''
-    ]);
+  it('should report number of passed tests', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'success' });
+        summary.done(clock());
+      },
+      ['', /1 passing/, '']
+    );
   });
 
-  it('should report total time it took for tests to run', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      clock.step(4000);
-      summary.done(clock());
-    }, [
-      '',
-      /(4s)/,
-      ''
-    ]);
+  it('should report total time it took for tests to run', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        clock.step(4000);
+        summary.done(clock());
+      },
+      ['', /(4s)/, '']
+    );
   });
 
-  it('should report number of skipped tests', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'skipped' });
-      summary.done(clock());
-    }, [
-      '',
-      /0 passing/,
-      /1 skipped/,
-      ''
-    ]);
+  it('should report number of skipped tests', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'skipped' });
+        summary.done(clock());
+      },
+      ['', /0 passing/, /1 skipped/, '']
+    );
   });
 
-  it('should report number of aborted tests', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'aborted' });
-      summary.done(clock());
-    }, [
-      '',
-      /0 passing/,
-      /1 aborted/,
-      ''
-    ]);
+  it('should report number of aborted tests', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'aborted' });
+        summary.done(clock());
+      },
+      ['', /0 passing/, /1 aborted/, '']
+    );
   });
 
-  it('should report number of failing tests', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'failure' });
-      summary.done(clock());
-    }, [
-      '',
-      /0 passing/,
-      /1 failing/,
-      ''
-    ]);
+  it('should report number of failing tests', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'failure' });
+        summary.done(clock());
+      },
+      ['', /0 passing/, /1 failing/, '']
+    );
   });
 
-  it('should report number of tests that time out', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'timeout' });
-      summary.done(clock());
-    }, [
-      '',
-      /0 passing/,
-      /1 failing/,
-      ''
-    ]);
+  it('should report number of tests that time out', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'timeout' });
+        summary.done(clock());
+      },
+      ['', /0 passing/, /1 failing/, '']
+    );
   });
 
-  it('should report number of skipped, timed out and number of failing tests', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'failure' });
-      summary.gotMessage(null, { type: 'finish', result: 'skipped' });
-      summary.gotMessage(null, { type: 'finish', result: 'timeout' });
-      summary.done(clock());
-    }, [
-      '',
-      /0 passing/,
-      /1 skipped/,
-      /2 failing/,
-      ''
-    ]);
+  it('should report number of skipped, timed out and number of failing tests', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'failure' });
+        summary.gotMessage(null, { type: 'finish', result: 'skipped' });
+        summary.gotMessage(null, { type: 'finish', result: 'timeout' });
+        summary.done(clock());
+      },
+      ['', /0 passing/, /1 skipped/, /2 failing/, '']
+    );
   });
 
-  it('should report number of skipped, aborted, timed out and number of failing tests', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'failure' });
-      summary.gotMessage(null, { type: 'finish', result: 'skipped' });
-      summary.gotMessage(null, { type: 'finish', result: 'aborted' });
-      summary.gotMessage(null, { type: 'finish', result: 'timeout' });
-      summary.done(clock());
-    }, [
-      '',
-      /0 passing/,
-      /1 skipped/,
-      /2 failing/,
-      /1 aborted/,
-      ''
-    ]);
+  it('should report number of skipped, aborted, timed out and number of failing tests', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'failure' });
+        summary.gotMessage(null, { type: 'finish', result: 'skipped' });
+        summary.gotMessage(null, { type: 'finish', result: 'aborted' });
+        summary.gotMessage(null, { type: 'finish', result: 'timeout' });
+        summary.done(clock());
+      },
+      ['', /0 passing/, /1 skipped/, /2 failing/, /1 aborted/, '']
+    );
   });
 
-  it('should color the passing tests text', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.done(clock());
-    }, [
-      '',
-      new RegExp('\u001b\\[32m0 passing\u001b\\[39m'),
-      ''
-    ], { dontStrip: true });
+  it('should color the passing tests text', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.done(clock());
+      },
+      ['', new RegExp('\u001b\\[32m0 passing\u001b\\[39m'), ''],
+      { dontStrip: true }
+    );
   });
 
-  it('should color the test time text', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.done(clock());
-    }, [
-      '',
-      new RegExp('\u001b\\[90m\\(0s\\)\u001b\\[39m'),
-      ''
-    ], { dontStrip: true });
+  it('should color the test time text', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.done(clock());
+      },
+      ['', new RegExp('\u001b\\[90m\\(0s\\)\u001b\\[39m'), ''],
+      { dontStrip: true }
+    );
   });
 
-  it('should color the skipped tests text', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'skipped' });
-      summary.done(clock());
-    }, [
-      '',
-      /passing/,
-      new RegExp('\u001b\\[36m1 skipped\u001b\\[39m'),
-      ''
-    ], { dontStrip: true });
+  it('should color the skipped tests text', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'skipped' });
+        summary.done(clock());
+      },
+      ['', /passing/, new RegExp('\u001b\\[36m1 skipped\u001b\\[39m'), ''],
+      { dontStrip: true }
+    );
   });
 
-  it('should color the aborted tests text', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'aborted' });
-      summary.done(clock());
-    }, [
-      '',
-      /passing/,
-      new RegExp('\u001b\\[33m1 aborted\u001b\\[39m'),
-      ''
-    ], { dontStrip: true });
+  it('should color the aborted tests text', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'aborted' });
+        summary.done(clock());
+      },
+      ['', /passing/, new RegExp('\u001b\\[33m1 aborted\u001b\\[39m'), ''],
+      { dontStrip: true }
+    );
   });
 
-  it('should color the failing tests text', function() {
-    return performActionsAndCheckOutput(function(summary) {
-      summary.registerTests([], {}, clock());
-      summary.gotMessage(null, { type: 'finish', result: 'failure' });
-      summary.done(clock());
-    }, [
-      '',
-      /passing/,
-      new RegExp('\u001b\\[31m1 failing\u001b\\[39m'),
-      ''
-    ], { dontStrip: true });
+  it('should color the failing tests text', function () {
+    return performActionsAndCheckOutput(
+      function (summary) {
+        summary.registerTests([], {}, clock());
+        summary.gotMessage(null, { type: 'finish', result: 'failure' });
+        summary.done(clock());
+      },
+      ['', /passing/, new RegExp('\u001b\\[31m1 failing\u001b\\[39m'), ''],
+      { dontStrip: true }
+    );
   });
 });

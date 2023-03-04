@@ -19,8 +19,8 @@
 var expect = require('chai').expect;
 var TestFailureError = require('../dist/test_failure_error');
 
-describe('TestFailureError', function() {
-  it('should be instanceof Error', function() {
+describe('TestFailureError', function () {
+  it('should be instanceof Error', function () {
     expect(new TestFailureError() instanceof Error).to.be.true;
   });
 });

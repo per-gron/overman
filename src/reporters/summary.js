@@ -24,7 +24,7 @@ var colors = {
   failure: chalk.red,
   skipped: chalk.cyan,
   aborted: chalk.yellow,
-  time: chalk.grey
+  time: chalk.grey,
 };
 
 /**
@@ -36,22 +36,22 @@ var colors = {
  */
 function Summary(stream) {
   this._stream = stream;
-  this._startedAt = null;  // Timestamp in ms when the tests started running
-  this._results = {};  // Map from result string (ie 'skipped') to number of tests
+  this._startedAt = null; // Timestamp in ms when the tests started running
+  this._results = {}; // Map from result string (ie 'skipped') to number of tests
 }
 
-Summary.prototype.registerTests = function(test, options, time) {
+Summary.prototype.registerTests = function (test, options, time) {
   this._startedAt = time;
 };
 
-Summary.prototype.gotMessage = function(testPath, message) {
+Summary.prototype.gotMessage = function (testPath, message) {
   if (message.type === 'finish') {
     var oldValue = this._results[message.result];
     this._results[message.result] = oldValue ? oldValue + 1 : 1;
   }
 };
 
-Summary.prototype.done = function(time) {
+Summary.prototype.done = function (time) {
   var timeSinceStart = time.getTime() - this._startedAt.getTime();
 
   this._stream.write('\n  ' + colors.success((this._results.success || 0) + ' passing'));

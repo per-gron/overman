@@ -45,13 +45,13 @@ function SuiteMarker(reporter) {
 }
 SuiteMarker.prototype = Object.create(Combined.prototype);
 
-SuiteMarker.prototype.registerTests = function(tests) {
+SuiteMarker.prototype.registerTests = function (tests) {
   Combined.prototype.registerTests.apply(this, arguments);
   this._totalTests.addTests(tests);
   this._remainingTests.addTests(tests);
 };
 
-SuiteMarker.prototype._maybeEmitSuiteStart = function(suitePath, time) {
+SuiteMarker.prototype._maybeEmitSuiteStart = function (suitePath, time) {
   if (suitePath === null) {
     return;
   }
@@ -60,24 +60,34 @@ SuiteMarker.prototype._maybeEmitSuiteStart = function(suitePath, time) {
   var remainingTestsInSuite = this._remainingTests.numberOfTestsInSuite(suitePath);
   if (totalTestsInSuite === remainingTestsInSuite) {
     this._maybeEmitSuiteStart(testPathUtil.suitePathOf(suitePath));
-    Combined.prototype.gotMessage.call(this, null, {
-      type: 'suiteStart',
-      suite: suitePath
-    }, time);
+    Combined.prototype.gotMessage.call(
+      this,
+      null,
+      {
+        type: 'suiteStart',
+        suite: suitePath,
+      },
+      time
+    );
   }
 };
 
-SuiteMarker.prototype._maybeEmitSuiteFinish = function(suitePath, time) {
+SuiteMarker.prototype._maybeEmitSuiteFinish = function (suitePath, time) {
   if (suitePath !== null && this._remainingTests.numberOfTestsInSuite(suitePath) === 0) {
-    Combined.prototype.gotMessage.call(this, null, {
-      type: 'suiteFinish',
-      suite: suitePath
-    }, time);
+    Combined.prototype.gotMessage.call(
+      this,
+      null,
+      {
+        type: 'suiteFinish',
+        suite: suitePath,
+      },
+      time
+    );
     this._maybeEmitSuiteFinish(testPathUtil.suitePathOf(suitePath), time);
   }
 };
 
-SuiteMarker.prototype.gotMessage = function(testPath, message, time) {
+SuiteMarker.prototype.gotMessage = function (testPath, message, time) {
   var suitePath = testPathUtil.suitePathOf(testPath);
 
   if (message.type === 'start') {

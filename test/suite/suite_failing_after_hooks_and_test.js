@@ -16,15 +16,14 @@
 
 'use strict';
 
-after(function() {
+after(function () {
   console.log('running_after_hook_1');
   throw new Error('Failure');
 });
 
-after(function() {
+after(function () {
   console.log('running_after_hook_2');
   throw new Error('Failure');
 });
 
-it('should succeed', function() {
-});
+it('should succeed', function () {});

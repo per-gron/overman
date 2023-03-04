@@ -21,9 +21,11 @@ var testPathUtil = require('../test_path_util');
 var TestCount = require('../test_count');
 
 function suiteIsAncestorOfOrSameAs(ancestor, descendant) {
-  return (ancestor.file === descendant.file &&
-          ancestor.path.length <= descendant.path.length &&
-          _.isEqual(ancestor.path, descendant.path.slice(0, ancestor.path.length)));
+  return (
+    ancestor.file === descendant.file &&
+    ancestor.path.length <= descendant.path.length &&
+    _.isEqual(ancestor.path, descendant.path.slice(0, ancestor.path.length))
+  );
 }
 
 /**
@@ -53,7 +55,7 @@ function Serializer(reporter) {
   this._finishedTests = {};
 }
 
-Serializer.prototype._storeMessageForLater = function(serializedTestPath, message) {
+Serializer.prototype._storeMessageForLater = function (serializedTestPath, message) {
   if (!this._pendingTestMessages[serializedTestPath]) {
     this._pendingTestMessages[serializedTestPath] = [];
   }
@@ -64,7 +66,7 @@ Serializer.prototype._storeMessageForLater = function(serializedTestPath, messag
 /**
  * Emits pending messages for a given test and clears them from the queue.
  */
-Serializer.prototype._emitPendingMessagesForTest = function(testPath) {
+Serializer.prototype._emitPendingMessagesForTest = function (testPath) {
   var serializedTestPath = JSON.stringify(testPath);
   var pendingMessages = this._pendingTestMessages[serializedTestPath];
   if (this._reporter.gotMessage) {
@@ -73,11 +75,11 @@ Serializer.prototype._emitPendingMessagesForTest = function(testPath) {
   delete this._pendingTestMessages[serializedTestPath];
 };
 
-Serializer.prototype._pendingTestHasFinished = function(testPath) {
+Serializer.prototype._pendingTestHasFinished = function (testPath) {
   return _.last(this._pendingTestMessages[JSON.stringify(testPath)]).type === 'finish';
 };
 
-Serializer.prototype._currentTestFinished = function() {
+Serializer.prototype._currentTestFinished = function () {
   this._finishedTests[this._currentTest] = true;
   this._remainingTests.removeTest(JSON.parse(this._currentTest));
   this._canPickNewTest = true;
@@ -89,7 +91,7 @@ Serializer.prototype._currentTestFinished = function() {
  *
  * A null return value means that any test can be chosen.
  */
-Serializer.prototype._getPremissibleSuiteForNextTest = function(currentSuite) {
+Serializer.prototype._getPremissibleSuiteForNextTest = function (currentSuite) {
   if (currentSuite.path.length === 0) {
     return null;
   } else if (this._remainingTests.numberOfTestsInSuite(currentSuite) !== 0) {
@@ -99,29 +101,36 @@ Serializer.prototype._getPremissibleSuiteForNextTest = function(currentSuite) {
   }
 };
 
-Serializer.prototype._getPermissibleNextTests = function() {
+Serializer.prototype._getPermissibleNextTests = function () {
   var allPendingTests = _.keys(this._pendingTestMessages).map(JSON.parse);
 
-  var permissibleSuiteForNextTest = this._currentTest && this._getPremissibleSuiteForNextTest(testPathUtil.suitePathOf(JSON.parse(this._currentTest)));
+  var permissibleSuiteForNextTest =
+    this._currentTest &&
+    this._getPremissibleSuiteForNextTest(testPathUtil.suitePathOf(JSON.parse(this._currentTest)));
   if (permissibleSuiteForNextTest) {
-    return allPendingTests.filter(suiteIsAncestorOfOrSameAs.bind(this, permissibleSuiteForNextTest));
+    return allPendingTests.filter(
+      suiteIsAncestorOfOrSameAs.bind(this, permissibleSuiteForNextTest)
+    );
   } else {
     return allPendingTests;
   }
 };
 
-Serializer.prototype._getNextTest = function() {
+Serializer.prototype._getNextTest = function () {
   var permissiblePendingTests = this._getPermissibleNextTests();
 
   if (permissiblePendingTests.length === 0) {
     return null;
   } else {
-    var finishedPendingTest = _.find(permissiblePendingTests, this._pendingTestHasFinished.bind(this));
+    var finishedPendingTest = _.find(
+      permissiblePendingTests,
+      this._pendingTestHasFinished.bind(this)
+    );
     return finishedPendingTest || _.first(permissiblePendingTests);
   }
 };
 
-Serializer.prototype._pickNewCurrentTest = function() {
+Serializer.prototype._pickNewCurrentTest = function () {
   var nextTest = this._getNextTest();
 
   if (nextTest) {
@@ -137,7 +146,7 @@ Serializer.prototype._pickNewCurrentTest = function() {
   }
 };
 
-Serializer.prototype.registerTests = function(testPaths) {
+Serializer.prototype.registerTests = function (testPaths) {
   this._remainingTests.addTests(testPaths);
 
   if (this._reporter.registerTests) {
@@ -145,17 +154,22 @@ Serializer.prototype.registerTests = function(testPaths) {
   }
 };
 
-Serializer.prototype.registrationFailed = function(error) {
+Serializer.prototype.registrationFailed = function (error) {
   if (this._reporter.registrationFailed) {
     this._reporter.registrationFailed(error);
   }
 };
 
-Serializer.prototype.gotMessage = function(testPath, message) {
+Serializer.prototype.gotMessage = function (testPath, message) {
   var serializedTestPath = JSON.stringify(testPath);
 
   if (serializedTestPath in this._finishedTests) {
-    throw new Error('Got message (type ' + message.type + ') for test that has already finished: ' + serializedTestPath);
+    throw new Error(
+      'Got message (type ' +
+        message.type +
+        ') for test that has already finished: ' +
+        serializedTestPath
+    );
   }
 
   if (this._currentTest === serializedTestPath) {
@@ -175,7 +189,7 @@ Serializer.prototype.gotMessage = function(testPath, message) {
   }
 };
 
-Serializer.prototype.done = function() {
+Serializer.prototype.done = function () {
   if (_.keys(this._pendingTestMessages).length !== 0 || !this._canPickNewTest) {
     throw new Error('Got start messages that were not matched with finish messages');
   }

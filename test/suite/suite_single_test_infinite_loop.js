@@ -16,6 +16,6 @@
 
 'use strict';
 
-it('should loop infinitely', function() {
+it('should loop infinitely', function () {
   for (;;) {}
 });

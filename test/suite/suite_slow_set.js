@@ -16,7 +16,7 @@
 
 'use strict';
 
-it('should set the slow threshold', function() {
+it('should set the slow threshold', function () {
   this.slow(20);
-  return new Promise(function() {});  // Never complete the test
+  return new Promise(function () {}); // Never complete the test
 });

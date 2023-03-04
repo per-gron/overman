@@ -24,5 +24,5 @@ var suiteRunner = require('../../dist/suite_runner');
 
 suiteRunner({
   files: [__dirname + '/../../test/suite/suite_single_successful_test'],
-  reporters: []
+  reporters: [],
 });

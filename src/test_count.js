@@ -22,7 +22,7 @@ function incrementValue(obj, key, by) {
   if (!(key in obj)) {
     obj[key] = 0;
   }
-  obj[key] += (typeof by === 'undefined') ? 1 : by;
+  obj[key] += typeof by === 'undefined' ? 1 : by;
 }
 
 /**
@@ -48,7 +48,7 @@ module.exports = TestCount;
  * For a given suite path, increment the number of tests in it and its ancestors
  * by a given amount.
  */
-TestCount.prototype._incrementValueForSuitePath = function(suitePath, by) {
+TestCount.prototype._incrementValueForSuitePath = function (suitePath, by) {
   if (suitePath === null) {
     return;
   } else {
@@ -57,7 +57,7 @@ TestCount.prototype._incrementValueForSuitePath = function(suitePath, by) {
   }
 };
 
-TestCount.prototype.addTest = function(testPath) {
+TestCount.prototype.addTest = function (testPath) {
   this._incrementValueForSuitePath(testPathUtil.suitePathOf(testPath));
 };
 
@@ -65,14 +65,14 @@ TestCount.prototype.addTest = function(testPath) {
  * Helper method that is like addTest but it takes an array of test paths and
  * adds all of them.
  */
-TestCount.prototype.addTests = function(testPaths) {
+TestCount.prototype.addTests = function (testPaths) {
   testPaths.forEach(this.addTest.bind(this));
 };
 
-TestCount.prototype.removeTest = function(testPath) {
+TestCount.prototype.removeTest = function (testPath) {
   this._incrementValueForSuitePath(testPathUtil.suitePathOf(testPath), -1);
 };
 
-TestCount.prototype.numberOfTestsInSuite = function(suitePath) {
+TestCount.prototype.numberOfTestsInSuite = function (suitePath) {
   return this._testCounts[JSON.stringify(suitePath)] || 0;
 };

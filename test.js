@@ -23,9 +23,14 @@ var promiseUtil = require('./dist/promise_util');
 
 process.env['FORCE_COLOR'] = 'true';
 
-var suiteFiles = fs.readdirSync('build')
-  .filter(function(filename) { return filename.match(/^test_/); })
-  .map(function(filename) { return path.join('build', filename) });
+var suiteFiles = fs
+  .readdirSync('build')
+  .filter(function (filename) {
+    return filename.match(/^test_/);
+  })
+  .map(function (filename) {
+    return path.join('build', filename);
+  });
 
 const reporters = [
   new overman.reporters.Spec(process),
@@ -34,11 +39,11 @@ const reporters = [
 var suitePromise = overman({ files: suiteFiles, reporters });
 
 var finished = false;
-promiseUtil.finally(suitePromise, function() {
+promiseUtil.finally(suitePromise, function () {
   finished = true;
 });
 
-process.on('SIGINT', function() {
+process.on('SIGINT', function () {
   if (finished) {
     // It is possible that the test suite has finished running, but that
     // something is still left on the runloop. In that case, we shoulnd't
@@ -49,6 +54,9 @@ process.on('SIGINT', function() {
   }
 });
 
-suitePromise.then(function() {}, function(err) {
-  process.exit(1);
-});
+suitePromise.then(
+  function () {},
+  function (err) {
+    process.exit(1);
+  }
+);

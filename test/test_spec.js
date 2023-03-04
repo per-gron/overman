@@ -31,7 +31,7 @@ function simulateOneTest(spec) {
     type: 'finish',
     result: 'success',
     slow: true,
-    duration: 123
+    duration: 123,
   });
   spec.done(new Date());
 }
@@ -53,20 +53,20 @@ function simulateOneTestAndWaitForLine(line) {
   return simulateAndWaitForLine(simulateOneTest, line);
 }
 
-describe('Spec reporter', function() {
-  it('should mark slow tests', function() {
+describe('Spec reporter', function () {
+  it('should mark slow tests', function () {
     return simulateOneTestAndWaitForLine(/\(123ms\)/);
   });
 
-  it('should mark suites', function() {
+  it('should mark suites', function () {
     return simulateOneTestAndWaitForLine(/suite_name/);
   });
 
-  it('should emit a summary', function() {
+  it('should emit a summary', function () {
     return simulateOneTestAndWaitForLine(/1 passing/);
   });
 
-  it('should print details about errors', function() {
+  it('should print details about errors', function () {
     return simulateAndWaitForLine(function simulateFailingTest(spec) {
       var path = { file: 'file', path: ['suite_name', 'test'] };
 
@@ -75,30 +75,26 @@ describe('Spec reporter', function() {
       spec.gotMessage(path, {
         type: 'error',
         in: 'uncaught',
-        stack: 'an_error'
+        stack: 'an_error',
       });
       spec.gotMessage(path, {
         type: 'finish',
-        result: 'failure'
+        result: 'failure',
       });
       spec.done(new Date());
     }, /Uncaught error: an_error/);
   });
 
-  it('should print to stdout by default', function() {
+  it('should print to stdout by default', function () {
     var out = through();
-    var outputPromise = streamUtil.waitForStreamToEmitLines(out, [
-      /./,
-      /suite_name/,
-      /test/
-    ]);
+    var outputPromise = streamUtil.waitForStreamToEmitLines(out, [/./, /suite_name/, /test/]);
 
     // This test can't be done within the test process, because when the test
     // runs in Mocha it's not ok to pipe stdout to something else.
     var suitePromise = suiteRunner({
       files: [__dirname + '/../test/suite/' + 'suite_spec_should_print_to_stdout_by_default'],
       timeout: 1000,
-      reporters: new OnMessage(function(path, message) {
+      reporters: new OnMessage(function (path, message) {
         if (message.type === 'finish') {
           out.end();
         } else if (message.type === 'stdout') {

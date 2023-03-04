@@ -20,45 +20,54 @@ var expect = require('chai').expect;
 var promiseUtil = require('../dist/promise_util');
 var delay = require('./util/delay');
 
-describe('Promise utilities', function() {
-  describe('finally', function() {
-    it('should support returning value when promise succeeds', async function() {
+describe('Promise utilities', function () {
+  describe('finally', function () {
+    it('should support returning value when promise succeeds', async function () {
       let callbackHit = false;
-      const value = await promiseUtil.finally(Promise.resolve(123), function() {
+      const value = await promiseUtil.finally(Promise.resolve(123), function () {
         callbackHit = true;
       });
       expect(callbackHit).to.be.true;
       expect(value).to.equal(123);
     });
 
-    it('should support returning value when promise fails', async function() {
+    it('should support returning value when promise fails', async function () {
       let callbackHit = false;
-      await promiseUtil.finally(Promise.reject(123), function() {
+      await promiseUtil
+        .finally(Promise.reject(123), function () {
           callbackHit = true;
         })
-        .then(function() {
-          throw new Error('should fail');
-        }, function(err) {
-          expect(err).to.equal(123);
-        });
+        .then(
+          function () {
+            throw new Error('should fail');
+          },
+          function (err) {
+            expect(err).to.equal(123);
+          }
+        );
 
       expect(callbackHit).to.be.true;
     });
 
-    [true, false].forEach(function(succeed) {
-      it('should support returning promise when promise ' + (succeed ? 'succeeds' : 'fails'), function() {
-        var initialPromise = succeed ? Promise.resolve(123) : Promise.reject(123);
-        var mainPromise = promiseUtil.finally(initialPromise, function() {
-            return new Promise(function() {});  // Never fulfilled
-          })
-          .then(function() {
-            throw new Error('should not reach this point');
-          });
+    [true, false].forEach(function (succeed) {
+      it(
+        'should support returning promise when promise ' + (succeed ? 'succeeds' : 'fails'),
+        function () {
+          var initialPromise = succeed ? Promise.resolve(123) : Promise.reject(123);
+          var mainPromise = promiseUtil
+            .finally(initialPromise, function () {
+              return new Promise(function () {}); // Never fulfilled
+            })
+            .then(function () {
+              throw new Error('should not reach this point');
+            });
 
-        return Promise.race([
-          mainPromise,  // Should not ever fulfill
-          delay(100)]);
-      });
+          return Promise.race([
+            mainPromise, // Should not ever fulfill
+            delay(100),
+          ]);
+        }
+      );
     });
   });
 });

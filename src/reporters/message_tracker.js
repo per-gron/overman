@@ -33,26 +33,26 @@ function testPathToKey(testPath) {
  */
 function MessageTracker(messageType) {
   this._messageType = messageType;
-  this._messages = {};  // Hash of JSON'd testPath to array of messages
-  this._timedout = {};  // Hash of JSON'd testPath to bool indicating if this run of the test timed out
+  this._messages = {}; // Hash of JSON'd testPath to array of messages
+  this._timedout = {}; // Hash of JSON'd testPath to bool indicating if this run of the test timed out
 }
 module.exports = MessageTracker;
 
-MessageTracker.prototype.getMessages = function(testPath) {
+MessageTracker.prototype.getMessages = function (testPath) {
   var key = testPathToKey(testPath);
   return this._messages[key] || [];
 };
 
-MessageTracker.prototype._addMessage = function(testPath, message) {
+MessageTracker.prototype._addMessage = function (testPath, message) {
   var key = testPathToKey(testPath);
   this._messages[key] = this.getMessages(testPath).concat([message]);
 };
 
-MessageTracker.prototype._testTimedOut = function(testPath) {
+MessageTracker.prototype._testTimedOut = function (testPath) {
   return !!this._timedout[testPathToKey(testPath)];
 };
 
-MessageTracker.prototype.gotMessage = function(testPath, message) {
+MessageTracker.prototype.gotMessage = function (testPath, message) {
   if (message.type === this._messageType) {
     if (!this._testTimedOut(testPath)) {
       this._addMessage(testPath, message);

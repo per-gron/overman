@@ -16,10 +16,10 @@
 
 'use strict';
 
-after(function() {
+after(function () {
   console.log('running_after_hook');
 });
 
-it('should succeed', function() {
+it('should succeed', function () {
   console.log('running_test');
 });

@@ -16,4 +16,4 @@
 
 'use strict';
 
-afterEach(function() {});
+afterEach(function () {});

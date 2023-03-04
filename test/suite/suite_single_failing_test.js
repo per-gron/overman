@@ -16,6 +16,6 @@
 
 'use strict';
 
-it('should fail', function() {
+it('should fail', function () {
   return Promise.reject(new Error('Failing test'));
 });

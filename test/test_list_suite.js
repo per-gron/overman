@@ -24,209 +24,232 @@ var listSuite = require('../dist/list_suite');
 var shouldFail = require('./util/should_fail');
 
 function list(suite, timeout, childProcess) {
-  return listSuite.listTestsOfFile(_.isNumber(timeout) ? timeout : 2000, __dirname + '/../dist/interfaces/bdd_mocha', 'param', suite, childProcess);
+  return listSuite.listTestsOfFile(
+    _.isNumber(timeout) ? timeout : 2000,
+    __dirname + '/../dist/interfaces/bdd_mocha',
+    'param',
+    suite,
+    childProcess
+  );
 }
 
-describe('List suite', function() {
-  describe('ListTestError', function() {
-    it('should be instanceof Error', function() {
+describe('List suite', function () {
+  describe('ListTestError', function () {
+    it('should be instanceof Error', function () {
       expect(new listSuite.ListTestError() instanceof Error).to.be.true;
     });
 
-    it('should have a message with the suite name', function() {
+    it('should have a message with the suite name', function () {
       var error = new listSuite.ListTestError('suite_name');
       expect(error).property('message').to.contain('suite_name');
     });
 
-    it('should have a stack with the suite name', function() {
+    it('should have a stack with the suite name', function () {
       var error = new listSuite.ListTestError('suite_name');
       expect(error).property('stack').to.contain('suite_name');
     });
 
-    it('should elide error output when not present', function() {
+    it('should elide error output when not present', function () {
       var error = new listSuite.ListTestError('suite_name');
       expect(error).property('stack').to.be.equal('suite_name');
     });
 
-    it('should have a stack with the error output', function() {
+    it('should have a stack with the error output', function () {
       var error = new listSuite.ListTestError('suite_name', 'error\noutput');
       expect(error).property('stack').to.contain('error\noutput');
     });
   });
 
-  describe('#listTestsOfFile', function() {
-    it('should parse stdout JSON on success', function() {
+  describe('#listTestsOfFile', function () {
+    it('should parse stdout JSON on success', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_single_successful_test');
-      return list(suite)
-        .then(function(result) {
-          expect(result).to.be.deep.equal([{
-            'path': {
-              'file': suite,
-              'path': ['should succeed']
-            }
-          }]);
-        });
+      return list(suite).then(function (result) {
+        expect(result).to.be.deep.equal([
+          {
+            path: {
+              file: suite,
+              path: ['should succeed'],
+            },
+          },
+        ]);
+      });
     });
 
-    it('should parse attributes', function() {
+    it('should parse attributes', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_single_test_attributes');
-      return list(suite)
-        .then(function(result) {
-          expect(result).to.be.deep.equal([{
-            'path': {
-              'file': suite,
-              'path': ['should succeed']
+      return list(suite).then(function (result) {
+        expect(result).to.be.deep.equal([
+          {
+            path: {
+              file: suite,
+              path: ['should succeed'],
             },
-            'attributes': {
-              'foo': 'bar'
-            }
-          }]);
-        });
+            attributes: {
+              foo: 'bar',
+            },
+          },
+        ]);
+      });
     });
 
-    it('should parse attributes where test attributes overrides the suite', function() {
+    it('should parse attributes where test attributes overrides the suite', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_attributes');
-      return list(suite)
-        .then(function(result) {
-          expect(result).to.be.deep.equal([{
-            'path': {
-              'file': suite,
-              'path': ['suite', 'should override']
+      return list(suite).then(function (result) {
+        expect(result).to.be.deep.equal([
+          {
+            path: {
+              file: suite,
+              path: ['suite', 'should override'],
             },
-            'attributes': {
-              'foo': 'baz',
-              'bar': 'qux'
-            }
-          }, {
-            'path': {
-              'file': suite,
-              'path': ['suite', 'should override again']
+            attributes: {
+              foo: 'baz',
+              bar: 'qux',
             },
-            'attributes': {
-              'foo': 'quux',
-              'bar': 'qux'
-            }
-          }]);
-        });
+          },
+          {
+            path: {
+              file: suite,
+              path: ['suite', 'should override again'],
+            },
+            attributes: {
+              foo: 'quux',
+              bar: 'qux',
+            },
+          },
+        ]);
+      });
     });
 
-    it('should report skipped tests as skipped', function() {
+    it('should report skipped tests as skipped', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_single_skipped_test');
-      return list(suite)
-        .then(function(result) {
-          expect(result).to.be.deep.equal([{
-            'path': {
-              'file': suite,
-              'path': ['should be skipped']
+      return list(suite).then(function (result) {
+        expect(result).to.be.deep.equal([
+          {
+            path: {
+              file: suite,
+              path: ['should be skipped'],
             },
-            'skipped': true
-          }]);
-        });
+            skipped: true,
+          },
+        ]);
+      });
     });
 
-    it('should report tests where the suite overrides the timeout', function() {
+    it('should report tests where the suite overrides the timeout', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_timeout_set_in_suite');
-      return list(suite)
-        .then(function(result) {
-          expect(result).to.be.deep.equal([{
-            'path': {
-              'file': suite,
-              'path': ['A suite', 'should print its timeout']
+      return list(suite).then(function (result) {
+        expect(result).to.be.deep.equal([
+          {
+            path: {
+              file: suite,
+              path: ['A suite', 'should print its timeout'],
             },
-            'timeout': 1234
-          }]);
-        });
+            timeout: 1234,
+          },
+        ]);
+      });
     });
 
-    it('should report tests where the suite overrides the slowness threshold', function() {
+    it('should report tests where the suite overrides the slowness threshold', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_slow_set_in_suite');
-      return list(suite)
-        .then(function(result) {
-          expect(result).to.be.deep.equal([{
-            'path': {
-              'file': suite,
-              'path': ['A suite', 'should print its slowness threshold']
+      return list(suite).then(function (result) {
+        expect(result).to.be.deep.equal([
+          {
+            path: {
+              file: suite,
+              path: ['A suite', 'should print its slowness threshold'],
             },
-            'slow': 1234
-          }]);
-        });
+            slow: 1234,
+          },
+        ]);
+      });
     });
 
-    it('should report tests marked as only', function() {
+    it('should report tests marked as only', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_single_only_test');
-      return list(suite)
-        .then(function(result) {
-          expect(result).to.be.deep.equal([{
-            'path': {
-              'file': suite,
-              'path': ['should be run only']
+      return list(suite).then(function (result) {
+        expect(result).to.be.deep.equal([
+          {
+            path: {
+              file: suite,
+              path: ['should be run only'],
             },
-            'only': true
-          }]);
-        });
+            only: true,
+          },
+        ]);
+      });
     });
 
-    it('should report unstable tests as unstable', function() {
+    it('should report unstable tests as unstable', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_single_unstable_test');
-      return list(suite)
-        .then(function(result) {
-          expect(result).to.be.deep.equal([{
-            'path': {
-              'file': suite,
-              'path': ['should be run if unstable']
+      return list(suite).then(function (result) {
+        expect(result).to.be.deep.equal([
+          {
+            path: {
+              file: suite,
+              path: ['should be run if unstable'],
             },
-            'unstable': true
-          }]);
-        });
+            unstable: true,
+          },
+        ]);
+      });
     });
 
-    it('should fail with a ListTestError when the listing fails', function() {
+    it('should fail with a ListTestError when the listing fails', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_syntax_error');
-      return shouldFail(list(suite), function(error) {
-        expect(error).property('message').to.match(/Failed to process .*suite_syntax_error/);
-        expect(error).property('stack').to.match(/SyntaxError: Unexpected identifier/);
+      return shouldFail(list(suite), function (error) {
+        expect(error)
+          .property('message')
+          .to.match(/Failed to process .*suite_syntax_error/);
+        expect(error)
+          .property('stack')
+          .to.match(/SyntaxError: Unexpected identifier/);
         return error instanceof listSuite.ListTestError;
       });
     });
 
-    it('should fail with a timed out ListTestError when the listing times out', function() {
+    it('should fail with a timed out ListTestError when the listing times out', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_neverending_listing');
-      return shouldFail(list(suite, 10), function(error) {
-        expect(error).property('message').to.match(/Timed out while listing tests of .*suite_neverending_listing/);
-        expect(error).property('stack').to.match(/Timed out while listing tests of .*suite_neverending_listing/);
+      return shouldFail(list(suite, 10), function (error) {
+        expect(error)
+          .property('message')
+          .to.match(/Timed out while listing tests of .*suite_neverending_listing/);
+        expect(error)
+          .property('stack')
+          .to.match(/Timed out while listing tests of .*suite_neverending_listing/);
         expect(error).property('timeout').to.be.true;
         return error instanceof listSuite.ListTestError;
       });
     });
 
-    it('should kill the subprocess on timeout', async function() {
+    it('should kill the subprocess on timeout', async function () {
       var killed = false;
 
       function fork() {
         return {
           stdout: through(),
           stderr: through(),
-          on: function() {},
-          kill: function(signal) {
+          on: function () {},
+          kill: function (signal) {
             expect(signal).to.be.equal('SIGKILL');
             killed = true;
-          }
+          },
         };
       }
 
       var suite = path.resolve(__dirname + '/../test/suite/suite_neverending_listing');
-      await shouldFail(list(suite, 10, { fork: fork }), function(error) {
+      await shouldFail(list(suite, 10, { fork: fork }), function (error) {
         return error instanceof listSuite.ListTestError;
       });
       expect(killed).to.be.true;
     });
 
-    it('should treat a 0 timeout as no timeout', function() {
+    it('should treat a 0 timeout as no timeout', function () {
       var suite = path.resolve(__dirname + '/../test/suite/suite_single_successful_test');
       return list(suite, 0);
     });
 
-    it('should provide the test interface parameter to the list_suite process', async function() {
+    it('should provide the test interface parameter to the list_suite process', async function () {
       let paramChecked = false;
 
       function fork(path, parameters) {
@@ -238,12 +261,12 @@ describe('List suite', function() {
         return {
           stdout: out,
           stderr: through(),
-          on: function(event, fn) {
+          on: function (event, fn) {
             expect(event).to.be.equal('exit');
             fn(0);
             out.end();
           },
-          kill: function() {}
+          kill: function () {},
         };
       }
 
@@ -251,12 +274,16 @@ describe('List suite', function() {
       expect(paramChecked).to.be.true;
     });
 
-    it('should provide the test interface parameter to the interface', function() {
-      return listSuite.listTestsOfFile(1000, __dirname + '/../test/util/dummy_parameterized_interface', 'test_param', 'suite')
-        .then(function(result) {
-          expect(result).to.be.deep.equal([
-            { path: { file: 'suite', path: ['test_param'] } }
-          ]);
+    it('should provide the test interface parameter to the interface', function () {
+      return listSuite
+        .listTestsOfFile(
+          1000,
+          __dirname + '/../test/util/dummy_parameterized_interface',
+          'test_param',
+          'suite'
+        )
+        .then(function (result) {
+          expect(result).to.be.deep.equal([{ path: { file: 'suite', path: ['test_param'] } }]);
         });
     });
   });

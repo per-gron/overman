@@ -26,7 +26,7 @@ function ErrorDetector() {
   this._message = '';
 }
 
-ErrorDetector.prototype.gotMessage = function(testPath, message) {
+ErrorDetector.prototype.gotMessage = function (testPath, message) {
   if (message.type === 'finish' && !message.result.match(/^(success)|(skipped)$/)) {
     this._didFail = true;
     this._testPath = testPath;
@@ -34,15 +34,15 @@ ErrorDetector.prototype.gotMessage = function(testPath, message) {
   }
 };
 
-ErrorDetector.prototype.didFail = function() {
+ErrorDetector.prototype.didFail = function () {
   return this._didFail;
 };
 
-ErrorDetector.prototype.testPath = function() {
+ErrorDetector.prototype.testPath = function () {
   return this._testPath;
 };
 
-ErrorDetector.prototype.message = function() {
+ErrorDetector.prototype.message = function () {
   return this._message;
 };
 

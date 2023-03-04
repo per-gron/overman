@@ -32,26 +32,26 @@ function Cancellable(reporter) {
   this._finished = false;
   this._reporter = reporter;
   this._registerTestsCalled = false;
-  this._outstandingTests = {};  // Map from JSON'd test path to true (a set)
+  this._outstandingTests = {}; // Map from JSON'd test path to true (a set)
 }
 
-Cancellable.prototype._forwardCall = function(message, args) {
+Cancellable.prototype._forwardCall = function (message, args) {
   if (!this._finished && this._reporter[message]) {
     this._reporter[message].apply(this._reporter, args);
   }
 };
 
-Cancellable.prototype.registrationFailed = function() {
+Cancellable.prototype.registrationFailed = function () {
   this._forwardCall('registrationFailed', arguments);
   this._finished = true;
 };
 
-Cancellable.prototype.registerTests = function() {
+Cancellable.prototype.registerTests = function () {
   this._registerTestsCalled = true;
   this._forwardCall('registerTests', arguments);
 };
 
-Cancellable.prototype.gotMessage = function(testPath, message) {
+Cancellable.prototype.gotMessage = function (testPath, message) {
   var key = JSON.stringify(testPath);
   if (message.type === 'start') {
     this._outstandingTests[key] = true;
@@ -62,18 +62,18 @@ Cancellable.prototype.gotMessage = function(testPath, message) {
   this._forwardCall('gotMessage', [testPath, message]);
 };
 
-Cancellable.prototype.done = function() {
+Cancellable.prototype.done = function () {
   this._forwardCall('done', arguments);
   this._finished = true;
 };
 
-Cancellable.prototype.cancel = function() {
+Cancellable.prototype.cancel = function () {
   var self = this;
 
   this._finished = true;
 
   if (this._reporter.gotMessage) {
-    _.keys(this._outstandingTests).forEach(function(key) {
+    _.keys(this._outstandingTests).forEach(function (key) {
       var testPath = JSON.parse(key);
       self._reporter.gotMessage(testPath, { type: 'finish', result: 'aborted' });
     });
@@ -84,7 +84,7 @@ Cancellable.prototype.cancel = function() {
   }
 };
 
-Cancellable.prototype.isFinished = function() {
+Cancellable.prototype.isFinished = function () {
   return this._finished;
 };
 

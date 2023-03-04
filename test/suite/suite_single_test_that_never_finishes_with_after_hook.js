@@ -16,11 +16,11 @@
 
 'use strict';
 
-it('should never finish', function() {
-  return new Promise(function() {});
+it('should never finish', function () {
+  return new Promise(function () {});
 });
 
-after(function() {
+after(function () {
   this.debugInfo('in', 'afterHook');
   console.log('in_after_hook');
 });

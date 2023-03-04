@@ -34,188 +34,200 @@ function doWithReporterAndCheck(callback, expectedLines) {
   return promise;
 }
 
-describe('Error detail reporter', function() {
-  it('should not print anything if no test failed', function() {
-    return doWithReporterAndCheck(function(reporter) {
+describe('Error detail reporter', function () {
+  it('should not print anything if no test failed', function () {
+    return doWithReporterAndCheck(function (reporter) {
       reporter.done();
     }, []);
   });
 
-  it('should print registrationFailed information', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.registrationFailed(new listSuite.ListTestError('Failed to process suite.js', 'blah\nblah'));
-    }, [
-      /Failed to process suite.js/,
-      /blah/,
-      /blah/
-    ]);
+  it('should print registrationFailed information', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.registrationFailed(
+          new listSuite.ListTestError('Failed to process suite.js', 'blah\nblah')
+        );
+      },
+      [/Failed to process suite.js/, /blah/, /blah/]
+    );
   });
 
-  it('should handle missing result in finish message', function() {
-    return doWithReporterAndCheck(function(reporter) {
+  it('should handle missing result in finish message', function () {
+    return doWithReporterAndCheck(function (reporter) {
       reporter.gotMessage({ path: ['test'] }, { type: 'finish' });
       reporter.done();
     }, []);
   });
 
-  it('should number test failures', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'An error' });
-      reporter.gotMessage({ path: ['test2'] }, { type: 'error', stack: 'An error' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
-      reporter.gotMessage({ path: ['test2'] }, { type: 'finish', result: 'failure' });
-      reporter.done();
-    }, [
-      / 1\) /,
-      /.*/,
-      /.*/,
-      / 2\) /,
-      /.*/,
-      /.*/
-    ]);
+  it('should number test failures', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'An error' });
+        reporter.gotMessage({ path: ['test2'] }, { type: 'error', stack: 'An error' });
+        reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
+        reporter.gotMessage({ path: ['test2'] }, { type: 'finish', result: 'failure' });
+        reporter.done();
+      },
+      [/ 1\) /, /.*/, /.*/, / 2\) /, /.*/, /.*/]
+    );
   });
 
-  it('should report suite as well as test names', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['suite', 'test1'] }, { type: 'error', stack: 'An error' });
-      reporter.gotMessage({ path: ['suite', 'test1'] }, { type: 'finish', result: 'failure' });
-      reporter.done();
-    }, [
-      /suite test1:$/,
-      /.*/,
-      /.*/
-    ]);
+  it('should report suite as well as test names', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['suite', 'test1'] }, { type: 'error', stack: 'An error' });
+        reporter.gotMessage({ path: ['suite', 'test1'] }, { type: 'finish', result: 'failure' });
+        reporter.done();
+      },
+      [/suite test1:$/, /.*/, /.*/]
+    );
   });
 
-  it('should report test errors', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
-      reporter.done();
-    }, [
-      /test1:/,
-      '     Error: X',
-      '       Trace',
-      ''
-    ]);
+  it('should report test errors', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
+        reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
+        reporter.done();
+      },
+      [/test1:/, '     Error: X', '       Trace', '']
+    );
   });
 
-  it('should report tests that time out', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
-      reporter.done();
-    }, [
-      /test1:$/,
-      '     In before hook: Timed out',
-      ''
-    ]);
+  it('should report tests that time out', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+        reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
+        reporter.done();
+      },
+      [/test1:$/, '     In before hook: Timed out', '']
+    );
   });
 
-  it('should report timeouts after test errors', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
-      reporter.done();
-    }, [
-      /test1:$/,
-      '     Error: X',
-      '       Trace',
-      '',
-      '     In before hook: Timed out',
-      ''
-    ]);
+  it('should report timeouts after test errors', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+        reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
+        reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
+        reporter.done();
+      },
+      [/test1:$/, '     Error: X', '       Trace', '', '     In before hook: Timed out', '']
+    );
   });
 
-  it('should report the last breadcrumb before timeout for tests that time out', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'other_breadcrumb_msg', trace: 'trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'timeout' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'yet_another_breadcrumb_msg', trace: 'trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
-      reporter.done();
-    }, [
-      /test1:$/,
-      '     In before hook: Timed out',
-      '',
-      '     Last breadcrumb: breadcrumb_msg',
-      '     trace',
-      ''
-    ]);
+  it('should report the last breadcrumb before timeout for tests that time out', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+        reporter.gotMessage(
+          { path: ['test1'] },
+          { type: 'breadcrumb', message: 'other_breadcrumb_msg', trace: 'trace' }
+        );
+        reporter.gotMessage(
+          { path: ['test1'] },
+          { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' }
+        );
+        reporter.gotMessage({ path: ['test1'] }, { type: 'timeout' });
+        reporter.gotMessage(
+          { path: ['test1'] },
+          { type: 'breadcrumb', message: 'yet_another_breadcrumb_msg', trace: 'trace' }
+        );
+        reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'timeout' });
+        reporter.done();
+      },
+      [
+        /test1:$/,
+        '     In before hook: Timed out',
+        '',
+        '     Last breadcrumb: breadcrumb_msg',
+        '     trace',
+        '',
+      ]
+    );
   });
 
-  it('should report the last breadcrumb for tests that fail with an uncaught exception', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'other_breadcrumb_msg', trace: 'trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', in: 'uncaught', stack: 'Message\nstack' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
-      reporter.done();
-    }, [
-      /test1:$/,
-      '     Uncaught error: Message',
-      '     stack',
-      '',
-      '     Last breadcrumb: breadcrumb_msg',
-      '     trace',
-      ''
-    ]);
+  it('should report the last breadcrumb for tests that fail with an uncaught exception', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+        reporter.gotMessage(
+          { path: ['test1'] },
+          { type: 'breadcrumb', message: 'other_breadcrumb_msg', trace: 'trace' }
+        );
+        reporter.gotMessage(
+          { path: ['test1'] },
+          { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' }
+        );
+        reporter.gotMessage(
+          { path: ['test1'] },
+          { type: 'error', in: 'uncaught', stack: 'Message\nstack' }
+        );
+        reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
+        reporter.done();
+      },
+      [
+        /test1:$/,
+        '     Uncaught error: Message',
+        '     stack',
+        '',
+        '     Last breadcrumb: breadcrumb_msg',
+        '     trace',
+        '',
+      ]
+    );
   });
 
-  it('should not report breadcrumb for tests that fail with an normal error', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', in: 'test', stack: 'Message\nstack' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
-      reporter.done();
-    }, [
-      /test1:$/,
-      '     In test: Message',
-      '     stack',
-      '',
-    ]);
+  it('should not report breadcrumb for tests that fail with an normal error', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['test1'] }, { type: 'startedBeforeHook' });
+        reporter.gotMessage(
+          { path: ['test1'] },
+          { type: 'breadcrumb', message: 'breadcrumb_msg', trace: 'trace' }
+        );
+        reporter.gotMessage(
+          { path: ['test1'] },
+          { type: 'error', in: 'test', stack: 'Message\nstack' }
+        );
+        reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
+        reporter.done();
+      },
+      [/test1:$/, '     In test: Message', '     stack', '']
+    );
   });
 
-  it('should not treat successful tests as failures', function() {
-    return doWithReporterAndCheck(function(reporter) {
+  it('should not treat successful tests as failures', function () {
+    return doWithReporterAndCheck(function (reporter) {
       reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'success' });
       reporter.done();
     }, []);
   });
 
-  it('should not treat skipped tests as failures', function() {
-    return doWithReporterAndCheck(function(reporter) {
+  it('should not treat skipped tests as failures', function () {
+    return doWithReporterAndCheck(function (reporter) {
       reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'skipped' });
       reporter.done();
     }, []);
   });
 
-  it('should not treat aborted tests as failures', function() {
-    return doWithReporterAndCheck(function(reporter) {
+  it('should not treat aborted tests as failures', function () {
+    return doWithReporterAndCheck(function (reporter) {
       reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'aborted' });
       reporter.done();
     }, []);
   });
 
-  it('should report all errors that a test emitted', function() {
-    return doWithReporterAndCheck(function(reporter) {
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: Y\n    Trace' });
-      reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
-      reporter.done();
-    }, [
-      /test1:/,
-      '     Error: X',
-      '       Trace',
-      '',
-      '     Error: Y',
-      '       Trace',
-      ''
-    ]);
+  it('should report all errors that a test emitted', function () {
+    return doWithReporterAndCheck(
+      function (reporter) {
+        reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: X\n    Trace' });
+        reporter.gotMessage({ path: ['test1'] }, { type: 'error', stack: 'Error: Y\n    Trace' });
+        reporter.gotMessage({ path: ['test1'] }, { type: 'finish', result: 'failure' });
+        reporter.done();
+      },
+      [/test1:/, '     Error: X', '       Trace', '', '     Error: Y', '       Trace', '']
+    );
   });
 });

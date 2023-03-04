@@ -16,18 +16,18 @@
 
 'use strict';
 
-it('should be run', function() {
+it('should be run', function () {
   console.log('should_be_run');
 });
 
-it.unstable('should run if unstable', function() {
+it.unstable('should run if unstable', function () {
   console.log('should_run_if_unstable');
 });
 
-it.unstable('should also run if unstable', function() {
+it.unstable('should also run if unstable', function () {
   console.log('should_also_run_if_unstable');
 });
 
-it('should also be run', function() {
+it('should also be run', function () {
   console.log('should_also_be_run');
 });

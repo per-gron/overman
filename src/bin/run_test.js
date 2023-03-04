@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-
-
-
-
-
-
-
-
-
 /**
  * Welcome to debugging mode of Overman!
  *
@@ -36,16 +27,6 @@
  * test by clicking the resume button (with an |> icon) to the right.
  */
 'use strict';
-
-
-
-
-
-
-
-
-
-
 
 /**
  * This file is a runnable script that takes three or more command line arguments:
@@ -61,7 +42,7 @@
 
 var _ = require('lodash');
 var co = require('co');
-var exit = require('exit');  // process.exit that works on Windows
+var exit = require('exit'); // process.exit that works on Windows
 var promiseUtil = require('../promise_util');
 
 require('source-map-support').install();
@@ -77,7 +58,7 @@ var testFile = process.argv[4];
 var testPath = process.argv.slice(5);
 
 var testInterface = require(testInterfacePath);
-var cleanup = (function() {
+var cleanup = (function () {
   var cleaned = false;
   return function (exitCode) {
     if (!killSubProcesses) {
@@ -87,8 +68,10 @@ var cleanup = (function() {
     }
     cleaned = true;
     require('ps-tree')(process.pid, function (err, children) {
-      var childProcesses = children.map(function (p) { return p.PID; });
-      childProcesses.forEach(function(pid) {
+      var childProcesses = children.map(function (p) {
+        return p.PID;
+      });
+      childProcesses.forEach(function (pid) {
         if (require('is-running')(pid)) {
           process.kill(pid, 'SIGKILL');
         }
@@ -96,7 +79,7 @@ var cleanup = (function() {
       exit(exitCode);
     });
   };
-}());
+})();
 
 function sendError(error, extraInformation) {
   process.send(
@@ -105,7 +88,7 @@ function sendError(error, extraInformation) {
         type: 'error',
         stack:
           (error instanceof Error ? error.stack : null) ||
-          'Unknown error: ' + JSON.stringify(error)
+          'Unknown error: ' + JSON.stringify(error),
       },
       extraInformation
     )
@@ -122,7 +105,8 @@ function invokeGeneratorOrPromiseFunction(fun) {
     return Promise.reject(e);
   }
 
-  if (result && result.next) {  // This looks like a generator
+  if (result && result.next) {
+    // This looks like a generator
     return co(result);
   } else {
     return Promise.resolve(result);
@@ -131,14 +115,18 @@ function invokeGeneratorOrPromiseFunction(fun) {
 
 function invokeFunctionNoErrorHandling(fun) {
   if (fun.length > 0) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       var callbackCalled = false;
-      fun(function(error) {
+      fun(function (error) {
         if (callbackCalled) {
-          sendError({}, {
-            stack: 'done callback invoked more than once' +
-              (error ? ', failing with: ' + error.stack : ', succeeding')
-          });
+          sendError(
+            {},
+            {
+              stack:
+                'done callback invoked more than once' +
+                (error ? ', failing with: ' + error.stack : ', succeeding'),
+            }
+          );
           cleanup(1);
         }
 
@@ -156,16 +144,15 @@ function invokeFunctionNoErrorHandling(fun) {
 }
 
 function invokeFunction(fun, placeInformation) {
-  return invokeFunctionNoErrorHandling(fun)
-    .catch(function(error) {
-      sendError(error, placeInformation);
-      throw error;
-    });
+  return invokeFunctionNoErrorHandling(fun).catch(function (error) {
+    sendError(error, placeInformation);
+    throw error;
+  });
 }
 
 function searchForTest(suite, completeTestPath) {
   return (function search(contents, path, before, after) {
-    var subsuite = _.find(contents, function(subsuite) {
+    var subsuite = _.find(contents, function (subsuite) {
       return subsuite.name === path[0];
     });
 
@@ -178,10 +165,12 @@ function searchForTest(suite, completeTestPath) {
         return {
           test: subsuite,
           before: before,
-          after: after
+          after: after,
         };
       } else {
-        throw new Error('Test with path ' + JSON.stringify(completeTestPath) + ' is actually a suite');
+        throw new Error(
+          'Test with path ' + JSON.stringify(completeTestPath) + ' is actually a suite'
+        );
       }
     } else {
       if (subsuite.type === 'suite') {
@@ -189,7 +178,8 @@ function searchForTest(suite, completeTestPath) {
           subsuite.contents,
           path.slice(1),
           before.concat(subsuite.before || []),
-          (subsuite.after || []).concat(after));
+          (subsuite.after || []).concat(after)
+        );
       } else {
         throw new Error('Test with path ' + JSON.stringify(completeTestPath) + ' not found');
       }
@@ -204,31 +194,36 @@ function runHooks(before, hooks) {
     var hook = hooks[0];
     process.send({
       type: 'breadcrumb',
-      message: 'Starting ' + (before ? 'before' : 'after') + ' hook' + (hook.name ? ' "' + hook.name + '"' : ''),
-      systemGenerated: true
+      message:
+        'Starting ' +
+        (before ? 'before' : 'after') +
+        ' hook' +
+        (hook.name ? ' "' + hook.name + '"' : ''),
+      systemGenerated: true,
     });
     process.send({
       type: before ? 'startedBeforeHook' : 'startedAfterHook',
-      name: hook.name
+      name: hook.name,
     });
     return invokeFunction(hook.run, {
-        in: before ? 'beforeHook' : 'afterHook',
-        inName: hook.name
-      })
-      .then(function() {
+      in: before ? 'beforeHook' : 'afterHook',
+      inName: hook.name,
+    }).then(
+      function () {
         return runHooks(before, hooks.slice(1));
-      }, function(error) {
+      },
+      function (error) {
         if (before) {
           throw error;
         } else {
           // All after hooks should be run always
-          return runHooks(before, hooks.slice(1))
-            .then(function() {
-              // Even though the other hooks succeeded, this one failed
-              throw error;
-            });
+          return runHooks(before, hooks.slice(1)).then(function () {
+            // Even though the other hooks succeeded, this one failed
+            throw error;
+          });
         }
-      });
+      }
+    );
   }
 }
 
@@ -239,7 +234,7 @@ function runHooks(before, hooks) {
  */
 function doOnce(thunk) {
   var result = null;
-  return function() {
+  return function () {
     if (thunk) {
       result = thunk();
       thunk = null;
@@ -250,20 +245,19 @@ function doOnce(thunk) {
 
 function runAfterHooks(hooks) {
   process.send({ type: 'startedAfterHooks' });
-  return runHooks(false, hooks)
-    .then(function() {
-      process.send({
-        type: 'breadcrumb',
-        message: 'Finished running after hooks',
-        systemGenerated: true
-      });
-      process.send({ type: 'finishedAfterHooks' });
+  return runHooks(false, hooks).then(function () {
+    process.send({
+      type: 'breadcrumb',
+      message: 'Finished running after hooks',
+      systemGenerated: true,
     });
+    process.send({ type: 'finishedAfterHooks' });
+  });
 }
 
 function makeSureProcessRunsUntilPromiseIsFulfilled(promise) {
-  var interval = setInterval(function() {}, 5000);
-  return promiseUtil.finally(promise, function() {
+  var interval = setInterval(function () {}, 5000);
+  return promiseUtil.finally(promise, function () {
     clearInterval(interval);
   });
 }
@@ -274,68 +268,69 @@ function runTest(foundTest, runAfter) {
   // and exit non-zero, but I don't know how to do that, so instead we make
   // sure to time out.
   var testPromise = Promise.resolve()
-    .then(function() {
+    .then(function () {
       process.send({ type: 'startedBeforeHooks' });
       return runHooks(true, foundTest.before);
     })
-    .then(function() {
+    .then(function () {
       process.send({ type: 'startedTest' });
       process.send({
         type: 'breadcrumb',
         message: 'Starting test',
-        systemGenerated: true
+        systemGenerated: true,
       });
       return invokeFunction(foundTest.test.run, { in: 'test' });
     });
 
   return makeSureProcessRunsUntilPromiseIsFulfilled(
-    promiseUtil.finally(testPromise, function() {
+    promiseUtil.finally(testPromise, function () {
       return runAfter();
-    }));
+    })
+  );
 }
 
-process.on('uncaughtException', function(error) {
+process.on('uncaughtException', function (error) {
   sendError(error, { in: 'uncaught' });
   cleanup(1);
 });
 
-process.on('beforeExit', function(exitCode) {
+process.on('beforeExit', function (exitCode) {
   cleanup(exitCode);
 });
 
 var suite = testInterface(testInterfaceParameter, testFile, {
   attributes: attributes,
-  getTimeout: function() {
+  getTimeout: function () {
     return testTimeout;
   },
-  setTimeout: function(newTimeout) {
+  setTimeout: function (newTimeout) {
     testTimeout = newTimeout;
     process.send({ type: 'setTimeout', value: newTimeout });
   },
-  getSlowThreshold: function() {
+  getSlowThreshold: function () {
     return slowThreshold;
   },
-  setSlowThreshold: function(newSlowThreshold) {
+  setSlowThreshold: function (newSlowThreshold) {
     slowThreshold = newSlowThreshold;
     process.send({ type: 'setSlowThreshold', value: newSlowThreshold });
   },
-  leaveBreadcrumb: function(message, trace) {
+  leaveBreadcrumb: function (message, trace) {
     process.send({ type: 'breadcrumb', message: message, trace: trace });
   },
-  emitDebugInfo: function(name, value) {
+  emitDebugInfo: function (name, value) {
     process.send({ type: 'debugInfo', name: name, value: value });
   },
-  getTitle: function() {
+  getTitle: function () {
     return testPath;
-  }
+  },
 });
 
 var foundTest = searchForTest(suite, testPath);
-var runAfterHooksOnce = doOnce(function() {
+var runAfterHooksOnce = doOnce(function () {
   return runAfterHooks(foundTest.after);
 });
 
-process.on('message', function(message) {
+process.on('message', function (message) {
   function end() {
     cleanup(1);
   }
@@ -346,7 +341,7 @@ process.on('message', function(message) {
 });
 
 // Orphan detection
-setInterval(function() {
+setInterval(function () {
   try {
     process.send({});
   } catch (e) {
@@ -355,11 +350,13 @@ setInterval(function() {
   }
 }, 1000);
 
-runTest(foundTest, runAfterHooksOnce)
-  .then(function() {
+runTest(foundTest, runAfterHooksOnce).then(
+  function () {
     // If there are remaining things on the runloop that never finish, we want
     // to exit here, to make sure the test doesn't wait forever.
     cleanup(0);
-  }, function() {
+  },
+  function () {
     cleanup(1);
-  });
+  }
+);

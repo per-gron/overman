@@ -16,6 +16,6 @@
 
 'use strict';
 
-it('should return the test\'s slow threshold', function() {
+it("should return the test's slow threshold", function () {
   return this.slow();
 });

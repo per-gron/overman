@@ -18,26 +18,26 @@
 
 context.outside = true;
 
-before(function() {
+before(function () {
   context.before = true;
 });
 
-beforeEach(function() {
+beforeEach(function () {
   context.beforeEach = true;
 });
 
-it(function() {
+it(function () {
   context.it = true;
 });
 
-describe(function() {
+describe(function () {
   context.describe = true;
 });
 
-after(function() {
+after(function () {
   context.after = true;
 });
 
-afterEach(function() {
+afterEach(function () {
   context.afterEach = true;
 });

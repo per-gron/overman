@@ -44,7 +44,7 @@ function Spec(streams) {
   Combined.call(this, [
     new Timer(new SuiteMarker(new SpecProgress(streams))),
     new Summary(streams.stdout),
-    new ErrorDetail(streams.stdout)
+    new ErrorDetail(streams.stdout),
   ]);
 }
 Spec.prototype = Object.create(Combined.prototype);

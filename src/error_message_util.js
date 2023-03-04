@@ -20,13 +20,13 @@ var chalk = require('chalk');
 
 var errorLocations = {
   afterHook: 'after hook',
-  beforeHook: 'before hook'
+  beforeHook: 'before hook',
 };
 
 var colors = {
   errorPlace: chalk.cyan,
   errorHeader: chalk.red,
-  trace: chalk.grey
+  trace: chalk.grey,
 };
 
 /**
@@ -45,7 +45,7 @@ function prettyErrorLocation(errorMessage) {
   }
 
   var placeType = errorLocations[errorMessage.in] || errorMessage.in;
-  var placeName = errorMessage.inName ? (' "' + errorMessage.inName + '"') : '';
+  var placeName = errorMessage.inName ? ' "' + errorMessage.inName + '"' : '';
   return 'In ' + placeType + placeName;
 }
 exports.prettyErrorLocation = prettyErrorLocation;
@@ -77,9 +77,12 @@ function prettyError(errorMessage) {
     result += colors.errorPlace(prettyErrorLocation(errorMessage) + ':') + ' ';
   }
   result += colors.errorHeader(errorLines[0]) + '\n';
-  errorLines.splice(1).map(dedentTraceLine).forEach(function(line) {
-    result += colors.trace(line) + '\n';
-  });
+  errorLines
+    .splice(1)
+    .map(dedentTraceLine)
+    .forEach(function (line) {
+      result += colors.trace(line) + '\n';
+    });
 
   return result;
 }
@@ -93,8 +96,12 @@ exports.prettyError = prettyError;
  *     The object should be of the form that prettyErrorLocation expects.
  */
 function prettyTimeout(location) {
-  return (colors.errorPlace(prettyErrorLocation(location) + ':') + ' ' +
-          colors.errorHeader('Timed out') + '\n');
+  return (
+    colors.errorPlace(prettyErrorLocation(location) + ':') +
+    ' ' +
+    colors.errorHeader('Timed out') +
+    '\n'
+  );
 }
 exports.prettyTimeout = prettyTimeout;
 
@@ -107,7 +114,9 @@ function prettyBreadcrumb(breadcrumb, place) {
     breadcrumb.trace
       .split(/\n/)
       .map(dedentTraceLine)
-      .forEach(function(line) { result += colors.trace(line) + '\n'; });
+      .forEach(function (line) {
+        result += colors.trace(line) + '\n';
+      });
   }
 
   return result;
@@ -136,12 +145,15 @@ function spaces(num) {
  */
 function indent(str, num) {
   var space = spaces(num);
-  return str.split('\n').map(function(line) {
-    if (line.match(/^\s*$/)) {
-      return line;
-    } else {
-      return space + line;
-    }
-  }).join('\n');
+  return str
+    .split('\n')
+    .map(function (line) {
+      if (line.match(/^\s*$/)) {
+        return line;
+      } else {
+        return space + line;
+      }
+    })
+    .join('\n');
 }
 exports.indent = indent;

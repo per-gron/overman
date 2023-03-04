@@ -16,14 +16,13 @@
 
 'use strict';
 
-describe('Suite', function() {
-  it('should succeed 1', function() {
+describe('Suite', function () {
+  it('should succeed 1', function () {
     console.log(this.currentTest.title);
     console.log(this.currentTest.fullTitle());
   });
-  it('should succeed 2', function() {
+  it('should succeed 2', function () {
     console.log(this.currentTest.title);
     console.log(this.currentTest.fullTitle());
   });
 });
-

@@ -16,15 +16,17 @@
 
 'use strict';
 
-module.exports = function(parameter) {
+module.exports = function (parameter) {
   return {
     type: 'suite',
     contents: [
       {
         type: 'test',
         name: parameter,
-        run: function() { console.log('param: "' + parameter + '"'); }
-      }
-    ]
+        run: function () {
+          console.log('param: "' + parameter + '"');
+        },
+      },
+    ],
   };
 };

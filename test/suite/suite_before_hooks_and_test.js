@@ -16,13 +16,12 @@
 
 'use strict';
 
-before(function() {
+before(function () {
   console.log('running_before_hook_1');
 });
 
-before(function() {
+before(function () {
   console.log('running_before_hook_2');
 });
 
-it('should succeed', function() {
-});
+it('should succeed', function () {});

@@ -24,7 +24,7 @@ var errorMessageUtil = require('../error_message_util');
 var MessageTracker = require('./message_tracker');
 var PhaseTracker = require('./phase_tracker');
 
-teamcityServiceMessages.stdout = false;  // Global yuck :-(
+teamcityServiceMessages.stdout = false; // Global yuck :-(
 
 // Documentation for the TeamCity reporter format:
 // https://confluence.jetbrains.com/display/TCD65/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-ReportingTests
@@ -35,28 +35,30 @@ teamcityServiceMessages.stdout = false;  // Global yuck :-(
  */
 function Teamcity(stream) {
   this._stream = stream;
-  this._emittedErrorForTest = {};  // Keys are JSON testPath, value is true if an error has been emitted for that test
-  this._bufferedOutput = {};  // Keys are JSON testPath, value is output for the test
+  this._emittedErrorForTest = {}; // Keys are JSON testPath, value is true if an error has been emitted for that test
+  this._bufferedOutput = {}; // Keys are JSON testPath, value is output for the test
   this._errorTracker = new MessageTracker('error');
   this._breadcrumbTracker = new MessageTracker('breadcrumb');
   this._phaseTracker = new PhaseTracker();
 }
 
-Teamcity.prototype.registrationFailed = function(error) {
+Teamcity.prototype.registrationFailed = function (error) {
   var name = 'Processing of test files';
   this._write(teamcityServiceMessages.testStarted({ name: name }));
-  this._write(teamcityServiceMessages.testFailed({
-    message: 'Error when loading the test files',
-    details: error.stack
-  }));
+  this._write(
+    teamcityServiceMessages.testFailed({
+      message: 'Error when loading the test files',
+      details: error.stack,
+    })
+  );
   this._write(teamcityServiceMessages.testFinished({ name: name }));
 };
 
-Teamcity.prototype._write = function(string) {
+Teamcity.prototype._write = function (string) {
   this._stream.write(string + '\n');
 };
 
-Teamcity.prototype._bufferTestOutput = function(testPath, string) {
+Teamcity.prototype._bufferTestOutput = function (testPath, string) {
   var key = JSON.stringify(testPath);
   if (!(key in this._bufferTestOutput)) {
     this._bufferTestOutput[key] = '';
@@ -64,18 +66,18 @@ Teamcity.prototype._bufferTestOutput = function(testPath, string) {
   this._bufferTestOutput[key] += string + '\n';
 };
 
-Teamcity.prototype._writeBufferedOutput = function(testPath) {
+Teamcity.prototype._writeBufferedOutput = function (testPath) {
   var key = JSON.stringify(testPath);
   this._stream.write(this._bufferTestOutput[key]);
 };
 
-Teamcity.prototype._clearBufferedOutput = function(testPath) {
+Teamcity.prototype._clearBufferedOutput = function (testPath) {
   var key = JSON.stringify(testPath);
   this._bufferTestOutput[key] = '';
   this._emittedErrorForTest[key] = false;
 };
 
-Teamcity.prototype._emitErrorForTest = function(testPath, args) {
+Teamcity.prototype._emitErrorForTest = function (testPath, args) {
   // According to the TC spec, only one testFailed should be emitted per test
   var key = JSON.stringify(testPath);
   if (!this._emittedErrorForTest[key]) {
@@ -84,7 +86,7 @@ Teamcity.prototype._emitErrorForTest = function(testPath, args) {
   }
 };
 
-Teamcity.prototype.gotMessage = function(testPath, message) {
+Teamcity.prototype.gotMessage = function (testPath, message) {
   var testName = testPath && _.last(testPath.path);
   var suiteName = message.suite && message.suite.path.join(' ');
 
@@ -94,23 +96,31 @@ Teamcity.prototype.gotMessage = function(testPath, message) {
 
   if (message.type === 'stdout') {
     // ##teamcity[testStdOut name='testname' out='text']
-    this._bufferTestOutput(testPath, teamcityServiceMessages.testStdOut({
-      name: testName,
-      out: message.data
-    }));
+    this._bufferTestOutput(
+      testPath,
+      teamcityServiceMessages.testStdOut({
+        name: testName,
+        out: message.data,
+      })
+    );
   } else if (message.type === 'stderr') {
     // ##teamcity[testStdErr name='testname' out='error text']
-    this._bufferTestOutput(testPath, teamcityServiceMessages.testStdErr({
-      name: testName,
-      out: message.data
-    }));
+    this._bufferTestOutput(
+      testPath,
+      teamcityServiceMessages.testStdErr({
+        name: testName,
+        out: message.data,
+      })
+    );
   } else if (message.type === 'suiteStart') {
-    if (suiteName) {  // suiteName is '' for the top level file suite
+    if (suiteName) {
+      // suiteName is '' for the top level file suite
       // ##teamcity[testSuiteStarted name='suite.name']
       this._write(teamcityServiceMessages.testSuiteStarted({ name: suiteName }));
     }
   } else if (message.type === 'suiteFinish') {
-    if (suiteName) {  // suiteName is '' for the top level file suite
+    if (suiteName) {
+      // suiteName is '' for the top level file suite
       //##teamcity[testSuiteFinished name='suite
       this._write(teamcityServiceMessages.testSuiteFinished({ name: suiteName }));
     }
@@ -121,7 +131,7 @@ Teamcity.prototype.gotMessage = function(testPath, message) {
     var msgs = [];
 
     var errors = this._errorTracker.getMessages(testPath);
-    errors.forEach(function(error) {
+    errors.forEach(function (error) {
       msgs.push(errorMessageUtil.indent(errorMessageUtil.prettyError(error), indentation) + '\n');
     });
 
@@ -137,7 +147,7 @@ Teamcity.prototype.gotMessage = function(testPath, message) {
     var timeoutMessage = {
       name: testName,
       message: 'Timed out: ' + (breadcrumb ? breadcrumb.message : 'missing breadcrumb'),
-      details: msgs.join('\n')
+      details: msgs.join('\n'),
     };
     this._emitErrorForTest(testPath, timeoutMessage);
   } else if (message.type === 'error') {
@@ -147,14 +157,14 @@ Teamcity.prototype.gotMessage = function(testPath, message) {
     var errorMessage = {
       name: testName,
       message: stack.split(/\n/)[0],
-      details: stack
+      details: stack,
     };
 
     if (message.expected && message.actual) {
       _.assign(errorMessage, {
         type: 'comparisonFailure',
         expected: message.expected,
-        actual: message.actual
+        actual: message.actual,
       });
     }
 
@@ -192,8 +202,6 @@ Teamcity.prototype.gotMessage = function(testPath, message) {
   }
 };
 
-module.exports = function(stream) {
-  return new Serializer(
-    new SuiteMarker(
-      new Teamcity(stream)));
+module.exports = function (stream) {
+  return new Serializer(new SuiteMarker(new Teamcity(stream)));
 };

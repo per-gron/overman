@@ -16,10 +16,10 @@
 
 'use strict';
 
-it('should succeed', function() {
-  return new Promise(function(resolve) {
+it('should succeed', function () {
+  return new Promise(function (resolve) {
     console.log('running_test');
-    process.nextTick(function() {
+    process.nextTick(function () {
       // The idea here is that if the test runner respects that we return a
       // promise here, then this should be run before the after hook.
       console.log('still_running_test');
@@ -28,6 +28,6 @@ it('should succeed', function() {
   });
 });
 
-after(function() {
+after(function () {
   console.log('running_after_hook');
 });

@@ -28,12 +28,12 @@
  * helpful to say what timed out.
  */
 function PhaseTracker() {
-  this._lastPhase = {};  // Hash of JSON'd testPath to { in: '', inName: '' }
-  this._timedOut = {};  // Hash of JSON'd testPath to true, if the test has timed out
+  this._lastPhase = {}; // Hash of JSON'd testPath to { in: '', inName: '' }
+  this._timedOut = {}; // Hash of JSON'd testPath to true, if the test has timed out
 }
 module.exports = PhaseTracker;
 
-PhaseTracker.prototype.gotMessage = function(testPath, message) {
+PhaseTracker.prototype.gotMessage = function (testPath, message) {
   var key = JSON.stringify(testPath);
 
   if (message.type === 'retry') {
@@ -54,6 +54,6 @@ PhaseTracker.prototype.gotMessage = function(testPath, message) {
   }
 };
 
-PhaseTracker.prototype.getLastPhase = function(path) {
+PhaseTracker.prototype.getLastPhase = function (path) {
   return this._lastPhase[JSON.stringify(path)];
 };

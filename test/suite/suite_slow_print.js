@@ -16,6 +16,6 @@
 
 'use strict';
 
-it('should print its slow threshold', function() {
+it('should print its slow threshold', function () {
   console.log(this.slow());
 });

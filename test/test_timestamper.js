@@ -20,12 +20,12 @@ var _ = require('lodash');
 var expect = require('chai').expect;
 var Timestamper = require('../dist/reporters/timestamper');
 
-describe('Timestamper reporter', function() {
-  ['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function(message) {
-    describe(message, function() {
-      it('should forward ' + message + ' calls and append time to the arguments', function(done) {
+describe('Timestamper reporter', function () {
+  ['registrationFailed', 'registerTests', 'gotMessage', 'done'].forEach(function (message) {
+    describe(message, function () {
+      it('should forward ' + message + ' calls and append time to the arguments', function (done) {
         var reporter = {};
-        reporter[message] = function() {
+        reporter[message] = function () {
           expect(_.toArray(arguments)).to.be.deep.equal([1, 2, 3, 'clock']);
           done();
         };
@@ -33,11 +33,11 @@ describe('Timestamper reporter', function() {
         function clock() {
           return 'clock';
         }
-        (new Timestamper(reporter, clock))[message](1, 2, 3);
+        new Timestamper(reporter, clock)[message](1, 2, 3);
       });
 
-      it('should not forward ' + message + 'calls when reporter doesn\'t implement it', function() {
-        (new Timestamper({}))[message]();
+      it('should not forward ' + message + "calls when reporter doesn't implement it", function () {
+        new Timestamper({})[message]();
       });
     });
   });

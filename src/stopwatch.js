@@ -24,24 +24,28 @@
  * @param clock. Function that returns wall time as a Date object. Optional.
  */
 function Stopwatch(clock) {
-  this._clock = clock || function() { return new Date(); };
+  this._clock =
+    clock ||
+    function () {
+      return new Date();
+    };
   this._startedAt = this._clock();
   this._events = {};
 }
 
-Stopwatch.prototype.emit = function(name) {
+Stopwatch.prototype.emit = function (name) {
   this._events[name] = this._clock().getTime();
 };
 
-Stopwatch.prototype._getTimeSince = function(time) {
+Stopwatch.prototype._getTimeSince = function (time) {
   return this._clock().getTime() - time;
 };
 
-Stopwatch.prototype.getTimeSinceStart = function() {
+Stopwatch.prototype.getTimeSinceStart = function () {
   return this._getTimeSince(this._startedAt);
 };
 
-Stopwatch.prototype.getTimeSince = function(name) {
+Stopwatch.prototype.getTimeSince = function (name) {
   if (!(name in this._events)) {
     throw new Error('No registered timestamp for event with name ' + name);
   }

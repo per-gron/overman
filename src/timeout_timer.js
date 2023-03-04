@@ -45,7 +45,11 @@ function TimeoutTimer(timeout, options) {
   }
 
   this._timeout = timeout;
-  this._clock = (options || {}).clock || function() { return new Date(); };
+  this._clock =
+    (options || {}).clock ||
+    function () {
+      return new Date();
+    };
   this._startTime = this._clock().getTime();
   this._setTimeout = (options || {}).setTimeout || setTimeout;
   this._clearTimeout = (options || {}).clearTimeout || clearTimeout;
@@ -55,7 +59,7 @@ function TimeoutTimer(timeout, options) {
 }
 TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
 
-TimeoutTimer.prototype._timedOut = function() {
+TimeoutTimer.prototype._timedOut = function () {
   this._timeoutToken = null;
   this.emit('timeout', this._timeout);
 };
@@ -63,11 +67,11 @@ TimeoutTimer.prototype._timedOut = function() {
 /**
  * Calculate the remaining time for this timeout. May return a negative number.
  */
-TimeoutTimer.prototype._remainingTime = function() {
+TimeoutTimer.prototype._remainingTime = function () {
   return this._timeout - (this._clock().getTime() - this._startTime);
 };
 
-TimeoutTimer.prototype._armTimeout = function() {
+TimeoutTimer.prototype._armTimeout = function () {
   if (this._timeoutToken) {
     this._clearTimeout(this._timeoutToken);
   }
@@ -77,7 +81,7 @@ TimeoutTimer.prototype._armTimeout = function() {
     this._timeoutToken = this._setTimeout(this._timedOut.bind(this), remainingTime);
   } else {
     var self = this;
-    process.nextTick(function() {
+    process.nextTick(function () {
       self._timedOut();
     });
   }
@@ -88,7 +92,7 @@ TimeoutTimer.prototype._armTimeout = function() {
  * timer was created. Setting the timeout to a time that has already passed
  * causes the timer to elapse immediately (on the next tick).
  */
-TimeoutTimer.prototype.updateTimeout = function(timeout) {
+TimeoutTimer.prototype.updateTimeout = function (timeout) {
   if (this._timeoutToken === null) {
     throw new Error('Cannot updateTimeout on timer that has elapsed');
   }
@@ -100,7 +104,7 @@ TimeoutTimer.prototype.updateTimeout = function(timeout) {
 /**
  * Cancel the timer.
  */
-TimeoutTimer.prototype.cancel = function() {
+TimeoutTimer.prototype.cancel = function () {
   this._clearTimeout(this._timeoutToken);
   this._timeoutToken = null;
 };

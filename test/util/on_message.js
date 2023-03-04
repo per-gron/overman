@@ -22,7 +22,7 @@ function OnMessage(onMessage) {
   this._onMessage = onMessage;
 }
 
-OnMessage.prototype.gotMessage = function() {
+OnMessage.prototype.gotMessage = function () {
   this._onMessage.apply(this, arguments);
 };
 

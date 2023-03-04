@@ -16,7 +16,7 @@
 
 'use strict';
 
-it('should succeed', function() {
+it('should succeed', function () {
   console.log(this.currentTest.title);
   console.log(this.currentTest.fullTitle());
 });

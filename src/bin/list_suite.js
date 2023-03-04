@@ -29,7 +29,9 @@
 var _ = require('lodash');
 
 function only(object, keys) {
-  return _.pickBy(object, function(value, key) { return _.indexOf(keys, key) !== -1; });
+  return _.pickBy(object, function (value, key) {
+    return _.indexOf(keys, key) !== -1;
+  });
 }
 
 var propertyKeys = ['skipped', 'only', 'unstable', 'timeout', 'slow'];
@@ -42,17 +44,31 @@ function testsOfSuite(file, suite, suitePath, properties) {
     properties.attributes = _.assign({}, properties.attributes, suite.attributes);
   }
   if (suite.type === 'test') {
-    return [_.assign({
-      path: {
-        file: file,
-        path: suitePath.concat([suite.name])
-      }
-    }, only(suite, propertyKeys), properties)];
+    return [
+      _.assign(
+        {
+          path: {
+            file: file,
+            path: suitePath.concat([suite.name]),
+          },
+        },
+        only(suite, propertyKeys),
+        properties
+      ),
+    ];
   } else if (suite.type === 'suite') {
     var subPath = suite.name ? suitePath.concat([suite.name]) : suitePath;
-    return _.flatten(suite.contents.map(function(subSuite) {
-      return testsOfSuite(file, subSuite, subPath, _.assign(only(subSuite, propertyKeys), properties));
-    }), true);
+    return _.flatten(
+      suite.contents.map(function (subSuite) {
+        return testsOfSuite(
+          file,
+          subSuite,
+          subPath,
+          _.assign(only(subSuite, propertyKeys), properties)
+        );
+      }),
+      true
+    );
   } else {
     throw new Error('Unrecognized suite type ' + suite.type);
   }

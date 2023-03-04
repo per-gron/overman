@@ -27,10 +27,10 @@ function mock(methods) {
   };
 }
 
-describe('Spec progress reporter', function() {
-  describe('Constructor', function() {
-    it('should pass stream to the InsertionLog', function() {
-      return new Promise(function(resolve) {
+describe('Spec progress reporter', function () {
+  describe('Constructor', function () {
+    it('should pass stream to the InsertionLog', function () {
+      return new Promise(function (resolve) {
         var stream = {};
         new SpecProgress({ stdout: stream }, function InsertionLog(param) {
           expect(stream).to.be.equal(param);
@@ -40,47 +40,53 @@ describe('Spec progress reporter', function() {
     });
   });
 
-  describe('Suites', function() {
+  describe('Suites', function () {
     function verifySuiteStartLog(path, expectedOutput) {
-      return new Promise(function(resolve) {
-        var reporter = new SpecProgress(null, mock({
-          log: function(msg) {
-            expect(msg).to.be.equal(expectedOutput);
-            resolve();
-          }
-        }));
+      return new Promise(function (resolve) {
+        var reporter = new SpecProgress(
+          null,
+          mock({
+            log: function (msg) {
+              expect(msg).to.be.equal(expectedOutput);
+              resolve();
+            },
+          })
+        );
 
         var suitePath = { file: 'file', path: path };
         reporter.gotMessage(null, { type: 'suiteStart', suite: suitePath });
       });
     }
 
-    it('should log suite name on suiteStart messages', function() {
+    it('should log suite name on suiteStart messages', function () {
       return verifySuiteStartLog(['suite'], '  suite');
     });
 
-    it('should log suite name on suiteStart messages for the root suite', function() {
+    it('should log suite name on suiteStart messages for the root suite', function () {
       return verifySuiteStartLog([], '');
     });
   });
 
-  describe('Test start', function() {
-    it('should log first test name after suite name', function() {
+  describe('Test start', function () {
+    it('should log first test name after suite name', function () {
       var suiteLineId = null;
 
-      return new Promise(function(resolve) {
-        var reporter = new SpecProgress(null, mock({
-          log: function(msg, id) {
-            suiteLineId = id;
-          },
+      return new Promise(function (resolve) {
+        var reporter = new SpecProgress(
+          null,
+          mock({
+            log: function (msg, id) {
+              suiteLineId = id;
+            },
 
-          logAfter: function(afterId, line) {
-            expect(suiteLineId).not.to.be.null;
-            expect(suiteLineId).to.be.equal(afterId);
-            expect(stripAnsi(line)).to.be.equal('    test');
-            resolve();
-          }
-        }));
+            logAfter: function (afterId, line) {
+              expect(suiteLineId).not.to.be.null;
+              expect(suiteLineId).to.be.equal(afterId);
+              expect(stripAnsi(line)).to.be.equal('    test');
+              resolve();
+            },
+          })
+        );
 
         var suitePath = { file: 'file', path: [] };
         var testPath = { file: 'file', path: ['test'] };
@@ -89,29 +95,32 @@ describe('Spec progress reporter', function() {
       });
     });
 
-    it('should log second test name after first test name', function() {
+    it('should log second test name after first test name', function () {
       var suiteLineId = null;
       var test1LineId = null;
 
-      return new Promise(function(resolve) {
-        var reporter = new SpecProgress(null, mock({
-          log: function(msg, id) {
-            suiteLineId = id;
-          },
+      return new Promise(function (resolve) {
+        var reporter = new SpecProgress(
+          null,
+          mock({
+            log: function (msg, id) {
+              suiteLineId = id;
+            },
 
-          logAfter: function(afterId, line, id) {
-            expect(afterId).not.to.be.null;
+            logAfter: function (afterId, line, id) {
+              expect(afterId).not.to.be.null;
 
-            if (afterId === suiteLineId) {
-              expect(stripAnsi(line)).to.contain('test1');
-              test1LineId = id;
-            } else {
-              expect(afterId).to.be.equal(test1LineId);
-              expect(stripAnsi(line)).to.contain('test2');
-              resolve();
-            }
-          }
-        }));
+              if (afterId === suiteLineId) {
+                expect(stripAnsi(line)).to.contain('test1');
+                test1LineId = id;
+              } else {
+                expect(afterId).to.be.equal(test1LineId);
+                expect(stripAnsi(line)).to.contain('test2');
+                resolve();
+              }
+            },
+          })
+        );
 
         var suitePath = { file: 'file', path: [] };
         var testPath1 = { file: 'file', path: ['test1'] };
@@ -123,26 +132,29 @@ describe('Spec progress reporter', function() {
     });
   });
 
-  describe('Test breadcrumb', function() {
-    it('should emit breadcrumbs', function() {
+  describe('Test breadcrumb', function () {
+    it('should emit breadcrumbs', function () {
       var testLineId = null;
 
-      return new Promise(function(resolve) {
-        var reporter = new SpecProgress(null, mock({
-          log: function() {},
+      return new Promise(function (resolve) {
+        var reporter = new SpecProgress(
+          null,
+          mock({
+            log: function () {},
 
-          logAfter: function(afterId, line, id) {
-            expect(stripAnsi(line)).to.contain('test');
-            testLineId = id;
-          },
+            logAfter: function (afterId, line, id) {
+              expect(stripAnsi(line)).to.contain('test');
+              testLineId = id;
+            },
 
-          replace: function(replacedId, line) {
-            expect(testLineId).to.not.be.null;
-            expect(replacedId).to.be.equal(testLineId);
-            expect(stripAnsi(line)).to.be.equal('    test  >  42');
-            resolve();
-          }
-        }));
+            replace: function (replacedId, line) {
+              expect(testLineId).to.not.be.null;
+              expect(replacedId).to.be.equal(testLineId);
+              expect(stripAnsi(line)).to.be.equal('    test  >  42');
+              resolve();
+            },
+          })
+        );
 
         var suitePath = { file: 'file', path: [] };
         var testPath = { file: 'file', path: ['test'] };
@@ -152,25 +164,28 @@ describe('Spec progress reporter', function() {
       });
     });
 
-    it('should not emit breadcrumbs when disabled', function() {
+    it('should not emit breadcrumbs when disabled', function () {
       var testLineId = null;
 
-      return new Promise(function(resolve, reject) {
-        var reporter = new SpecProgress({ disableBreadcrumbs: true }, mock({
-          log: function() {},
+      return new Promise(function (resolve, reject) {
+        var reporter = new SpecProgress(
+          { disableBreadcrumbs: true },
+          mock({
+            log: function () {},
 
-          logAfter: function(afterId, line, id) {
-            expect(stripAnsi(line)).to.contain('test');
-            testLineId = id;
-          },
+            logAfter: function (afterId, line, id) {
+              expect(stripAnsi(line)).to.contain('test');
+              testLineId = id;
+            },
 
-          replace: function(replacedId, line) {
-            expect(testLineId).to.not.be.null;
-            expect(replacedId).to.be.equal(testLineId);
-            expect(stripAnsi(line)).to.be.equal('  ✓ test');
-            resolve();
-          }
-        }));
+            replace: function (replacedId, line) {
+              expect(testLineId).to.not.be.null;
+              expect(replacedId).to.be.equal(testLineId);
+              expect(stripAnsi(line)).to.be.equal('  ✓ test');
+              resolve();
+            },
+          })
+        );
 
         var suitePath = { file: 'file', path: [] };
         var testPath = { file: 'file', path: ['test'] };
@@ -182,73 +197,82 @@ describe('Spec progress reporter', function() {
     });
   });
 
-  describe('Test finish', function() {
+  describe('Test finish', function () {
     function verifyTestFinishLog(result, expectedOutput, extraFinishOptions) {
       var testLineId = null;
 
-      return new Promise(function(resolve) {
-        var reporter = new SpecProgress(null, mock({
-          log: function() {},
+      return new Promise(function (resolve) {
+        var reporter = new SpecProgress(
+          null,
+          mock({
+            log: function () {},
 
-          logAfter: function(afterId, line, id) {
-            expect(stripAnsi(line)).to.contain('test');
-            testLineId = id;
-          },
+            logAfter: function (afterId, line, id) {
+              expect(stripAnsi(line)).to.contain('test');
+              testLineId = id;
+            },
 
-          replace: function(replacedId, line) {
-            expect(testLineId).to.not.be.null;
-            expect(replacedId).to.be.equal(testLineId);
-            expect(stripAnsi(line)).to.be.equal(expectedOutput);
-            resolve();
-          }
-        }));
+            replace: function (replacedId, line) {
+              expect(testLineId).to.not.be.null;
+              expect(replacedId).to.be.equal(testLineId);
+              expect(stripAnsi(line)).to.be.equal(expectedOutput);
+              resolve();
+            },
+          })
+        );
 
         var suitePath = { file: 'file', path: [] };
         var testPath = { file: 'file', path: ['test'] };
         reporter.gotMessage(null, { type: 'suiteStart', suite: suitePath });
         reporter.gotMessage(testPath, { type: 'start' });
-        reporter.gotMessage(testPath, _.assign({ type: 'finish', result: result }, extraFinishOptions));
+        reporter.gotMessage(
+          testPath,
+          _.assign({ type: 'finish', result: result }, extraFinishOptions)
+        );
       });
     }
 
-    it('should replace test name with success test marker', function() {
+    it('should replace test name with success test marker', function () {
       return verifyTestFinishLog('success', '  ✓ test');
     });
 
-    it('should replace test name with failure test marker', function() {
+    it('should replace test name with failure test marker', function () {
       return verifyTestFinishLog('failure', '  ✖ test');
     });
 
-    it('should mark slow tests', function() {
+    it('should mark slow tests', function () {
       return verifyTestFinishLog('failure', '  ✖ test (12345ms)', { slow: true, duration: 12345 });
     });
   });
 
-  describe('Stream piping', function() {
-    ['stdout', 'stderr'].forEach(function(streamName) {
-      describe(streamName, function() {
-        it('should pipe the output from a test', function() {
+  describe('Stream piping', function () {
+    ['stdout', 'stderr'].forEach(function (streamName) {
+      describe(streamName, function () {
+        it('should pipe the output from a test', function () {
           var testLineId = null;
           var testOutputLineId = null;
 
-          return new Promise(function(resolve) {
-            var reporter = new SpecProgress(null, mock({
-              log: function() {},
+          return new Promise(function (resolve) {
+            var reporter = new SpecProgress(
+              null,
+              mock({
+                log: function () {},
 
-              logAfter: function(afterId, line, id) {
-                expect(afterId).to.not.be.null;
+                logAfter: function (afterId, line, id) {
+                  expect(afterId).to.not.be.null;
 
-                if (line.match(/test/)) {
-                  testLineId = id;
-                } else if (afterId === testLineId) {
-                  expect(line).to.be.equal('a_line');
-                  testOutputLineId = id;
-                } else if (afterId === testOutputLineId) {
-                  expect(line).to.be.equal('a_second_line');
-                  resolve();
-                }
-              }
-            }));
+                  if (line.match(/test/)) {
+                    testLineId = id;
+                  } else if (afterId === testLineId) {
+                    expect(line).to.be.equal('a_line');
+                    testOutputLineId = id;
+                  } else if (afterId === testOutputLineId) {
+                    expect(line).to.be.equal('a_second_line');
+                    resolve();
+                  }
+                },
+              })
+            );
 
             var suitePath = { file: 'file', path: [] };
             var testPath = { file: 'file', path: ['test'] };
@@ -257,11 +281,11 @@ describe('Spec progress reporter', function() {
 
             reporter.gotMessage(testPath, {
               type: streamName,
-              data: 'a_line\n'
+              data: 'a_line\n',
             });
             reporter.gotMessage(testPath, {
               type: streamName,
-              data: 'a_second_line\n'
+              data: 'a_second_line\n',
             });
           });
         });
@@ -269,7 +293,7 @@ describe('Spec progress reporter', function() {
     });
   });
 
-  it('should do nothing on other messages', function() {
+  it('should do nothing on other messages', function () {
     var reporter = new SpecProgress(null, mock({}));
     reporter.gotMessage(null, { type: 'breadcrumb' });
   });

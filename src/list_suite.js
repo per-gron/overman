@@ -22,12 +22,12 @@
 var childProcess = require('child_process');
 
 function streamToString(stream) {
-  return new Promise(function(resolve) {
+  return new Promise(function (resolve) {
     var string = '';
-    stream.on('data', function(data) {
+    stream.on('data', function (data) {
       string += data;
     });
-    stream.on('end', function() {
+    stream.on('end', function () {
       resolve(string);
     });
   });
@@ -42,9 +42,9 @@ function withTimeout(promise, timeout, onTimeout) {
   if (timeout === 0) {
     return promise;
   } else {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       var timedout = false;
-      var timeoutToken = setTimeout(function() {
+      var timeoutToken = setTimeout(function () {
         timedout = true;
         try {
           resolve(onTimeout());
@@ -54,7 +54,7 @@ function withTimeout(promise, timeout, onTimeout) {
       }, timeout);
 
       function makeDoneCallback(resolveOrReject) {
-        return function(value) {
+        return function (value) {
           clearTimeout(timeoutToken);
           if (!timedout) {
             resolveOrReject(value);
@@ -62,9 +62,7 @@ function withTimeout(promise, timeout, onTimeout) {
         };
       }
 
-      promise.then(
-        makeDoneCallback(resolve),
-        makeDoneCallback(reject));
+      promise.then(makeDoneCallback(resolve), makeDoneCallback(reject));
     });
   }
 }
@@ -81,36 +79,48 @@ function _ListTestError(message, errorOutput) {
 _ListTestError.prototype = Object.create(Error.prototype);
 exports.ListTestError = _ListTestError;
 
-function listTestsOfFile(timeout, testInterfacePath, testInterfaceParameter, suite, opt_childProcess) {
+function listTestsOfFile(
+  timeout,
+  testInterfacePath,
+  testInterfaceParameter,
+  suite,
+  opt_childProcess
+) {
   var child = (opt_childProcess || childProcess).fork(
     __dirname + '/bin/list_suite',
     [testInterfacePath, testInterfaceParameter, suite],
-    { silent: true });
+    { silent: true }
+  );
 
   var successObjectPromise = streamToString(child.stdout)
-    .then(function(string) {
+    .then(function (string) {
       return JSON.parse(string);
     })
-    .catch(function() {});
+    .catch(function () {});
 
-  var failureErrorPromise = streamToString(child.stderr)
-    .then(function(string) {
-      return new _ListTestError('Failed to process ' + suite, string);
-    });
+  var failureErrorPromise = streamToString(child.stderr).then(function (string) {
+    return new _ListTestError('Failed to process ' + suite, string);
+  });
 
-  var resultPromise = new Promise(function(resolve, reject) {
-    child.on('exit', function(code) {
+  var resultPromise = new Promise(function (resolve, reject) {
+    child.on('exit', function (code) {
       if (code === 0) {
-        failureErrorPromise.then(function() {}, function() {});
+        failureErrorPromise.then(
+          function () {},
+          function () {}
+        );
         successObjectPromise.then(resolve, reject);
       } else {
-        successObjectPromise.then(function() {}, function() {});
+        successObjectPromise.then(
+          function () {},
+          function () {}
+        );
         failureErrorPromise.then(reject, reject);
       }
     });
   });
 
-  return withTimeout(resultPromise, timeout, function() {
+  return withTimeout(resultPromise, timeout, function () {
     child.kill('SIGKILL');
 
     var error = new _ListTestError('Timed out while listing tests of ' + suite);

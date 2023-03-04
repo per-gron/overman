@@ -16,9 +16,9 @@
 
 'use strict';
 
-afterEach(function() {
+afterEach(function () {
   console.log(this.currentTest.title);
   console.log(this.currentTest.fullTitle());
 });
 
-it('should succeed', function() {});
+it('should succeed', function () {});

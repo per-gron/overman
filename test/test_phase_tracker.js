@@ -19,61 +19,79 @@
 var expect = require('chai').expect;
 var PhaseTracker = require('../dist/reporters/phase_tracker');
 
-describe('PhaseTracker', function() {
+describe('PhaseTracker', function () {
   var tracker;
-  beforeEach(function() {
+  beforeEach(function () {
     tracker = new PhaseTracker();
   });
 
-  it('should return undefined for tests that haven\'t done anything yet', function() {
+  it("should return undefined for tests that haven't done anything yet", function () {
     expect(tracker.getLastPhase({})).to.be.undefined;
   });
 
-  it('should report the before hook phase', function() {
+  it('should report the before hook phase', function () {
     tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook' });
-    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'beforeHook', inName: 'The hook' });
+    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({
+      in: 'beforeHook',
+      inName: 'The hook',
+    });
   });
 
-  it('should report the test phase', function() {
+  it('should report the test phase', function () {
     tracker.gotMessage({ test: 'path' }, { type: 'startedTest' });
     expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'test' });
   });
 
-  it('should report the after hook phase', function() {
+  it('should report the after hook phase', function () {
     tracker.gotMessage({ test: 'path' }, { type: 'startedAfterHook', name: 'The hook' });
-    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'afterHook', inName: 'The hook' });
+    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({
+      in: 'afterHook',
+      inName: 'The hook',
+    });
   });
 
-  it('should report the last phase when several are received for one test', function() {
+  it('should report the last phase when several are received for one test', function () {
     tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
     tracker.gotMessage({ test: 'path' }, { type: 'startedAfterHook', name: 'The hook 2' });
-    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'afterHook', inName: 'The hook 2' });
+    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({
+      in: 'afterHook',
+      inName: 'The hook 2',
+    });
   });
 
-  it('should separate phases of different tests', function() {
+  it('should separate phases of different tests', function () {
     tracker.gotMessage({ test: 'path1' }, { type: 'startedBeforeHook', name: 'The hook 1' });
     tracker.gotMessage({ test: 'path2' }, { type: 'startedAfterHook', name: 'The hook 2' });
-    expect(tracker.getLastPhase({ test: 'path1' })).to.be.deep.equal({ in: 'beforeHook', inName: 'The hook 1' });
+    expect(tracker.getLastPhase({ test: 'path1' })).to.be.deep.equal({
+      in: 'beforeHook',
+      inName: 'The hook 1',
+    });
   });
 
-  it('should reset the phase on retry', function() {
+  it('should reset the phase on retry', function () {
     tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
     tracker.gotMessage({ test: 'path' }, { type: 'retry' });
     expect(tracker.getLastPhase({ test: 'path' })).to.not.exist;
   });
 
-  it('should ignore phases after timeout', function() {
+  it('should ignore phases after timeout', function () {
     tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
     tracker.gotMessage({ test: 'path' }, { type: 'timeout' });
     tracker.gotMessage({ test: 'path' }, { type: 'startedAfterHook', name: 'The hook 2' });
-    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'beforeHook', inName: 'The hook 1' });
+    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({
+      in: 'beforeHook',
+      inName: 'The hook 1',
+    });
   });
 
-  it('should start saving phases again after retries even if the previous attempt timed out', function() {
+  it('should start saving phases again after retries even if the previous attempt timed out', function () {
     tracker.gotMessage({ test: 'path' }, { type: 'startedBeforeHook', name: 'The hook 1' });
     tracker.gotMessage({ test: 'path' }, { type: 'timeout' });
     tracker.gotMessage({ test: 'path' }, { type: 'retry' });
     tracker.gotMessage({ test: 'path' }, { type: 'startedAfterHook', name: 'The hook 2' });
-    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({ in: 'afterHook', inName: 'The hook 2' });
+    expect(tracker.getLastPhase({ test: 'path' })).to.be.deep.equal({
+      in: 'afterHook',
+      inName: 'The hook 2',
+    });
   });
 });

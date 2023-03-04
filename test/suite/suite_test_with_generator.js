@@ -16,11 +16,11 @@
 
 'use strict';
 
-it('should succeed', function() {
+it('should succeed', function () {
   // Simulate a generator without actually using the syntax, for node 0.10 compatibility
   var state = 0;
   return {
-    next: function(value) {
+    next: function (value) {
       state++;
       if (state === 1) {
         console.log('running_test');
@@ -30,10 +30,10 @@ it('should succeed', function() {
         return { value: undefined, done: true };
       }
       return { done: true };
-    }
+    },
   };
 });
 
-after(function() {
+after(function () {
   console.log('running_after_hook');
 });

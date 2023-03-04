@@ -16,4 +16,4 @@
 
 'use strict';
 
-before(function() {});
+before(function () {});

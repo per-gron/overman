@@ -16,10 +16,10 @@
 
 'use strict';
 
-it('should succeed', { foo: 'bar' }, function() {
+it('should succeed', { foo: 'bar' }, function () {
   process.send({
     type: 'in_test_attributes',
     contextAttributes: context.attributes,
-    testAttributes: this.attributes
+    testAttributes: this.attributes,
   });
 });

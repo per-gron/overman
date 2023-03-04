@@ -16,8 +16,6 @@
 
 'use strict';
 
-it('should succeed 1', function() {
-});
+it('should succeed 1', function () {});
 
-it('should succeed 2', function() {
-});
+it('should succeed 2', function () {});

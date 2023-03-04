@@ -16,6 +16,6 @@
 
 'use strict';
 
-it('should emit debug info', function() {
+it('should emit debug info', function () {
   this.debugInfo('name', { the: 'value' });
 });

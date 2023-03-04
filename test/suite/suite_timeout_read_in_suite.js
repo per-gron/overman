@@ -18,12 +18,12 @@
 
 var expect = require('chai').expect;
 
-describe('A suite', function() {
+describe('A suite', function () {
   expect(this.timeout()).to.be.null;
   this.timeout(1234);
   expect(this.timeout()).to.be.equal(1234);
 
-  describe('A subsuite', function() {
+  describe('A subsuite', function () {
     expect(this.timeout()).to.be.equal(1234);
     this.timeout(2345);
     expect(this.timeout()).to.be.equal(2345);

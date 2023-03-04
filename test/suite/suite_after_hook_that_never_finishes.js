@@ -16,8 +16,8 @@
 
 'use strict';
 
-after(function() {
-  return new Promise(function() {});
+after(function () {
+  return new Promise(function () {});
 });
 
-it('should succeed', function() {});
+it('should succeed', function () {});

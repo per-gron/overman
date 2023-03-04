@@ -18,10 +18,12 @@
 
 function makeFakeClock() {
   var time = Math.floor(Math.random() * 1000);
-  var clock = function() {
+  var clock = function () {
     return new Date(time);
   };
-  clock.step = function(steps) { time += steps; };
+  clock.step = function (steps) {
+    time += steps;
+  };
   return clock;
 }
 module.exports = makeFakeClock;

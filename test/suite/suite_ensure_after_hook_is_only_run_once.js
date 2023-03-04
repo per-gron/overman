@@ -23,14 +23,14 @@
 // timed out.
 
 let afterHookCallback;
-const afterHookPromise = new Promise(resolve => (afterHookCallback = resolve));
+const afterHookPromise = new Promise((resolve) => (afterHookCallback = resolve));
 
-it('should be run', function() {
+it('should be run', function () {
   console.log('in_test');
   return afterHookPromise;
 });
 
-after('should be run only once', function() {
+after('should be run only once', function () {
   console.log('in_after_hook');
   afterHookCallback();
 });

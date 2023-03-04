@@ -22,17 +22,17 @@ var recursive = require('recursive-readdir');
 // This doesn't actually test for anything per se. Its purpose is to make sure
 // that all source files are required by at least one test, so that the test
 // coverage reporting is accurate.
-it('should require all files', function(done) {
-  recursive(__dirname + '/../dist', function(err, files) {
+it('should require all files', function (done) {
+  recursive(__dirname + '/../dist', function (err, files) {
     expect(err).to.be.null;
     files
-      .filter(file => file.endsWith('.js'))
-      .filter(function(file) {
+      .filter((file) => file.endsWith('.js'))
+      .filter(function (file) {
         // The scripts can't just be required. They are tested though so it
         // doesn't hurt much.
         return !file.match(/[\/\\]bin[\/\\](list_suite|run_test)\.js/);
       })
-      .forEach(function(file) {
+      .forEach(function (file) {
         require(file);
       });
     done();

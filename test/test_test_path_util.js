@@ -19,13 +19,15 @@
 var expect = require('chai').expect;
 var testPathUtil = require('../dist/test_path_util');
 
-describe('Test path util', function() {
-  it('should return the parent path of a test path', function() {
-    expect(testPathUtil.suitePathOf({ path: ['a'], file: 'file' }))
-      .to.be.deep.equal({ path: [], file: 'file' });
+describe('Test path util', function () {
+  it('should return the parent path of a test path', function () {
+    expect(testPathUtil.suitePathOf({ path: ['a'], file: 'file' })).to.be.deep.equal({
+      path: [],
+      file: 'file',
+    });
   });
 
-  it('should return null for root paths', function() {
+  it('should return null for root paths', function () {
     expect(testPathUtil.suitePathOf({ path: [], file: 'file' })).to.be.null;
   });
 });
