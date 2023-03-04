@@ -20,7 +20,7 @@ var _ = require('lodash');
 var chalk = require('chalk');
 var readline = require('readline');
 var through = require('through');
-var InsertionLog = require('../insertion_log');
+var InsertionLog = require('../insertion_log').default;
 var testPathUtil = require('../test_path_util');
 
 function nSpaces(n) {
