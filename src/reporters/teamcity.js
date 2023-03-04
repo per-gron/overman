@@ -18,7 +18,7 @@
 
 var _ = require('lodash');
 var teamcityServiceMessages = require('teamcity-service-messages');
-var Serializer = require('./serializer');
+var Serializer = require('./serializer').default;
 var SuiteMarker = require('./suite_marker');
 var errorMessageUtil = require('../error_message_util');
 var MessageTracker = require('./message_tracker').default;
