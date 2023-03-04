@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-module.exports = function (time) {
-  var s = Math.round(time / 1000) % 60;
-  var m = Math.round(time / 1000 / 60) % 60;
-  var h = Math.round(time / 1000 / 60 / 60);
-
-  var times = [h && h + 'h', m && m + 'm', s && s + 's'].filter(function (x) {
-    return x;
-  });
-
-  return times.join(' ') || '0s';
-};
+export default function (time: number) {
+  time /= 1000;
+  const s = Math.round(time) % 60;
+  time /= 60;
+  const m = Math.round(time) % 60;
+  const h = Math.round(time / 60);
+  return [h && `${h}h`, m && `${m}m`, s && `${s}s`].filter((s) => s).join(' ') || '0s';
+}

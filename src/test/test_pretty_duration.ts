@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-'use strict';
-
-var expect = require('chai').expect;
-var prettyDuration = require('../pretty_duration');
+import { expect } from 'chai';
+import prettyDuration from '../pretty_duration';
 
 describe('Pretty duration', function () {
   it('should properly handle zero', function () {

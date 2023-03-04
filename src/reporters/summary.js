@@ -17,7 +17,7 @@
 'use strict';
 
 var chalk = require('chalk');
-var prettyDuration = require('../pretty_duration');
+var prettyDuration = require('../pretty_duration').default;
 
 var colors = {
   success: chalk.green,
