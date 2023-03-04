@@ -27,7 +27,6 @@ var shouldFail = require('./util/should_fail');
 const { setTimeout } = require('timers/promises');
 var TestFailureError = require('../test_failure_error');
 var suiteRunner = require('../suite_runner');
-var promiseUtil = require('../promise_util');
 var chaiAsPromised = require('chai-as-promised');
 
 var expect = chai.expect;
@@ -589,12 +588,7 @@ describe('Suite runner', function () {
       return raisedError === error;
     });
 
-    return Promise.all([
-      streamOutput,
-      promiseUtil.finally(expectFailure, function () {
-        out.end();
-      }),
-    ]);
+    return Promise.all([streamOutput, expectFailure.finally(() => out.end())]);
   });
 
   describe('Timeouts', function () {

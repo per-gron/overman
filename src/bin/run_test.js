@@ -43,7 +43,6 @@
 var _ = require('lodash');
 var co = require('co');
 var exit = require('exit'); // process.exit that works on Windows
-var promiseUtil = require('../promise_util');
 
 require('source-map-support').install();
 
@@ -261,9 +260,8 @@ function runAfterHooks(hooks) {
 
 function makeSureProcessRunsUntilPromiseIsFulfilled(promise) {
   var interval = setInterval(function () {}, 5000);
-  return promiseUtil.finally(promise, function () {
-    clearInterval(interval);
-  });
+
+  return promise.finally(() => clearInterval(interval));
 }
 
 function runTest(foundTest, runAfter) {
@@ -286,11 +284,7 @@ function runTest(foundTest, runAfter) {
       return invokeFunction(foundTest.test.run, { in: 'test' });
     });
 
-  return makeSureProcessRunsUntilPromiseIsFulfilled(
-    promiseUtil.finally(testPromise, function () {
-      return runAfter();
-    })
-  );
+  return makeSureProcessRunsUntilPromiseIsFulfilled(testPromise.finally(() => runAfter()));
 }
 
 process.on('uncaughtException', function (error) {
