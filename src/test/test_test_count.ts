@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-var expect = require('chai').expect;
-var TestCount = require('../test_count');
+import { expect } from 'chai';
+import TestCount from '../test_count';
 
 describe('TestCount', function () {
-  var testCount = new TestCount();
+  let testCount: TestCount;
 
   beforeEach(function () {
     testCount = new TestCount();

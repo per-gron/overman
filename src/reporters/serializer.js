@@ -18,7 +18,7 @@
 
 var _ = require('lodash');
 var testPathUtil = require('../test_path_util');
-var TestCount = require('../test_count');
+var TestCount = require('../test_count').default;
 
 function suiteIsAncestorOfOrSameAs(ancestor, descendant) {
   return (

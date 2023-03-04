@@ -16,7 +16,7 @@
 
 'use strict';
 
-var TestCount = require('../test_count');
+var TestCount = require('../test_count').default;
 var testPathUtil = require('../test_path_util');
 var Combined = require('./combined');
 
