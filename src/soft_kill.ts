@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-'use strict';
-
-var TimeoutTimer = require('./timeout_timer').default;
+import { ProcessLike } from './process_like';
+import TimeoutTimer, { Timer } from './timeout_timer';
 
 /**
  * Sends a faked sigint to a process. If it is still not dead after a short
  * while, it sends SIGKILL.
  */
-function softKill(process, timeout, timeoutTimer) {
+export default function softKill(
+  process: ProcessLike,
+  timeout: number,
+  timerFactory?: (timeout: number) => Timer
+) {
   if (timeout === 0) {
     process.kill('SIGKILL');
-  } else {
-    var timer = new (timeoutTimer || TimeoutTimer)(timeout);
-    timer.on('timeout', function () {
-      process.kill('SIGKILL');
-    });
-
-    process.on('exit', function () {
-      timer.cancel();
-    });
-    // Instead of sending a real SIGINT, send a message to the sub-process and
-    // let it treat it as if it received a SIGINT. SIGINT doesn't exist on
-    // Windows.
-    process.send({ type: 'sigint' });
+    return;
   }
+
+  const timer = timerFactory ? timerFactory(timeout) : new TimeoutTimer(timeout);
+  timer.on('timeout', () => process.kill('SIGKILL'));
+
+  process.on('exit', () => timer.cancel());
+  // Instead of sending a real SIGINT, send a message to the sub-process and
+  // let it treat it as if it received a SIGINT. SIGINT doesn't exist on
+  // Windows.
+  process.send({ type: 'sigint' });
 }
-module.exports = softKill;
+
+export type SoftKill = typeof softKill;

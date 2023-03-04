@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-'use strict';
-
-var expect = require('chai').expect;
-var softKill = require('../soft_kill');
-var EventEmitter = require('events').EventEmitter;
-
-function fakeProcess(kill, send) {
-  var process = new EventEmitter();
-  process.kill = kill || function () {};
-  process.send = send || function () {};
-  return process;
-}
+import { expect } from 'chai';
+import softKill from '../soft_kill';
+import { FakeTimer } from '../timeout_timer';
+import { FakeProcess } from '../fakes/fake_process_like';
+import { Message } from '../reporters/message';
 
 describe('Soft kill', function () {
   it("should immediately send a 'sigint' message to the process", function () {
-    var sigintWasSent = false;
-
+    let sigintWasSent = false;
     softKill(
-      fakeProcess(
-        function kill() {},
-        function send(message) {
-          sigintWasSent = sigintWasSent || message.type === 'sigint';
+      new FakeProcess<Message>(
+        () => {},
+        (message) => {
+          if (message.type === 'sigint') {
+            sigintWasSent = true;
+          }
         }
       ),
       1
@@ -45,55 +39,41 @@ describe('Soft kill', function () {
   });
 
   it('should set up a timer with the specified timeout', function (done) {
-    function TimeoutTimer(timeout) {
+    softKill(new FakeProcess(), 123, (timeout) => {
       expect(timeout).to.be.equal(123);
       done();
-    }
-    TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
-    softKill(fakeProcess(), 123, TimeoutTimer);
+      return new FakeTimer();
+    });
   });
 
   it('should cancel the timer when the process exits', function (done) {
-    var process = fakeProcess();
-
-    function TimeoutTimer() {
-      this.cancel = done;
-    }
-    TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
-    softKill(process, 1, TimeoutTimer);
+    const process = new FakeProcess();
+    softKill(process, 1, () => new FakeTimer(done));
 
     process.emit('exit');
   });
 
   it('should send a SIGKILL when the timer fires', function (done) {
-    var proc = fakeProcess(function kill(signal) {
+    const proc = new FakeProcess((signal) => {
       if (signal === 'SIGKILL') {
         done();
       }
     });
 
-    function TimeoutTimer() {
-      var self = this;
-      process.nextTick(function () {
-        self.emit('timeout');
-      });
-      this.cancel = function () {};
-    }
-    TimeoutTimer.prototype = Object.create(EventEmitter.prototype);
-
-    softKill(proc, 1, TimeoutTimer);
+    const timer = new FakeTimer();
+    softKill(proc, 1, () => (process.nextTick(() => timer.emit('timeout')), timer));
 
     proc.emit('exit');
   });
 
   it('should immediately send SIGKILL if timeout is 0', function () {
-    var wasKilled = false;
-    var proc = fakeProcess(function kill(signal) {
+    let wasKilled = false;
+    const proc = new FakeProcess((signal) => {
       expect(signal).to.be.equal('SIGKILL');
       wasKilled = true;
     });
 
-    softKill(proc, 0, {});
+    softKill(proc, 0, () => new FakeTimer());
 
     expect(wasKilled, 'process should be immediately killed').to.be.true;
   });
