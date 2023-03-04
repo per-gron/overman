@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { expect } from 'chai';
+import TestFailureError from '../test_failure_error';
 
-'use strict';
-
-/**
- * An error "class" that means that one or more tests failed.
- */
-function TestFailureError(message) {
-  Error.captureStackTrace(this);
-  this.message = message;
-  this.name = this.constructor.name;
-}
-TestFailureError.prototype = Object.create(Error.prototype);
-module.exports = TestFailureError;
+describe('TestFailureError', function () {
+  it('should be instanceof Error', function () {
+    expect(new TestFailureError() instanceof Error).to.be.true;
+  });
+});

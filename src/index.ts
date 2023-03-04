@@ -19,7 +19,7 @@
 import suiteRunner = require('./suite_runner');
 import reporters = require('./reporters');
 import Reporter from './reporters/reporter';
-import TestFailureError = require('./test_failure_error');
+import TestFailureError from './test_failure_error';
 
 export default suiteRunner;
 export * from './reporters/message';

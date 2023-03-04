@@ -28,7 +28,7 @@ var path = require('path');
 var OnMessage = require('./util/on_message').default;
 var shouldFail = require('./util/should_fail').default;
 var makeFakeClock = require('./util/fake_clock').default;
-var TestFailureError = require('../test_failure_error');
+var TestFailureError = require('../test_failure_error').default;
 var suiteRunner = require('../suite_runner');
 
 function pathForSuite(suite) {

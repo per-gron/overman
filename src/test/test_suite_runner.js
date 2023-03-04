@@ -25,7 +25,7 @@ var OnMessage = require('./util/on_message').default;
 var streamUtil = require('./util/stream');
 var shouldFail = require('./util/should_fail').default;
 const { setTimeout } = require('timers/promises');
-var TestFailureError = require('../test_failure_error');
+var TestFailureError = require('../test_failure_error').default;
 var suiteRunner = require('../suite_runner');
 var chaiAsPromised = require('chai-as-promised');
 

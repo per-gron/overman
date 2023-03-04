@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-var expect = require('chai').expect;
-var TestFailureError = require('../test_failure_error');
-
-describe('TestFailureError', function () {
-  it('should be instanceof Error', function () {
-    expect(new TestFailureError() instanceof Error).to.be.true;
-  });
-});
+/**
+ * An error class that means that one or more tests failed.
+ */
+export default class TestFailureError extends Error {}

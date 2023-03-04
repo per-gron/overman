@@ -20,7 +20,7 @@ import overman, {
 } from '..';
 import * as reporters from '../reporters';
 import Reporter from '../reporters/reporter';
-import * as TestFailureError from '../test_failure_error';
+import TestFailureError from '../test_failure_error';
 
 describe('Overman public module', function () {
   it('should invoke the suite runner when called', function (done) {

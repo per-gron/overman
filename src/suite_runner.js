@@ -29,7 +29,7 @@ var CancellableReporter = require('./reporters/cancellable');
 var ErrorDetectorReporter = require('./reporters/error_detector');
 var SpecReporter = require('./reporters/spec');
 var errorMessageUtil = require('./error_message_util');
-var TestFailureError = require('./test_failure_error');
+var TestFailureError = require('./test_failure_error').default;
 var TimeoutTimer = require('./timeout_timer');
 
 var defaultInterface = __dirname + '/interfaces/bdd_mocha';
