@@ -18,7 +18,7 @@
 
 var _ = require('lodash');
 var Combined = require('./combined').default;
-var ErrorDetail = require('./error_detail');
+var ErrorDetail = require('./error_detail').default;
 var SpecProgress = require('./spec_progress');
 var SuiteMarker = require('./suite_marker');
 var Summary = require('./summary');

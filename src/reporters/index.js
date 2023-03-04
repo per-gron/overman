@@ -20,7 +20,7 @@
 // export all reporters.
 
 exports.Combined = require('./combined').default;
-exports.ErrorDetail = require('./error_detail');
+exports.ErrorDetail = require('./error_detail').default;
 exports.ErrorDetector = require('./error_detector').default;
 exports.MessageTracker = require('./message_tracker').default;
 exports.Serializer = require('./serializer');
