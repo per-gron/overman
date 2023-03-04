@@ -22,7 +22,7 @@ var Serializer = require('./serializer');
 var SuiteMarker = require('./suite_marker');
 var errorMessageUtil = require('../error_message_util');
 var MessageTracker = require('./message_tracker').default;
-var PhaseTracker = require('./phase_tracker');
+var PhaseTracker = require('./phase_tracker').default;
 
 teamcityServiceMessages.stdout = false; // Global yuck :-(
 

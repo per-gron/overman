@@ -19,7 +19,7 @@
 var _ = require('lodash');
 var errorMessageUtil = require('../error_message_util');
 var MessageTracker = require('./message_tracker').default;
-var PhaseTracker = require('./phase_tracker');
+var PhaseTracker = require('./phase_tracker').default;
 
 /**
  * ErrorDetail is a reporter that, when all tests have run, prints the errors
