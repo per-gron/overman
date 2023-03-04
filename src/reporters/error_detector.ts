@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-'use strict';
+import { TestPath } from '../test_path';
+import { Message } from './message';
+import Reporter from './reporter';
 
 /**
  * ErrorDetector is a reporter mainly for internal use by the suite
  * runner. It remembers if any of the tests runs failed.
  */
-function ErrorDetector() {
-  this._didFail = false;
-  this._testPath = '';
-  this._message = '';
-}
+export default class ErrorDetector implements Reporter {
+  #didFail = false;
+  #testPath: TestPath | null = null;
+  #message: Message | null = null;
 
-ErrorDetector.prototype.gotMessage = function (testPath, message) {
-  if (message.type === 'finish' && !message.result.match(/^(success)|(skipped)$/)) {
-    this._didFail = true;
-    this._testPath = testPath;
-    this._message = message;
+  gotMessage(testPath: TestPath, message: Message) {
+    if (message.type === 'finish' && !['success', 'skipped'].includes(message.result)) {
+      this.#didFail = true;
+      this.#testPath = testPath;
+      this.#message = message;
+    }
   }
-};
 
-ErrorDetector.prototype.didFail = function () {
-  return this._didFail;
-};
+  didFail() {
+    return this.#didFail;
+  }
 
-ErrorDetector.prototype.testPath = function () {
-  return this._testPath;
-};
+  testPath() {
+    return this.#testPath;
+  }
 
-ErrorDetector.prototype.message = function () {
-  return this._message;
-};
-
-module.exports = ErrorDetector;
+  message() {
+    return this.#message;
+  }
+}

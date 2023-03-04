@@ -21,7 +21,7 @@
 
 exports.Combined = require('./combined').default;
 exports.ErrorDetail = require('./error_detail');
-exports.ErrorDetector = require('./error_detector');
+exports.ErrorDetector = require('./error_detector').default;
 exports.MessageTracker = require('./message_tracker');
 exports.Serializer = require('./serializer');
 exports.Spec = require('./spec');
