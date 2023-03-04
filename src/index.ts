@@ -16,10 +16,13 @@
 
 /// <reference path="interfaces/bdd_mocha.globals.ts" />
 
-'use strict';
-
-import * as suiteRunner from './suite_runner';
+import suiteRunner = require('./suite_runner');
 import reporters = require('./reporters');
+import Reporter from './reporters/reporter';
 import TestFailureError = require('./test_failure_error');
 
-export = Object.assign(suiteRunner, { reporters, TestFailureError });
+export default suiteRunner;
+export * from './reporters/message';
+export * from './reporters/reporter';
+export * from './test_path';
+export { reporters, Reporter, TestFailureError };

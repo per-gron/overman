@@ -2,8 +2,8 @@
   "name": "overman",
   "version": "0.15.1",
   "description": "Test runner for integration tests",
-  "main": "dist/overman.js",
-  "types": "dist/overman.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist",
     "!dist/tsconfig.tsbuildinfo",
@@ -108,7 +108,7 @@
     "overrides": [
       {
         "files": [
-          "src/overman.ts"
+          "src/index.ts"
         ],
         "rules": {
           "@typescript-eslint/triple-slash-reference": "off"

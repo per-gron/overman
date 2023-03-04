@@ -18,7 +18,7 @@
 
 var fs = require('fs');
 var path = require('path');
-var overman = require('./dist/overman');
+var overman = require('./dist/index');
 var promiseUtil = require('./dist/promise_util');
 
 var suiteFiles = fs
@@ -34,7 +34,7 @@ const reporters = [
   new overman.reporters.Spec(process),
   new overman.reporters.Summary(process.stdout),
 ];
-var suitePromise = overman({ files: suiteFiles, reporters });
+var suitePromise = overman.default({ files: suiteFiles, reporters });
 
 var finished = false;
 promiseUtil.finally(suitePromise, function () {
