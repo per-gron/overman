@@ -16,7 +16,7 @@
 
 'use strict';
 
-var TimeoutTimer = require('./timeout_timer');
+var TimeoutTimer = require('./timeout_timer').default;
 
 /**
  * Sends a faked sigint to a process. If it is still not dead after a short
