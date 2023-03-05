@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-'use strict';
-
 // This file exports things for the public API. It intentionally does not
 // export all reporters.
 
-exports.Combined = require('./combined').default;
-exports.ErrorDetail = require('./error_detail').default;
-exports.ErrorDetector = require('./error_detector').default;
-exports.MessageTracker = require('./message_tracker').default;
-exports.Serializer = require('./serializer').default;
-exports.Spec = require('./spec').default;
-exports.SuiteMarker = require('./suite_marker').default;
-exports.Summary = require('./summary').default;
-exports.Teamcity = require('./teamcity').default;
-exports.Timer = require('./timer').default;
+export { default as Combined } from './combined';
+export { default as ErrorDetail } from './error_detail';
+export { default as ErrorDetector } from './error_detector';
+export { default as MessageTracker } from './message_tracker';
+export { default as Serializer } from './serializer';
+export { default as Spec } from './spec';
+export { default as SuiteMarker } from './suite_marker';
+export { default as Summary } from './summary';
+export { default as Teamcity } from './teamcity';
+export { default as Timer } from './timer';

@@ -17,7 +17,7 @@
 /// <reference path="interfaces/bdd_mocha.globals.ts" />
 
 import suiteRunner = require('./suite_runner');
-import reporters = require('./reporters');
+import * as reporters from './reporters';
 import Reporter from './reporters/reporter';
 import TestFailureError from './test_failure_error';
 
