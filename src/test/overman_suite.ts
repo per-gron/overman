@@ -24,7 +24,6 @@ const suiteFiles = fs
   .map((filename) => path.join('dist/test', filename));
 
 const reporters = [
-  // @ts-ignore temporary
   new overmanReporters.Spec(process),
   new overmanReporters.Summary(process.stdout),
 ];

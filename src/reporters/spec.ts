@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-'use strict';
+import { Writable } from 'stream';
+import Combined from './combined';
+import ErrorDetail from './error_detail';
+import SpecProgress from './spec_progress';
+import SuiteMarker from './suite_marker';
+import Summary from './summary';
+import Timer from './timer';
 
-var _ = require('lodash');
-var Combined = require('./combined').default;
-var ErrorDetail = require('./error_detail').default;
-var SpecProgress = require('./spec_progress').default;
-var SuiteMarker = require('./suite_marker').default;
-var Summary = require('./summary').default;
-var Timer = require('./timer').default;
+export type Streams = { stdout: Writable };
 
 /**
  * Spec is a reporter that combines other reporters to form a complete bdd spec
@@ -36,17 +36,12 @@ var Timer = require('./timer').default;
  *     stream is ignored. The parameter itself is optional too; if nothing is
  *     passed, things are printed to the stdio streams of the process.
  */
-function Spec(streams) {
-  if (_.isUndefined(streams)) {
-    streams = process;
+export default class Spec extends Combined {
+  constructor({ stdout }: Streams = process) {
+    super([
+      new Timer(new SuiteMarker(new SpecProgress({ stdout }))),
+      new Summary(stdout),
+      new ErrorDetail(stdout),
+    ]);
   }
-
-  this.reporters = [
-    new Timer(new SuiteMarker(new SpecProgress(streams))),
-    new Summary(streams.stdout),
-    new ErrorDetail(streams.stdout),
-  ];
 }
-Spec.prototype = Object.create(Combined.prototype);
-
-module.exports = Spec;

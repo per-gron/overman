@@ -17,7 +17,7 @@
 'use strict';
 
 var through = require('through');
-var Spec = require('../reporters/spec');
+var Spec = require('../reporters/spec').default;
 var suiteRunner = require('../suite_runner');
 var OnMessage = require('./util/on_message').default;
 var streamUtil = require('./util/stream');
