@@ -27,5 +27,5 @@ exports.Serializer = require('./serializer').default;
 exports.Spec = require('./spec');
 exports.SuiteMarker = require('./suite_marker').default;
 exports.Summary = require('./summary').default;
-exports.Teamcity = require('./teamcity');
+exports.Teamcity = require('./teamcity').default;
 exports.Timer = require('./timer');
