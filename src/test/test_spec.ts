@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-'use strict';
+import * as through from 'through';
+import { RegisterOptions } from '../reporters/reporter';
+import SpecReporter from '../reporters/spec';
+import suiteRunner from '../suite_runner';
+import OnMessage from './util/on_message';
+import { stripAnsiStream, waitForStreamToEmitLine, waitForStreamToEmitLines } from './util/stream';
 
-var through = require('through');
-var Spec = require('../reporters/spec').default;
-var suiteRunner = require('../suite_runner').default;
-var OnMessage = require('./util/on_message').default;
-var streamUtil = require('./util/stream');
-
+const REG_OPTS: RegisterOptions = {
+  timeout: 0,
+  listingTimeout: 0,
+  slowThreshold: 0,
+  graceTime: 0,
+  attempts: 0,
+};
 const DATE = new Date(42);
 
-function simulateOneTest(spec) {
-  var path = { file: 'file', path: ['suite_name', 'test'] };
+function simulateOneTest(spec: SpecReporter) {
+  const path = { file: 'file', path: ['suite_name', 'test'] };
   const END = new Date(DATE.getTime() + 123);
 
-  spec.registerTests([path], { slowThreshold: 100 }, DATE);
+  spec.registerTests([path], { ...REG_OPTS, slowThreshold: 100 }, DATE);
   spec.gotMessage(path, { type: 'start' }, DATE);
   spec.gotMessage(path, { type: 'startedTest' }, DATE);
   spec.gotMessage(path, { type: 'startedAfterHooks' }, END);
@@ -36,20 +42,20 @@ function simulateOneTest(spec) {
   spec.done(END);
 }
 
-function simulateAndWaitForLine(simulate, line) {
-  var out = streamUtil.stripAnsiStream();
+function simulateAndWaitForLine(simulate: (_: SpecReporter) => void, line: string | RegExp) {
+  const stdout = stripAnsiStream();
 
-  var outputPromise = streamUtil.waitForStreamToEmitLine(out, line);
+  const outputPromise = waitForStreamToEmitLine(stdout, line);
 
-  var spec = new Spec({ stdout: out });
+  const spec = new SpecReporter({ stdout });
   simulate(spec);
 
-  out.end();
+  stdout.end();
 
   return outputPromise;
 }
 
-function simulateOneTestAndWaitForLine(line) {
+function simulateOneTestAndWaitForLine(line: string | RegExp) {
   return simulateAndWaitForLine(simulateOneTest, line);
 }
 
@@ -67,34 +73,27 @@ describe('Spec reporter', function () {
   });
 
   it('should print details about errors', function () {
-    return simulateAndWaitForLine(function simulateFailingTest(spec) {
-      var path = { file: 'file', path: ['suite_name', 'test'] };
+    return simulateAndWaitForLine((spec) => {
+      const path = { file: 'file', path: ['suite_name', 'test'] };
 
-      spec.registerTests([path], { slowThreshold: 100 }, new Date());
-      spec.gotMessage(path, { type: 'start' });
-      spec.gotMessage(path, {
-        type: 'error',
-        in: 'uncaught',
-        stack: 'an_error',
-      });
-      spec.gotMessage(path, {
-        type: 'finish',
-        result: 'failure',
-      });
-      spec.done(new Date());
+      spec.registerTests([path], { ...REG_OPTS, slowThreshold: 100 }, DATE);
+      spec.gotMessage(path, { type: 'start' }, DATE);
+      spec.gotMessage(path, { type: 'error', in: 'uncaught', stack: 'an_error' }, DATE);
+      spec.gotMessage(path, { type: 'finish', result: 'failure' }, DATE);
+      spec.done(DATE);
     }, /Uncaught error: an_error/);
   });
 
   it('should print to stdout by default', function () {
-    var out = through();
-    var outputPromise = streamUtil.waitForStreamToEmitLines(out, [/./, /suite_name/, /test/]);
+    const out = through();
+    const outputPromise = waitForStreamToEmitLines(out, [/./, /suite_name/, /test/]);
 
     // This test can't be done within the test process, because when the test
     // runs in Mocha it's not ok to pipe stdout to something else.
-    var suitePromise = suiteRunner({
-      files: [__dirname + '/../../data/suite/' + 'suite_spec_should_print_to_stdout_by_default'],
+    const suitePromise = suiteRunner({
+      files: [`${__dirname}/../../data/suite/suite_spec_should_print_to_stdout_by_default`],
       timeout: 1000,
-      reporters: new OnMessage(function (path, message) {
+      reporters: new OnMessage((_, message) => {
         if (message.type === 'finish') {
           out.end();
         } else if (message.type === 'stdout') {
