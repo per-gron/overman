@@ -14,65 +14,55 @@
  * limitations under the License.
  */
 
-'use strict';
-
-var _ = require('lodash');
-var childProcess = require('child_process');
-var EventEmitter = require('events').EventEmitter;
-var chai = require('chai');
-var through = require('through');
-var OnMessage = require('./util/on_message').default;
-var streamUtil = require('./util/stream');
-var shouldFail = require('./util/should_fail').default;
-const { setTimeout } = require('timers/promises');
-var TestFailureError = require('../test_failure_error').default;
-var suiteRunner = require('../suite_runner');
-var chaiAsPromised = require('chai-as-promised');
-
-var expect = chai.expect;
+import * as childProcess from 'child_process';
+import * as psTree from 'ps-tree';
+import isRunning = require('is-running');
+import * as chai from 'chai';
+import { expect } from 'chai';
+import * as through from 'through';
+import OnMessage from './util/on_message';
+import * as streamUtil from './util/stream';
+import shouldFail from './util/should_fail';
+import { setTimeout } from 'timers/promises';
+import TestFailureError from '../test_failure_error';
+import suiteRunner, { ChildProcessModuleLike, Options } from '../suite_runner';
+import * as chaiAsPromised from 'chai-as-promised';
+import { TestPath } from '../test_path';
+import { Message } from '../reporters/message';
+import { FakeProcess } from '../fakes/fake_process_like';
+import Reporter from '../reporters/reporter';
+import { SoftKill } from '../soft_kill';
 
 chai.use(chaiAsPromised);
 
-function ParallelismCounter() {
-  this.maxParallelism = 0;
-  this._currentTests = {};
-}
+class ParallelismCounter {
+  maxParallelism = 0;
+  _currentTests = new Set<string>();
 
-ParallelismCounter.prototype.gotMessage = function (testPath, message) {
-  var pathAsString = JSON.stringify(testPath);
-  if (message.type === 'start') {
-    this._currentTests[pathAsString] = true;
+  gotMessage(testPath: TestPath, message: Message) {
+    const pathAsString = JSON.stringify(testPath);
+    if (message.type === 'start') {
+      this._currentTests.add(pathAsString);
 
-    this.maxParallelism = Math.max(this.maxParallelism, _.keys(this._currentTests).length);
-  } else if (message.type === 'finish') {
-    delete this._currentTests[pathAsString];
+      this.maxParallelism = Math.max(this.maxParallelism, this._currentTests.size);
+    } else if (message.type === 'finish') {
+      this._currentTests.delete(pathAsString);
+    }
   }
-};
-
-function listNames(names) {
-  return names
-    .map(function (name) {
-      return '"' + name + '"';
-    })
-    .join(', ');
 }
 
-function runTestSuite(suite, reporters, options) {
-  return suiteRunner(
-    _.assign(
-      {
-        files: [__dirname + '/../../data/suite/' + suite],
-        timeout: 4000,
-        reporters: reporters || [],
-        internalErrorOutput: through(),
-      },
-      options
-    )
-  );
+function listNames(names: string[]) {
+  return names.map((name) => `"${name}"`).join(', ');
 }
 
-function isTestFailureError(err) {
-  return err instanceof TestFailureError;
+function runTestSuite(suite: string, reporters?: Reporter[], options?: Partial<Options>) {
+  return suiteRunner({
+    files: [`${__dirname}/../../data/suite/${suite}`],
+    timeout: 4000,
+    reporters: reporters || [],
+    internalErrorOutput: through(),
+    ...options,
+  });
 }
 
 /**
@@ -83,21 +73,24 @@ function isTestFailureError(err) {
  * options.allowTestsToFail), only tests that were specified are run and
  * the test output exactly matches the specification.
  */
-function ensureOutputFromTests(suite, tests, options) {
-  var gotStartForTests = [];
-  var reporters = [];
-  var encounteredTests = {};
+function ensureOutputFromTests(
+  suite: string,
+  tests: Record<string, (string | RegExp)[]>,
+  options?: Partial<Options> & { allowTestsToFail?: boolean }
+) {
+  const gotStartForTests: string[] = [];
+  const reporters: Reporter[] = [];
+  const encounteredTests = new Set<string>();
 
-  var testsPromises = _.keys(tests).map(function (testName) {
-    var lines = tests[testName];
-    var out = through();
+  const testsPromises = Object.entries(tests).map(([testName, lines]) => {
+    const out = through();
 
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       reporters.push(
-        new OnMessage(function (testPath, message) {
-          var currentTestName = _.last(testPath.path);
+        new OnMessage((testPath, message) => {
+          const currentTestName = testPath.path.at(-1)!;
           if (message.type === 'start' && !message.skipped) {
-            encounteredTests[currentTestName] = true;
+            encounteredTests.add(currentTestName);
           }
 
           if (currentTestName === testName) {
@@ -116,33 +109,36 @@ function ensureOutputFromTests(suite, tests, options) {
     });
   });
 
-  var suitePromise = runTestSuite(suite, reporters, options)
-    .catch(function (error) {
-      if (!(options || {}).allowTestsToFail) {
+  const suitePromise = runTestSuite(suite, reporters, options)
+    .catch((error) => {
+      if (!options || !options.allowTestsToFail) {
         throw error;
       }
     })
-    .then(function () {
-      var testNames = _.keys(tests);
-      if (gotStartForTests.length < testNames.length) {
-        var missingTests = _.difference(testNames, gotStartForTests);
+    .then(() => {
+      const testNames = new Set(Object.keys(tests));
+      if (gotStartForTests.length < testNames.size) {
+        const missingTests = testNames;
+        gotStartForTests.forEach((test) => missingTests.delete(test));
 
         throw new Error(
           'Did not run all tests (ran ' +
             listNames(gotStartForTests) +
             '. Missing ' +
-            listNames(missingTests) +
+            listNames([...missingTests]) +
             ')'
         );
       }
     });
 
-  return Promise.all(testsPromises.concat([suitePromise])).then(function () {
-    if (!_.isEqual(_.keys(encounteredTests).sort(), _.keys(tests).sort())) {
-      throw new Error(
-        'Encountered unexpected tests ' +
-          listNames(_.difference(_.keys(encounteredTests), _.keys(tests)))
-      );
+  return Promise.all(testsPromises.concat([suitePromise])).then(() => {
+    const lhs = Object.keys(encounteredTests).sort();
+    const rhs = Object.keys(tests).sort();
+
+    if (!lhs.every((lhs, i) => lhs === rhs[i])) {
+      const set = new Set(lhs);
+      rhs.forEach((s) => set.delete(s));
+      throw new Error('Encountered unexpected tests ' + listNames([...rhs]));
     }
   });
 }
@@ -150,7 +146,7 @@ function ensureOutputFromTests(suite, tests, options) {
 describe('Suite runner', function () {
   it('should require files parameter', function () {
     expect(function () {
-      suiteRunner({});
+      suiteRunner({} as Options);
     }).to.throw(/not present or not Array/);
   });
 
@@ -215,24 +211,25 @@ describe('Suite runner', function () {
   });
 
   it('should fail if a test fails', function () {
-    return shouldFail(runTestSuite('suite_various_tests'), function (error) {
-      return isTestFailureError(error) && error.message.match(/failed/);
-    });
+    return shouldFail(
+      runTestSuite('suite_various_tests'),
+      (error) => error instanceof TestFailureError && /failed/.test(error.message)
+    );
   });
 
   it('should fail with TestFailureError if a test has a syntax error', function () {
-    return shouldFail(runTestSuite('suite_syntax_error'), isTestFailureError);
+    return shouldFail(runTestSuite('suite_syntax_error'), (err) => err instanceof TestFailureError);
   });
 
   it('should not leak things to the runloop', function () {
     return Promise.race([
-      setTimeout(2000).then(function () {
+      setTimeout(2000).then(() => {
         throw new Error('Should be done by now');
       }),
-      new Promise(function (resolve, reject) {
-        var child = childProcess.fork(__dirname + '/util/run_single_test');
+      new Promise<void>((resolve, reject) => {
+        const child = childProcess.fork(__dirname + '/util/run_single_test');
 
-        child.on('exit', function (code) {
+        child.on('exit', (code) => {
           if (code === 0) {
             resolve();
           } else {
@@ -244,30 +241,30 @@ describe('Suite runner', function () {
   });
 
   it('should pass killSubProcesses option to test subprocess', function () {
-    var killSubProcesses = false;
-    var mockChildProcess = {
-      fork: function (path, args) {
+    let killSubProcesses = false;
+    const mockChildProcess: ChildProcessModuleLike = {
+      fork: (path, args) => {
+        if (!Array.isArray(args)) {
+          throw new Error();
+        }
         killSubProcesses = JSON.parse(args[1]).killSubProcesses;
         return childProcess.fork(path, args);
       },
-      on: { on: function () {} },
     };
     return runTestSuite('suite_single_successful_test', [], {
       childProcess: mockChildProcess,
       killSubProcesses: true,
-    }).then(function () {
-      expect(killSubProcesses).to.be.true;
-    });
+    }).then(() => expect(killSubProcesses).to.be.true);
   });
 
   it('should emit attributes message for test with attributes', function () {
-    var attributes = [];
-    var reporter = new OnMessage(function (testPath, message) {
+    const attributes: Record<string, unknown>[] = [];
+    const reporter = new OnMessage((_, message) => {
       if (message.type === 'attributes') {
         attributes.push(message.attributes);
       }
     });
-    return runTestSuite('suite_attributes', [reporter]).then(function () {
+    return runTestSuite('suite_attributes', [reporter]).then(() => {
       expect(attributes).to.be.deep.equal([
         { foo: 'baz', bar: 'qux' },
         { foo: 'quux', bar: 'qux' },
@@ -276,17 +273,17 @@ describe('Suite runner', function () {
   });
 
   describe('Stdio', function () {
-    var testSuite = {
+    const testSuite = {
       stdout: 'suite_single_successful_test',
       stderr: 'suite_single_successful_test_stderr',
     };
 
-    ['stdout', 'stderr'].forEach(function (streamName) {
-      it('should forward ' + streamName + ' data', function () {
-        return new Promise(function (resolve) {
+    (Object.keys(testSuite) as (keyof typeof testSuite)[]).forEach((streamName) => {
+      it(`should forward ${streamName} data`, function () {
+        return new Promise<void>((resolve) => {
           runTestSuite(testSuite[streamName], [
             {
-              gotMessage: function (testPath, message) {
+              gotMessage(_, message) {
                 if (message.type === streamName) {
                   expect(message.data).to.be.equal('running_test\n');
                   resolve();
@@ -301,44 +298,40 @@ describe('Suite runner', function () {
 
   describe('Suite cancellation', function () {
     it('should fail when the suite is cancelled', function () {
-      var suitePromise = runTestSuite('suite_single_successful_test', [
-        new OnMessage(function (testPath, message) {
+      const suitePromise = runTestSuite('suite_single_successful_test', [
+        new OnMessage((_, message) => {
           if (message.type === 'start') {
             suitePromise.cancel();
           }
         }),
       ]);
-      return shouldFail(suitePromise, function (error) {
-        return isTestFailureError(error) && error.message.match(/cancelled/);
-      });
+      return shouldFail(
+        suitePromise,
+        (error) => error instanceof TestFailureError && /cancelled/.test(error.message)
+      );
     });
 
-    it('should do nothing when cancelled after the suite is done', function () {
-      var doneCalledTimes = 0;
+    it('should do nothing when cancelled after the suite is done', async function () {
+      let doneCalledTimes = 0;
 
-      var suitePromise = runTestSuite('suite_single_successful_test', [
-        {
-          done: function () {
-            doneCalledTimes++;
-          },
-        },
+      const suitePromise = runTestSuite('suite_single_successful_test', [
+        { done: () => doneCalledTimes++ },
       ]);
-      return suitePromise.then(function () {
-        expect(doneCalledTimes, 'done should have been called').to.be.equal(1);
-        suitePromise.cancel();
-        expect(
-          doneCalledTimes,
-          'done should not be called when cancelling finished suite'
-        ).to.be.equal(1);
-      });
+      await suitePromise;
+      expect(doneCalledTimes, 'done should have been called').to.be.equal(1);
+      suitePromise.cancel();
+      expect(
+        doneCalledTimes,
+        'done should not be called when cancelling finished suite'
+      ).to.be.equal(1);
     });
 
     it('should do nothing when cancelled subsequent times', function () {
-      var doneCalledTimes = 0;
+      let doneCalledTimes = 0;
 
-      var suitePromise = runTestSuite('suite_single_successful_test', [
+      const suitePromise = runTestSuite('suite_single_successful_test', [
         {
-          gotMessage: function (testPath, message) {
+          gotMessage: (_, message) => {
             if (message.type === 'start') {
               suitePromise.cancel();
               expect(
@@ -352,15 +345,13 @@ describe('Suite runner', function () {
               ).to.be.equal(1);
             }
           },
-
-          done: function () {
-            doneCalledTimes++;
-          },
+          done: () => doneCalledTimes++,
         },
       ]);
-      return shouldFail(suitePromise, function (error) {
-        return isTestFailureError(error) && error.message.match(/cancelled/);
-      });
+      return shouldFail(
+        suitePromise,
+        (error) => error instanceof TestFailureError && /cancelled/.test(error.message)
+      );
     });
   });
 
@@ -383,83 +374,51 @@ describe('Suite runner', function () {
     return shouldFail(runTestSuite('suite_single_test_infinite_loop'));
   });
 
-  it('should run tests in parallel by default', function () {
-    var counter = new ParallelismCounter();
-    return runTestSuite('suite_various_tests', [counter])
-      .then(
-        function () {},
-        function () {}
-      ) // Discard test result
-      .then(function () {
-        expect(counter).to.have.property('maxParallelism').that.is.gt(3);
-      });
+  it('should run tests in parallel by default', async function () {
+    const counter = new ParallelismCounter();
+    await runTestSuite('suite_various_tests', [counter]).catch(() => {});
+    expect(counter).to.have.property('maxParallelism').that.is.gt(3);
   });
 
-  it('should run tests sequentially', function () {
-    var counter = new ParallelismCounter();
-    return runTestSuite('suite_various_tests', [counter], { parallelism: 1 })
-      .then(
-        function () {},
-        function () {}
-      ) // Discard test result
-      .then(function () {
-        expect(counter).to.have.property('maxParallelism').that.is.equal(1);
-      });
+  it('should run tests sequentially', async function () {
+    const counter = new ParallelismCounter();
+    await runTestSuite('suite_various_tests', [counter], { parallelism: 1 }).catch(() => {});
+    expect(counter).to.have.property('maxParallelism').that.is.equal(1);
   });
 
-  it('should run tests in parallel', function () {
-    var counter = new ParallelismCounter();
-    return runTestSuite('suite_various_tests', [counter], { parallelism: 3 })
-      .then(
-        function () {},
-        function () {}
-      ) // Discard test result
-      .then(function () {
-        expect(counter).to.have.property('maxParallelism').that.is.equal(3);
-      });
+  it('should run tests in parallel', async function () {
+    const counter = new ParallelismCounter();
+    await runTestSuite('suite_various_tests', [counter], { parallelism: 3 }).catch(() => {});
+    expect(counter).to.have.property('maxParallelism').that.is.equal(3);
   });
 
   it('should fail when encountering .only tests and disallowOnly is set', function () {
     return shouldFail(runTestSuite('suite_single_only_test', [], { disallowOnly: true }));
   });
 
-  it('should detect and kill orphan childprocess', function () {
-    var proc = require('child_process').fork(
-      'dist/test/util/run_single_test_that_never_finishes.js'
-    );
-    return Promise.resolve(
-      new Promise(function (resolve) {
-        var timeout = setInterval(function () {
-          require('ps-tree')(process.pid, function (err, children) {
-            var childrenPID = children
-              .filter(function (p) {
-                // command key is different on linux/windows
-                var command = p.COMMAND ? p.COMMAND : p.COMM;
-                return command.includes('node');
-              })
-              .map(function (p) {
-                return p.PID;
-              });
-            if (childrenPID.length === 2) {
-              proc.kill('SIGKILL');
-              clearInterval(timeout);
-              resolve(childrenPID);
-            }
-          });
-        }, 300);
-      }).then(function (childrenPID) {
-        return new Promise(function (resolve) {
-          setInterval(function () {
-            var livingChildProcesses = [];
-            childrenPID.forEach(function (childPID) {
-              if (require('is-running')(childPID)) {
-                livingChildProcesses.push(childPID);
-              }
-            });
-            livingChildProcesses.length === 0 && resolve();
-          }, 300);
+  it('should detect and kill orphan childprocess', async function () {
+    const proc = childProcess.fork('dist/test/util/run_single_test_that_never_finishes.js');
+    const pids = await new Promise<number[]>((resolve) => {
+      const timeout = setInterval(() => {
+        psTree(process.pid, (_err, children) => {
+          const childrenPID = children
+            .filter((p) => {
+              // command key is different on linux/windows
+              type WindowsPS = psTree.PS & { COMM: string };
+              const command = p.COMMAND ? p.COMMAND : (p as WindowsPS).COMM;
+              return command.includes('node');
+            })
+            .map((p) => Number.parseInt(p.PID, 10));
+          if (childrenPID.length === 2) {
+            proc.kill('SIGKILL');
+            clearInterval(timeout);
+            resolve(childrenPID);
+          }
         });
-      })
+      }, 300);
+    });
+    await new Promise<void>((resolve) =>
+      setInterval(() => pids.every((pid) => !isRunning(pid)) && resolve(), 300)
     );
   });
 
@@ -467,25 +426,22 @@ describe('Suite runner', function () {
     it('should run only tests that passes the attribute filter function', function () {
       return ensureOutputFromTests(
         'suite_attributes',
-        {
-          'should override': [],
-        },
-        {
-          attributeFilter: function (attributes) {
-            return attributes.foo === 'baz';
-          },
-        }
+        { 'should override': [] },
+        { attributeFilter: (attributes) => attributes.foo === 'baz' }
       );
     });
 
     it('should emit error for attribute filter which throws', function () {
-      function attributeFilter() {
+      const attributeFilter = () => {
         throw new Error('client error');
-      }
-      var suitePromise = runTestSuite('suite_attributes', [], { attributeFilter: attributeFilter });
-      return shouldFail(suitePromise, function (error) {
-        return error.message.match(/^Encountered error while filtering attributes/);
-      });
+      };
+      const suitePromise = runTestSuite('suite_attributes', [], { attributeFilter });
+      return shouldFail(
+        suitePromise,
+        (error) =>
+          error instanceof Error &&
+          /^Encountered error while filtering attributes/.test(error.message)
+      );
     });
   });
 
@@ -493,25 +449,21 @@ describe('Suite runner', function () {
     it('should run only tests that passes the filter function', function () {
       return ensureOutputFromTests(
         'suite_attributes',
-        {
-          'should override': [],
-        },
-        {
-          testFilter: function (test) {
-            return test.attributes.foo === 'baz';
-          },
-        }
+        { 'should override': [] },
+        { testFilter: (test) => test.attributes?.foo === 'baz' }
       );
     });
 
     it('should emit error for test filter which throws', function () {
-      function testFilter() {
+      const testFilter = () => {
         throw new Error('client error');
-      }
-      var suitePromise = runTestSuite('suite_attributes', [], { testFilter: testFilter });
-      return shouldFail(suitePromise, function (error) {
-        return error.message.match(/^Encountered error while filtering tests/);
-      });
+      };
+      const suitePromise = runTestSuite('suite_attributes', [], { testFilter });
+      return shouldFail(
+        suitePromise,
+        (error) =>
+          error instanceof Error && /^Encountered error while filtering tests/.test(error.message)
+      );
     });
   });
 
@@ -560,23 +512,23 @@ describe('Suite runner', function () {
   });
 
   it('should print internal error information to the internalErrorOutput stream', function () {
-    var out = streamUtil.stripAnsiStream();
+    const out = streamUtil.stripAnsiStream();
 
-    var streamOutput = streamUtil.waitForStreamToEmitLines(out, [
+    const streamOutput = streamUtil.waitForStreamToEmitLines(out, [
       /Internal error in Overman or a reporter:/,
       /Test/,
       /stack/,
       /.*/,
     ]);
 
-    var error = new Error('Test');
+    const error = new Error('Test');
     error.stack = 'Test\nstack';
 
-    var suitePromise = suiteRunner({
+    const suitePromise = suiteRunner({
       files: [__dirname + '/../../data/suite/suite_test_title'],
       reporters: [
         {
-          registerTests: function () {
+          registerTests() {
             throw error;
           },
         },
@@ -584,9 +536,7 @@ describe('Suite runner', function () {
       internalErrorOutput: out,
     });
 
-    var expectFailure = shouldFail(suitePromise, function (raisedError) {
-      return raisedError === error;
-    });
+    const expectFailure = shouldFail(suitePromise, (raisedError) => raisedError === error);
 
     return Promise.all([streamOutput, expectFailure.finally(() => out.end())]);
   });
@@ -596,7 +546,7 @@ describe('Suite runner', function () {
       return ensureOutputFromTests(
         'suite_timeout_print',
         {
-          'should print its timeout': [1337],
+          'should print its timeout': ['1337'],
         },
         { timeout: 1337 }
       );
@@ -613,7 +563,7 @@ describe('Suite runner', function () {
 
     it('should respect per test timeout overrides', function () {
       return ensureOutputFromTests('suite_timeout_set_in_suite', {
-        'should print its timeout': [1234],
+        'should print its timeout': ['1234'],
       });
     });
 
@@ -622,9 +572,8 @@ describe('Suite runner', function () {
         runTestSuite('suite_single_successful_test', [], {
           listingTimeout: 1,
         }),
-        function (error) {
-          return isTestFailureError(error) && error.message.match(/Timed out while listing tests/);
-        }
+        (error) =>
+          error instanceof TestFailureError && /Timed out while listing tests/.test(error.message)
       );
     });
 
@@ -642,112 +591,99 @@ describe('Suite runner', function () {
     });
 
     it("should send 'sigint' message to tests that time out", function () {
-      let deferredResolve;
+      class Child extends FakeProcess {
+        constructor(private deferredResolve: () => void) {
+          super(
+            () => {},
+            (message) => {
+              expect(message).property('type').to.be.equal('sigint');
+              this.emit('exit', 0, null);
+              this.emit('close');
+              this.deferredResolve();
+            }
+          );
+        }
+      }
+
+      let deferredResolve = (..._: unknown[]) => {};
       const deferredPromise = new Promise((resolve) => (deferredResolve = resolve));
 
-      function fork() {
-        var child = new EventEmitter();
-        child.stdout = { on: function () {} };
-        child.stderr = { on: function () {} };
-
-        child.kill = function () {};
-        child.send = function (message) {
-          expect(message).property('type').to.be.equal('sigint');
-          child.emit('exit', 0, null);
-          child.emit('close');
-          deferredResolve();
-        };
-
-        return child;
-      }
+      const fork = () => new Child(deferredResolve);
 
       return Promise.all([
         shouldFail(
           runTestSuite('suite_single_test_that_never_finishes', [], {
-            childProcess: { fork: fork },
+            childProcess: { fork },
             timeout: 10,
           }),
-          function (error) {
-            return error instanceof TestFailureError && error.message.match(/Tests failed/);
-          }
+          (error) => error instanceof TestFailureError && /Tests failed/.test(error.message)
         ),
         deferredPromise,
       ]);
     });
 
-    it('should suppress all messages from a test process after it times out', function () {
-      var lastMessage = null;
-      var didTimeout = false;
-
-      function fork() {
-        var child = new EventEmitter();
-        child.stdout = { on: function () {} };
-        child.stderr = { on: function () {} };
-
-        child.kill = function () {};
-        child.send = function (message) {
-          expect(message).property('type').to.be.equal('sigint');
-          child.emit('message', { type: 'debugInfo', name: 'a', value: 'should be suppressed' });
-          child.emit('exit', 0, null);
-          child.emit('close');
-          didTimeout = true;
-        };
-
-        return child;
+    it('should suppress all messages from a test process after it times out', async function () {
+      class Child extends FakeProcess {
+        constructor(private didTimeout: () => void) {
+          super(
+            () => {},
+            (message) => {
+              expect(message).property('type').to.be.equal('sigint');
+              this.emit('message', { type: 'debugInfo', name: 'a', value: 'should be suppressed' });
+              this.emit('exit', 0, null);
+              this.emit('close');
+              this.didTimeout();
+            }
+          );
+        }
       }
 
-      return shouldFail(
+      let lastMessage = null;
+      let didTimeout = false;
+
+      const fork = () => new Child(() => (didTimeout = true));
+
+      await shouldFail(
         runTestSuite('suite_single_test_that_never_finishes', [], {
-          childProcess: { fork: fork },
+          childProcess: { fork },
           timeout: 10,
-          reporters: [
-            new OnMessage(function (path, message) {
-              lastMessage = message;
-            }),
-          ],
+          reporters: [new OnMessage((_, message) => (lastMessage = message))],
         }),
-        function (error) {
-          return error instanceof TestFailureError && error.message.match(/Tests failed/);
-        }
-      ).then(function () {
-        expect(didTimeout, "The test wasn't run as expected").to.be.true;
-        expect(lastMessage, 'Finish should be the last message sent').to.be.deep.equal({
-          type: 'finish',
-          result: 'timeout',
-          unstable: false,
-        });
+        (error) => error instanceof TestFailureError && /Tests failed/.test(error.message)
+      );
+
+      expect(didTimeout, "The test wasn't run as expected").to.be.true;
+      expect(lastMessage, 'Finish should be the last message sent').to.be.deep.equal({
+        type: 'finish',
+        result: 'timeout',
+        unstable: false,
       });
     });
 
     it("should send SIGKILL to tests that don't die after 'sigint' message", function () {
-      let deferredResolve;
+      class Child extends FakeProcess {
+        constructor(private deferredResolve: () => void) {
+          super((signal) => {
+            expect(signal).to.be.equal('SIGKILL');
+            this.emit('exit', 0, null);
+            this.emit('close');
+            this.deferredResolve();
+          });
+        }
+      }
+
+      let deferredResolve = (..._: unknown[]) => {};
       const deferredPromise = new Promise((resolve) => (deferredResolve = resolve));
 
-      function fork() {
-        var child = new EventEmitter();
-        child.stdout = { on: function () {} };
-        child.stderr = { on: function () {} };
-
-        child.kill = function (signal) {
-          expect(signal).to.be.equal('SIGKILL');
-          child.emit('exit', 0, null);
-          child.emit('close');
-          deferredResolve();
-        };
-        child.send = function () {};
-
-        return child;
-      }
+      const fork = () => new Child(deferredResolve);
 
       return Promise.all([
         shouldFail(
           runTestSuite('suite_single_test_that_never_finishes', [], {
-            childProcess: { fork: fork },
+            childProcess: { fork },
             timeout: 10,
           }),
-          function (error) {
-            return error instanceof TestFailureError && error.message.match(/Tests failed/);
-          }
+          (error) => error instanceof TestFailureError && /Tests failed/.test(error.message)
         ),
         deferredPromise,
       ]);
@@ -755,16 +691,16 @@ describe('Suite runner', function () {
 
     [0, 1234].forEach(function (graceTime) {
       it('should respect the graceTime parameter of ' + graceTime, function () {
-        let softKillResolve;
+        let softKillResolve = (..._: unknown[]) => {};
         const softKillPromise = new Promise((resolve) => (softKillResolve = resolve));
 
-        function softKill(process, timeout) {
+        const softKill: SoftKill = (process, timeout) => {
           process.kill('SIGKILL');
           expect(timeout).to.be.equal(graceTime);
           softKillResolve();
-        }
+        };
 
-        var suitePromise = shouldFail(
+        const suitePromise = shouldFail(
           runTestSuite('suite_single_successful_test', [], {
             timeout: 1,
             graceTime: graceTime,
@@ -782,7 +718,7 @@ describe('Suite runner', function () {
     it('should treat timeout of 0 as no timeout', function () {
       return runTestSuite('suite_single_successful_test', [], {
         timeout: 0,
-        timeoutTimer: function () {
+        timerFactory() {
           throw new Error('No TimeoutTimer should be instantiated when timeout is 0');
         },
       });
@@ -790,26 +726,31 @@ describe('Suite runner', function () {
   });
 
   describe('Retries', function () {
-    function countAttempts(suite, attempts, suiteShouldFail, opt_options) {
-      var retryAttempts = 0;
+    function countAttempts(
+      suite: string,
+      attempts: number,
+      suiteShouldFail = false,
+      options?: ChildProcessModuleLike & Partial<Options>
+    ) {
+      let retryAttempts = 0;
 
-      var realFork = (opt_options || {}).fork || require('child_process').fork;
-      function fork() {
+      const realFork = (options || {}).fork || childProcess.fork;
+      const fork: ChildProcessModuleLike['fork'] = (...args) => {
         retryAttempts++;
-        return realFork.apply(this, arguments);
-      }
+        return realFork(...(args as Parameters<typeof realFork>));
+      };
 
-      var suitePromise = runTestSuite(suite, [], {
+      const suitePromise = runTestSuite(suite, [], {
         attempts: attempts,
         childProcess: { fork: fork },
-        timeout: (opt_options || {}).timeout,
+        timeout: (options || {}).timeout,
       });
 
-      return (suiteShouldFail ? shouldFail(suitePromise, isTestFailureError) : suitePromise).then(
-        function () {
-          return retryAttempts;
-        }
-      );
+      return (
+        suiteShouldFail
+          ? shouldFail(suitePromise, (err) => err instanceof TestFailureError)
+          : suitePromise
+      ).then(() => retryAttempts);
     }
 
     it('should retry failed tests', function () {
@@ -824,27 +765,27 @@ describe('Suite runner', function () {
       });
     });
 
-    it('should retry tests that time out even when the test process exits with a 0 exit code', function () {
-      function fork() {
-        var child = new EventEmitter();
-        child.stdout = { on: function () {} };
-        child.stderr = { on: function () {} };
-
-        child.send = function (message) {
-          expect(message).property('type').to.be.equal('sigint');
-          child.emit('exit', 0, null);
-          child.emit('close');
-        };
-
-        return child;
+    it('should retry tests that time out even when the test process exits with a 0 exit code', async function () {
+      class Child extends FakeProcess {
+        constructor() {
+          super(
+            () => {},
+            (message) => {
+              expect(message).property('type').to.be.equal('sigint');
+              this.emit('exit', 0, null);
+              this.emit('close');
+            }
+          );
+        }
       }
 
-      return countAttempts('suite_single_successful_test', 2, true, {
+      const fork = () => new Child();
+
+      const attempts = await countAttempts('suite_single_successful_test', 2, true, {
         timeout: 10,
-        fork: fork,
-      }).then(function (attempts) {
-        expect(attempts).to.be.equal(2);
+        fork,
       });
+      expect(attempts).to.be.equal(2);
     });
   });
 
@@ -853,7 +794,7 @@ describe('Suite runner', function () {
       return ensureOutputFromTests(
         'suite_slow_print',
         {
-          'should print its slow threshold': [1337],
+          'should print its slow threshold': ['1337'],
         },
         { slowThreshold: 1337 }
       );
@@ -861,7 +802,7 @@ describe('Suite runner', function () {
 
     it('should respect per test slow threshold overrides', function () {
       return ensureOutputFromTests('suite_slow_set_in_suite', {
-        'should print its slowness threshold': [1234],
+        'should print its slowness threshold': ['1234'],
       });
     });
   });
@@ -882,44 +823,34 @@ describe('Suite runner', function () {
   });
 
   describe('Debug', function () {
-    it('should run only one test when debugPort is specified', function () {
-      var suiteTests = [];
-      var tests = runTestSuite('suite_two_passing_tests', [], {
+    it('should run only one test when debugPort is specified', async function () {
+      let suiteTests = [];
+      await runTestSuite('suite_two_passing_tests', [], {
         reporters: [
           {
-            registerTests: function (tests) {
+            registerTests(tests) {
               suiteTests = tests;
             },
           },
         ],
         debugPort: 1234,
-      }).then(
-        function () {},
-        function () {}
-      );
+      }).catch(() => {});
 
-      return tests.then(function () {
-        expect(suiteTests.length).to.be.equal(1);
-      });
+      expect(suiteTests.length).to.be.equal(1);
     });
 
-    function extractSubprocessForkOptions(options) {
-      return new Promise(function (resolve, reject) {
-        var mockChildProcess = {
-          fork: function (path, args, options) {
-            resolve(options);
+    function extractSubprocessForkOptions(options: Partial<Options>) {
+      return new Promise((resolve, reject) => {
+        const mockChildProcess: ChildProcessModuleLike = {
+          fork: (...args) => {
+            resolve(args[2]);
+            return new FakeProcess();
           },
         };
-        runTestSuite(
-          'suite_single_successful_test',
-          [],
-          _.assign(
-            {
-              childProcess: mockChildProcess,
-            },
-            options
-          )
-        ).then(function () {}, reject);
+        runTestSuite('suite_single_successful_test', [], {
+          childProcess: mockChildProcess,
+          ...options,
+        }).catch(reject);
       });
     }
 

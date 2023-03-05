@@ -16,7 +16,7 @@
 
 /// <reference path="interfaces/bdd_mocha.globals.ts" />
 
-import suiteRunner = require('./suite_runner');
+import suiteRunner from './suite_runner';
 import * as reporters from './reporters';
 import Reporter from './reporters/reporter';
 import TestFailureError from './test_failure_error';
@@ -24,5 +24,6 @@ import TestFailureError from './test_failure_error';
 export default suiteRunner;
 export * from './reporters/message';
 export * from './reporters/reporter';
+export * from './suite_runner';
 export * from './test_path';
 export { reporters, Reporter, TestFailureError };

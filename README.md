@@ -18,3 +18,10 @@ Mocha inspired test framework for integration and system tests.
 + import overman, { reporters } from 'overman';
 + new reporters.Summary(process.stdout);
 ```
+
+- `Options.timeoutTimer` is replaced by `Options.timerFactory`
+
+```diff
+- suiteRunner({ timeoutTimer: MyTimerClass });
++ suiteRunner({ timerFactory: (timeout) => new MyTimerClass(timeout) });
+```

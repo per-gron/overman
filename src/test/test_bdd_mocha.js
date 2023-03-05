@@ -19,7 +19,7 @@
 var expect = require('chai').expect;
 
 var bddMocha = require('../interfaces/bdd_mocha');
-var suiteRunner = require('../suite_runner');
+var suiteRunner = require('../suite_runner').default;
 
 function parseSuite(name, runtimeContext) {
   return bddMocha(undefined, __dirname + '/../../data/suite/' + name, runtimeContext);

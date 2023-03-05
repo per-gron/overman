@@ -18,7 +18,7 @@
 
 var through = require('through');
 var Spec = require('../reporters/spec').default;
-var suiteRunner = require('../suite_runner');
+var suiteRunner = require('../suite_runner').default;
 var OnMessage = require('./util/on_message').default;
 var streamUtil = require('./util/stream');
 

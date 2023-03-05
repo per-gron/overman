@@ -20,7 +20,7 @@
 // runner to run a single test. Its purpose is to validate that nothing is
 // leaked on the runloop; the script should exit in a timely manner.
 
-var suiteRunner = require('../../suite_runner');
+var suiteRunner = require('../../suite_runner').default;
 
 suiteRunner({
   files: [__dirname + '/../../../data/suite/suite_single_successful_test'],

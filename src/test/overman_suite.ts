@@ -39,7 +39,6 @@ process.on('SIGINT', () => {
     // prevent the user from shutting down the process.
     process.exit(1);
   } else {
-    // @ts-ignore temporary
     suitePromise.cancel();
   }
 });
