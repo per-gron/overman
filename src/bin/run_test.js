@@ -57,6 +57,11 @@ var testFile = process.argv[4];
 var testPath = process.argv.slice(5);
 
 var testInterface = require(testInterfacePath);
+
+if (typeof testInterface !== 'function') {
+  testInterface = testInterface.default;
+}
+
 var cleanup = (function () {
   var cleaned = false;
   return function (exitCode) {

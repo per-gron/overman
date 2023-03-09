@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
-'use strict';
+import { expect } from 'chai';
 
-var expect = require('chai').expect;
+import bddMocha from '../interfaces/bdd_mocha';
+import RuntimeContext from '../runtime_context';
+import suiteRunner from '../suite_runner';
 
-var bddMocha = require('../interfaces/bdd_mocha');
-var suiteRunner = require('../suite_runner').default;
-
-function parseSuite(name, runtimeContext) {
-  return bddMocha(undefined, __dirname + '/../../data/suite/' + name, runtimeContext);
+function parseSuite<T>(name: string, ctx?: RuntimeContext<T>) {
+  return bddMocha('', `${__dirname}/../../data/suite/${name}`, ctx);
 }
 
-function getKeypath(object, keypath) {
+function makeContext(ctx: Partial<RuntimeContext<unknown>>): RuntimeContext<unknown> {
+  return {
+    attributes: undefined,
+    getTimeout: () => 0,
+    setTimeout: (_: number) => {},
+    getSlowThreshold: () => 0,
+    setSlowThreshold: (_: number) => {},
+    leaveBreadcrumb: (_1: string, _2: string) => {},
+    emitDebugInfo: <U>(_1: string, _2: U) => {},
+    getTitle: () => [''],
+    ...ctx,
+  };
+}
+
+function getKeypath(object: object, keypath: string) {
   try {
     return new Function('obj', 'return obj' + keypath)(object);
   } catch (e) {
@@ -33,7 +46,7 @@ function getKeypath(object, keypath) {
   }
 }
 
-function setKeypathToNull(object, keypath) {
+function setKeypathToNull(object: object, keypath: string) {
   try {
     new Function('obj', 'obj' + keypath + ' = null;')(object);
   } catch (e) {
@@ -41,8 +54,8 @@ function setKeypathToNull(object, keypath) {
   }
 }
 
-function expectKeypathIsFunctionAndSetToNull(object, keypath) {
-  var value = getKeypath(object, keypath);
+function expectKeypathIsFunctionAndSetToNull(object: object, keypath: string) {
+  const value = getKeypath(object, keypath);
   expect(value).to.be.a('function');
   setKeypathToNull(object, keypath);
 }
@@ -99,7 +112,7 @@ describe('BDD interface (Mocha flavor)', function () {
 
   describe('Tests', function () {
     it('should declare tests with it', function () {
-      var suite = parseSuite('suite_single_successful_test');
+      const suite = parseSuite('suite_single_successful_test');
       expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -114,7 +127,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should declare tests with attributes with it', function () {
-      var suite = parseSuite('suite_attributes');
+      const suite = parseSuite('suite_attributes');
       expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].contents[0].run');
       expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].contents[1].run');
       expect(suite).to.be.deep.equal({
@@ -144,7 +157,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should skip tests with it.skip', function () {
-      var suite = parseSuite('suite_single_skipped_test');
+      const suite = parseSuite('suite_single_skipped_test');
       expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -160,7 +173,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should mark only tests with it.only', function () {
-      var suite = parseSuite('suite_single_only_test');
+      const suite = parseSuite('suite_single_only_test');
       expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -176,7 +189,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should mark unstable tests with it.unstable', function () {
-      var suite = parseSuite('suite_single_unstable_test');
+      const suite = parseSuite('suite_single_unstable_test');
       expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -194,7 +207,7 @@ describe('BDD interface (Mocha flavor)', function () {
 
   describe('Hooks', function () {
     it('should declare before hooks', function () {
-      var suite = parseSuite('suite_before_hook');
+      const suite = parseSuite('suite_before_hook');
       expectKeypathIsFunctionAndSetToNull(suite, '.before[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -204,7 +217,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should declare beforeEach hooks', function () {
-      var suite = parseSuite('suite_before_each_hook');
+      const suite = parseSuite('suite_before_each_hook');
       expectKeypathIsFunctionAndSetToNull(suite, '.before[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -214,7 +227,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should declare after hooks', function () {
-      var suite = parseSuite('suite_after_hook');
+      const suite = parseSuite('suite_after_hook');
       expectKeypathIsFunctionAndSetToNull(suite, '.after[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -224,7 +237,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should declare afterEach hooks', function () {
-      var suite = parseSuite('suite_after_each_hook');
+      const suite = parseSuite('suite_after_each_hook');
       expectKeypathIsFunctionAndSetToNull(suite, '.after[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -234,7 +247,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should declare hooks with string names', function () {
-      var suite = parseSuite('suite_before_hook_name');
+      const suite = parseSuite('suite_before_hook_name');
       expectKeypathIsFunctionAndSetToNull(suite, '.before[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -249,7 +262,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should declare hooks with function names', function () {
-      var suite = parseSuite('suite_before_hook_function_name');
+      const suite = parseSuite('suite_before_hook_function_name');
       expectKeypathIsFunctionAndSetToNull(suite, '.before[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -264,7 +277,7 @@ describe('BDD interface (Mocha flavor)', function () {
     });
 
     it('should declare hooks within subsuites', function () {
-      var suite = parseSuite('suite_before_hook_within_describe');
+      const suite = parseSuite('suite_before_hook_within_describe');
       expectKeypathIsFunctionAndSetToNull(suite, '.contents[0].before[0].run');
       expect(suite).to.be.deep.equal({
         type: 'suite',
@@ -282,56 +295,68 @@ describe('BDD interface (Mocha flavor)', function () {
 
   describe('Timeouts', function () {
     it('should allow getting the timeout for the current test', function () {
-      var suite = parseSuite('suite_timeout_return', {
-        getTimeout: function () {
-          return 12345;
-        },
-      });
-      var fn = getKeypath(suite, '.contents[0].run');
+      const suite = parseSuite(
+        'suite_timeout_return',
+        makeContext({
+          getTimeout: function () {
+            return 12345;
+          },
+        })
+      );
+      const fn = getKeypath(suite, '.contents[0].run');
       expect(fn).to.be.a('function');
       expect(fn()).to.be.equal(12345);
     });
 
     it('should allow getting the timeout for the current test via the currentTest property', function () {
-      var suite = parseSuite('suite_timeout_return_current_test', {
-        getTimeout: function () {
-          return 12345;
-        },
-      });
-      var fn = getKeypath(suite, '.contents[0].run');
+      const suite = parseSuite(
+        'suite_timeout_return_current_test',
+        makeContext({
+          getTimeout: function () {
+            return 12345;
+          },
+        })
+      );
+      const fn = getKeypath(suite, '.contents[0].run');
       expect(fn).to.be.a('function');
       expect(fn()).to.be.equal(12345);
     });
 
     it('should allow setting the timeout for the current test', function (done) {
-      var suite = parseSuite('suite_timeout_set', {
-        setTimeout: function (value) {
-          expect(value).to.be.equal(10);
-          done();
-        },
-      });
-      var fn = getKeypath(suite, '.contents[0].run');
+      const suite = parseSuite(
+        'suite_timeout_set',
+        makeContext({
+          setTimeout: function (value) {
+            expect(value).to.be.equal(10);
+            done();
+          },
+        })
+      );
+      const fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
 
     it('should allow getting the timeout in a hook', function () {
-      var suite = parseSuite('suite_timeout_return_in_hook', {
-        getTimeout: function () {
-          return 12345;
-        },
-      });
-      var beforeFn = getKeypath(suite, '.before[0].run');
+      const suite = parseSuite(
+        'suite_timeout_return_in_hook',
+        makeContext({
+          getTimeout: function () {
+            return 12345;
+          },
+        })
+      );
+      const beforeFn = getKeypath(suite, '.before[0].run');
       expect(beforeFn).to.be.a('function');
       beforeFn();
 
-      var fn = getKeypath(suite, '.contents[0].run');
+      const fn = getKeypath(suite, '.contents[0].run');
       expect(fn).to.be.a('function');
       expect(fn()).to.be.equal(12345);
     });
 
     it('should allow setting the timeout in a suite', function () {
-      var rootSuite = parseSuite('suite_timeout_set_in_suite');
-      var suite = getKeypath(rootSuite, '.contents[0]');
+      const rootSuite = parseSuite('suite_timeout_set_in_suite');
+      const suite = getKeypath(rootSuite, '.contents[0]');
       expect(suite).property('timeout').to.be.equal(1234);
     });
 
@@ -346,70 +371,85 @@ describe('BDD interface (Mocha flavor)', function () {
 
   describe('Slow thresholds', function () {
     it('should allow getting the timeout for the current test', function () {
-      var suite = parseSuite('suite_slow_return', {
-        getSlowThreshold: function () {
-          return 23456;
-        },
-      });
-      var fn = getKeypath(suite, '.contents[0].run');
+      const suite = parseSuite(
+        'suite_slow_return',
+        makeContext({
+          getSlowThreshold: function () {
+            return 23456;
+          },
+        })
+      );
+      const fn = getKeypath(suite, '.contents[0].run');
       expect(fn).to.be.a('function');
       expect(fn()).to.be.equal(23456);
     });
 
     it('should allow setting the slow threshold for the current test', function (done) {
-      var suite = parseSuite('suite_slow_set', {
-        setSlowThreshold: function (value) {
-          expect(value).to.be.equal(20);
-          done();
-        },
-      });
-      var fn = getKeypath(suite, '.contents[0].run');
+      const suite = parseSuite(
+        'suite_slow_set',
+        makeContext({
+          setSlowThreshold: function (value) {
+            expect(value).to.be.equal(20);
+            done();
+          },
+        })
+      );
+      const fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
 
     it('should allow setting the slow threshold in a suite', function () {
-      var rootSuite = parseSuite('suite_slow_set_in_suite');
-      var suite = getKeypath(rootSuite, '.contents[0]');
+      const rootSuite = parseSuite('suite_slow_set_in_suite');
+      const suite = getKeypath(rootSuite, '.contents[0]');
       expect(suite).property('slow').to.be.equal(1234);
     });
   });
 
   describe('Breadcrumbs', function () {
     it('should allow leaving breadcrumbs', function (done) {
-      var suite = parseSuite('suite_leave_breadcrumb', {
-        leaveBreadcrumb: function (message, trace) {
-          expect(message).to.be.equal('A breadcrumb');
-          expect(trace).to.contain('suite_leave_breadcrumb.js:');
-          done();
-        },
-      });
-      var fn = getKeypath(suite, '.contents[0].run');
+      const suite = parseSuite(
+        'suite_leave_breadcrumb',
+        makeContext({
+          leaveBreadcrumb: function (message, trace) {
+            expect(message).to.be.equal('A breadcrumb');
+            expect(trace).to.contain('suite_leave_breadcrumb.js:');
+            done();
+          },
+        })
+      );
+      const fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
 
     it('should allow leaving breadcrumbs that are Error objects', function (done) {
-      var suite = parseSuite('suite_leave_error_breadcrumb', {
-        leaveBreadcrumb: function (message, trace) {
-          expect(message).to.be.equal('An Error breadcrumb');
-          expect(trace).to.contain('suite_leave_error_breadcrumb.js:');
-          done();
-        },
-      });
-      var fn = getKeypath(suite, '.contents[0].run');
+      const suite = parseSuite(
+        'suite_leave_error_breadcrumb',
+        makeContext({
+          leaveBreadcrumb: function (message, trace) {
+            expect(message).to.be.equal('An Error breadcrumb');
+            expect(trace).to.contain('suite_leave_error_breadcrumb.js:');
+            done();
+          },
+        })
+      );
+      const fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
   });
 
   describe('Debug info', function () {
     it('should allow emitting debug info', function (done) {
-      var suite = parseSuite('suite_emit_debug_info', {
-        emitDebugInfo: function (name, value) {
-          expect(name).to.be.equal('name');
-          expect(value).to.be.deep.equal({ the: 'value' });
-          done();
-        },
-      });
-      var fn = getKeypath(suite, '.contents[0].run');
+      const suite = parseSuite(
+        'suite_emit_debug_info',
+        makeContext({
+          emitDebugInfo: function (name, value) {
+            expect(name).to.be.equal('name');
+            expect(value).to.be.deep.equal({ the: 'value' });
+            done();
+          },
+        })
+      );
+      const fn = getKeypath(suite, '.contents[0].run');
       fn();
     });
   });

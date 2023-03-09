@@ -79,6 +79,11 @@ var testInterfaceParameter = process.argv[3];
 var testFile = process.argv[4];
 
 var testInterface = require(testInterfacePath);
+
+if (typeof testInterface !== 'function') {
+  testInterface = testInterface.default;
+}
+
 var suite = testInterface(testInterfaceParameter, testFile);
 
 console.log(JSON.stringify(testsOfSuite(testFile, suite)));
