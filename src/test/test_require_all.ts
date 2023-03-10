@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-'use strict';
+import * as path from 'path';
+import * as recursive from 'recursive-readdir';
 
-var expect = require('chai').expect;
-var recursive = require('recursive-readdir');
+// The scripts can't just be required. They are tested though so it
+// doesn't hurt much.
+const RESERVED = ['list_suite.js', 'run_test.js'];
 
 // This doesn't actually test for anything per se. Its purpose is to make sure
 // that all source files are required by at least one test, so that the test
 // coverage reporting is accurate.
-it('should require all files', function (done) {
-  recursive(__dirname + '/..', function (err, files) {
-    expect(err).to.be.null;
+it('should require all files', async function () {
+  const files = await recursive(`${__dirname}/..`);
+  await Promise.all(
     files
-      .filter((file) => file.endsWith('.js'))
-      .filter((file) => !file.startsWith(__dirname))
-      .filter(function (file) {
-        // The scripts can't just be required. They are tested though so it
-        // doesn't hurt much.
-        return !file.match(/[\/\\]bin[\/\\](list_suite|run_test)\.js/);
-      })
-      .forEach(function (file) {
-        require(file);
-      });
-    done();
-  });
+      .filter((file) => !file.startsWith(__dirname) && file.endsWith('.js'))
+      .filter((file) => !RESERVED.includes(path.basename(file)))
+      .map((file) => import(file))
+  );
 });
