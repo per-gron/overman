@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-'use strict';
-
 // This is a script that does things, not just a module. It uses the suite
 // runner to run a single test. Its purpose is to validate that nothing is
 // leaked on the runloop; the script should exit in a timely manner.
 
-var suiteRunner = require('../../suite_runner').default;
+import suiteRunner from '../../suite_runner';
 
 suiteRunner({
-  files: [__dirname + '/../../../data/suite/suite_single_successful_test'],
+  files: [`${__dirname}/../../../data/suite/suite_single_successful_test`],
   reporters: [],
 });
