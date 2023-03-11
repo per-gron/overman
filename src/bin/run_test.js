@@ -95,6 +95,10 @@ function sendError(error, extraInformation) {
   );
 }
 
+function isGenerator(t) {
+  return typeof t === 'object' && t !== null && 'next' in t && typeof t.next === 'function';
+}
+
 // Takes a function that returns either a promise or a generator and
 // returns a promise.
 function invokeGeneratorOrPromiseFunction(fun) {
@@ -105,7 +109,7 @@ function invokeGeneratorOrPromiseFunction(fun) {
     return Promise.reject(e);
   }
 
-  if (result && result.next) {
+  if (isGenerator(result)) {
     // This looks like a generator
     return co(result);
   } else {
