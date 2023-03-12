@@ -1,5 +1,5 @@
 if (process.argv[2] === 'fork') {
-  proc = require('child_process').fork(
+  var proc = require('child_process').fork(
     __dirname + '/../util/never_ending_program_that_may_fork_subprocess.js',
     ['empty']
   );
