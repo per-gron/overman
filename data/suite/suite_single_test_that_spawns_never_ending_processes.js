@@ -21,7 +21,7 @@ var childProcess = require('child_process');
 it('should spawn child processes', function () {
   return new Promise(function (resolve) {
     var proc = childProcess.fork(
-      __dirname + '/../../dist/test/util/never_ending_program_that_may_fork_subprocess.js',
+      __dirname + '/../../data/util/never_ending_program_that_may_fork_subprocess.js',
       ['fork']
     );
 
