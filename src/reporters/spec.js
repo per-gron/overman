@@ -17,7 +17,7 @@
 'use strict';
 
 var _ = require('lodash');
-var Combined = require('./combined');
+var Combined = require('./combined').default;
 var ErrorDetail = require('./error_detail');
 var SpecProgress = require('./spec_progress');
 var SuiteMarker = require('./suite_marker');
@@ -41,11 +41,11 @@ function Spec(streams) {
     streams = process;
   }
 
-  Combined.call(this, [
+  this.reporters = [
     new Timer(new SuiteMarker(new SpecProgress(streams))),
     new Summary(streams.stdout),
     new ErrorDetail(streams.stdout),
-  ]);
+  ];
 }
 Spec.prototype = Object.create(Combined.prototype);
 

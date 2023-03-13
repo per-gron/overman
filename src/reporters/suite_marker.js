@@ -18,7 +18,7 @@
 
 var TestCount = require('../test_count').default;
 var testPathUtil = require('../test_path_util');
-var Combined = require('./combined');
+var Combined = require('./combined').default;
 
 /**
  * SuiteMarker is a reporter that emits extra messages that contain information
@@ -38,7 +38,7 @@ var Combined = require('./combined');
  * information about when suites start and end.
  */
 function SuiteMarker(reporter) {
-  Combined.call(this, [reporter]);
+  this.reporters = [reporter];
   this._reporter = reporter;
   this._totalTests = new TestCount();
   this._remainingTests = new TestCount();

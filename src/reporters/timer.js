@@ -16,7 +16,7 @@
 
 'use strict';
 
-var Combined = require('./combined');
+var Combined = require('./combined').default;
 
 /**
  * Timer is a reporter for internal use by the suite runner. It forwards all
@@ -26,7 +26,7 @@ var Combined = require('./combined');
  * This is used in the suite runner as a way to move logic out of that file.
  */
 function Timer(reporter) {
-  Combined.call(this, [reporter]);
+  this.reporters = [reporter];
   this._reporter = reporter;
   this._defaultSlowThreshold = null; // Is set in registerTests
   this._slowThresholdOverrides = {}; // Hash from test path JSON to overriden slow threshold

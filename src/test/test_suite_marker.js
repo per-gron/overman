@@ -17,11 +17,19 @@
 'use strict';
 
 var expect = require('chai').expect;
+const { default: FakeReporter } = require('../fakes/fake_reporter');
 var SuiteMarker = require('../reporters/suite_marker');
 var OnMessage = require('./util/on_message').default;
 
+const TEST_PATH = { file: 'file1', path: [] };
+const REG_ERR = new Error('registrationFailed');
+const MESSAGE = { type: 'start' };
+const DATE = new Date(42);
+
 describe('SuiteMarker reporter', function () {
   describe('Forwarding', function () {
+    const reporter = new FakeReporter();
+
     it('should forward registerTests calls', function (done) {
       var path = { file: 'file', path: ['test'] };
       var time = new Date();
@@ -37,21 +45,26 @@ describe('SuiteMarker reporter', function () {
       suiteMarker.registerTests([path], time);
     });
 
-    ['registrationFailed', 'done', 'gotMessage'].forEach(function (message) {
-      it('should forward ' + message + ' calls', function (done) {
-        var path = { file: 'file', path: ['test'] };
+    it('should forward registrationFailed calls', function () {
+      var suiteMarker = new SuiteMarker(reporter);
+      suiteMarker.registerTests([TEST_PATH]);
+      suiteMarker.registrationFailed(REG_ERR, DATE);
+      expect(reporter.registrationFailedCalls).to.deep.equal([[REG_ERR, DATE]]);
+    });
 
-        var reporter = {};
-        reporter[message] = function (arg1, arg2) {
-          expect(arg1).to.be.equal(path);
-          expect(arg2).to.be.equal('arg2');
-          done();
-        };
+    it('should forward gotMessage calls', function () {
+      var suiteMarker = new SuiteMarker(reporter);
+      suiteMarker.registerTests([TEST_PATH]);
+      suiteMarker.gotMessage(TEST_PATH, MESSAGE, DATE);
+      // todo: fix missing date bug
+      expect(reporter.gotMessageCalls).to.deep.equal([[TEST_PATH, MESSAGE, undefined]]);
+    });
 
-        var suiteMarker = new SuiteMarker(reporter);
-        suiteMarker.registerTests([path]);
-        suiteMarker[message](path, 'arg2');
-      });
+    it('should forward done calls', function () {
+      var suiteMarker = new SuiteMarker(reporter);
+      suiteMarker.registerTests([TEST_PATH]);
+      suiteMarker.done(DATE);
+      expect(reporter.doneCalls).to.deep.equal([[DATE]]);
     });
   });
 

@@ -19,7 +19,7 @@
 // This file exports things for the public API. It intentionally does not
 // export all reporters.
 
-exports.Combined = require('./combined');
+exports.Combined = require('./combined').default;
 exports.ErrorDetail = require('./error_detail');
 exports.ErrorDetector = require('./error_detector');
 exports.MessageTracker = require('./message_tracker');

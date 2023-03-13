@@ -20,7 +20,20 @@ var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var makeFakeClock = require('./util/fake_clock').default;
 var OnMessage = require('./util/on_message').default;
+const { default: FakeReporter } = require('../fakes/fake_reporter');
 var Timer = require('../reporters/timer');
+
+const TEST_PATH = { file: 'file1', path: [] };
+const REG_OPTS = {
+  timeout: 0,
+  listingTimeout: 0,
+  slowThreshold: 0,
+  graceTime: 0,
+  attempts: 0,
+};
+const REG_ERR = new Error('registrationFailed');
+const MESSAGE = { type: 'start' };
+const DATE = new Date(42);
 
 describe('Timer reporter', function () {
   var clock;
@@ -36,19 +49,30 @@ describe('Timer reporter', function () {
   });
 
   describe('Forwarding', function () {
-    ['registrationFailed', 'registerTests', 'done', 'gotMessage'].forEach(function (message) {
-      it('should forward ' + message + ' calls', function (done) {
-        var reporter = {};
-        reporter[message] = function (arg1, arg2, arg3) {
-          expect(arg1).to.be.equal('arg1');
-          expect(arg2).to.be.equal('arg2');
-          expect(arg3).to.be.deep.equal(clock.clock());
-          done();
-        };
+    const reporter = new FakeReporter();
 
-        var timer = new Timer(reporter);
-        timer[message]('arg1', 'arg2', clock.clock());
-      });
+    it('should forward registerTests calls', function () {
+      var timer = new Timer(reporter);
+      timer.registerTests([TEST_PATH], REG_OPTS, DATE);
+      expect(reporter.registerTestsCalls).to.deep.equal([[[TEST_PATH], REG_OPTS, DATE]]);
+    });
+
+    it('should forward registrationFailed calls', function () {
+      var timer = new Timer(reporter);
+      timer.registrationFailed(REG_ERR, DATE);
+      expect(reporter.registrationFailedCalls).to.deep.equal([[REG_ERR, DATE]]);
+    });
+
+    it('should forward gotMessage calls', function () {
+      var timer = new Timer(reporter);
+      timer.gotMessage(TEST_PATH, MESSAGE, DATE);
+      expect(reporter.gotMessageCalls).to.deep.equal([[TEST_PATH, MESSAGE, DATE]]);
+    });
+
+    it('should forward done calls', function () {
+      var timer = new Timer(reporter);
+      timer.done(DATE);
+      expect(reporter.doneCalls).to.deep.equal([[DATE]]);
     });
   });
 
