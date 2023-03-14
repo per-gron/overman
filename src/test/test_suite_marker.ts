@@ -14,69 +14,70 @@
  * limitations under the License.
  */
 
-'use strict';
+import { expect } from 'chai';
+import FakeReporter from '../fakes/fake_reporter';
+import { Message, MessageWithSlowness } from '../reporters/message';
+import { RegisterOptions } from '../reporters/reporter';
+import SuiteMarker from '../reporters/suite_marker';
+import { TestPath } from '../test_path';
+import OnMessage from './util/on_message';
 
-var expect = require('chai').expect;
-const { default: FakeReporter } = require('../fakes/fake_reporter');
-var SuiteMarker = require('../reporters/suite_marker');
-var OnMessage = require('./util/on_message').default;
-
-const TEST_PATH = { file: 'file1', path: [] };
+const TEST_PATH: TestPath = { file: 'file1', path: [] };
+const REG_OPTS: RegisterOptions = {
+  timeout: 0,
+  listingTimeout: 0,
+  slowThreshold: 0,
+  graceTime: 0,
+  attempts: 0,
+};
 const REG_ERR = new Error('registrationFailed');
-const MESSAGE = { type: 'start' };
+const MESSAGE: Message = { type: 'start' };
 const DATE = new Date(42);
 
 describe('SuiteMarker reporter', function () {
   describe('Forwarding', function () {
     const reporter = new FakeReporter();
 
-    it('should forward registerTests calls', function (done) {
-      var path = { file: 'file', path: ['test'] };
-      var time = new Date();
-
-      var reporter = {};
-      reporter.registerTests = function (arg, recievedTime) {
-        expect(arg).to.be.deep.equal([path]);
-        expect(recievedTime).to.be.deep.equal(time);
-        done();
-      };
-
-      var suiteMarker = new SuiteMarker(reporter);
-      suiteMarker.registerTests([path], time);
+    it('should forward registerTests calls', function () {
+      const suiteMarker = new SuiteMarker(reporter);
+      suiteMarker.registerTests([TEST_PATH], REG_OPTS, DATE);
+      expect(reporter.registerTestsCalls).to.deep.equal([[[TEST_PATH], REG_OPTS, DATE]]);
     });
 
     it('should forward registrationFailed calls', function () {
-      var suiteMarker = new SuiteMarker(reporter);
-      suiteMarker.registerTests([TEST_PATH]);
+      const suiteMarker = new SuiteMarker(reporter);
+      suiteMarker.registerTests([TEST_PATH], REG_OPTS, DATE);
       suiteMarker.registrationFailed(REG_ERR, DATE);
       expect(reporter.registrationFailedCalls).to.deep.equal([[REG_ERR, DATE]]);
     });
 
     it('should forward gotMessage calls', function () {
-      var suiteMarker = new SuiteMarker(reporter);
-      suiteMarker.registerTests([TEST_PATH]);
+      const suiteMarker = new SuiteMarker(reporter);
+      suiteMarker.registerTests([TEST_PATH], REG_OPTS, DATE);
       suiteMarker.gotMessage(TEST_PATH, MESSAGE, DATE);
-      // todo: fix missing date bug
-      expect(reporter.gotMessageCalls).to.deep.equal([[TEST_PATH, MESSAGE, undefined]]);
+      expect(reporter.gotMessageCalls).to.deep.equal([[TEST_PATH, MESSAGE, DATE]]);
     });
 
     it('should forward done calls', function () {
-      var suiteMarker = new SuiteMarker(reporter);
-      suiteMarker.registerTests([TEST_PATH]);
+      const suiteMarker = new SuiteMarker(reporter);
+      suiteMarker.registerTests([TEST_PATH], REG_OPTS, DATE);
       suiteMarker.done(DATE);
       expect(reporter.doneCalls).to.deep.equal([[DATE]]);
     });
   });
 
-  function testSuiteMarker(paths, actions) {
-    var expectations = null;
-    var suiteMarker = new SuiteMarker(
+  function testSuiteMarker(
+    paths: TestPath[],
+    actions: { expect?: unknown[]; emit: { testPath: TestPath; message: MessageWithSlowness } }[]
+  ) {
+    let expectations: unknown[] | null = null;
+    const suiteMarker = new SuiteMarker(
       new OnMessage(function (testPath, message) {
         if (expectations === null) {
           return;
         }
 
-        var args = {
+        const args = {
           testPath: testPath,
           message: message,
         };
@@ -90,18 +91,18 @@ describe('SuiteMarker reporter', function () {
       })
     );
 
-    function updateExpectations(newExpectations) {
+    function updateExpectations(newExpectations: unknown[] | null) {
       if (expectations !== null) {
         expect(expectations, 'expectations need to be fulfilled').to.be.empty;
       }
       expectations = newExpectations;
     }
 
-    suiteMarker.registerTests(paths);
+    suiteMarker.registerTests(paths, REG_OPTS, DATE);
 
-    actions.forEach(function (action) {
+    actions.forEach((action) => {
       updateExpectations(action.expect || null);
-      suiteMarker.gotMessage(action.emit.testPath, action.emit.message);
+      suiteMarker.gotMessage(action.emit.testPath, action.emit.message, DATE);
     });
 
     updateExpectations(null);
@@ -109,8 +110,8 @@ describe('SuiteMarker reporter', function () {
 
   describe('suiteStart', function () {
     it('should emit suiteStart message', function () {
-      var path = { file: 'file', path: ['test'] };
-      var suitePath = { file: 'file', path: [] };
+      const path = { file: 'file', path: ['test'] };
+      const suitePath = { file: 'file', path: [] };
 
       testSuiteMarker(
         [path],
@@ -118,7 +119,7 @@ describe('SuiteMarker reporter', function () {
           {
             emit: { testPath: path, message: { type: 'start' } },
             expect: [
-              { testPath: null, message: { type: 'suiteStart', suite: suitePath } },
+              { testPath: suitePath, message: { type: 'suiteStart', suite: suitePath } },
               { testPath: path, message: { type: 'start' } },
             ],
           },
@@ -127,11 +128,11 @@ describe('SuiteMarker reporter', function () {
     });
 
     it('should emit suiteStart message with time parameter', function (done) {
-      var path = { file: 'file', path: ['test'] };
-      var time = new Date();
+      const path = { file: 'file', path: ['test'] };
+      const time = new Date();
 
-      var suiteMarker = new SuiteMarker(
-        new OnMessage(function (testPath, message, recievedTime) {
+      const suiteMarker = new SuiteMarker(
+        new OnMessage((_, message, recievedTime) => {
           if (message.type === 'suiteStart') {
             expect(recievedTime).to.be.deep.equal(time);
             done();
@@ -139,14 +140,14 @@ describe('SuiteMarker reporter', function () {
         })
       );
 
-      suiteMarker.registerTests([path]);
+      suiteMarker.registerTests([path], REG_OPTS, DATE);
       suiteMarker.gotMessage(path, { type: 'start' }, time);
     });
 
     it('should emit suiteStart message only for the first test in a suite', function () {
-      var path1 = { file: 'file', path: ['test1'] };
-      var path2 = { file: 'file', path: ['test2'] };
-      var suitePath = { file: 'file', path: [] };
+      const path1 = { file: 'file', path: ['test1'] };
+      const path2 = { file: 'file', path: ['test2'] };
+      const suitePath = { file: 'file', path: [] };
 
       testSuiteMarker(
         [path1, path2],
@@ -154,13 +155,13 @@ describe('SuiteMarker reporter', function () {
           {
             emit: { testPath: path1, message: { type: 'start' } },
             expect: [
-              { testPath: null, message: { type: 'suiteStart', suite: suitePath } },
+              { testPath: suitePath, message: { type: 'suiteStart', suite: suitePath } },
               { testPath: path1, message: { type: 'start' } },
             ],
           },
           {
-            emit: { testPath: path1, message: { type: 'finish' } },
-            expect: [{ testPath: path1, message: { type: 'finish' } }],
+            emit: { testPath: path1, message: { type: 'finish', result: 'success' } },
+            expect: [{ testPath: path1, message: { type: 'finish', result: 'success' } }],
           },
           {
             emit: { testPath: path2, message: { type: 'start' } },
@@ -171,9 +172,9 @@ describe('SuiteMarker reporter', function () {
     });
 
     it('should emit suiteStart message only for the first test in a suite, even when tests are run in parallel', function () {
-      var path1 = { file: 'file', path: ['test1'] };
-      var path2 = { file: 'file', path: ['test2'] };
-      var suitePath = { file: 'file', path: [] };
+      const path1 = { file: 'file', path: ['test1'] };
+      const path2 = { file: 'file', path: ['test2'] };
+      const suitePath = { file: 'file', path: [] };
 
       testSuiteMarker(
         [path1, path2],
@@ -181,7 +182,7 @@ describe('SuiteMarker reporter', function () {
           {
             emit: { testPath: path1, message: { type: 'start' } },
             expect: [
-              { testPath: null, message: { type: 'suiteStart', suite: suitePath } },
+              { testPath: suitePath, message: { type: 'suiteStart', suite: suitePath } },
               { testPath: path1, message: { type: 'start' } },
             ],
           },
@@ -194,9 +195,9 @@ describe('SuiteMarker reporter', function () {
     });
 
     it('should emit suiteStart messages for ancestor tests as well when needed', function () {
-      var path = { file: 'file', path: ['suite', 'test1'] };
-      var suitePath1 = { file: 'file', path: [] };
-      var suitePath2 = { file: 'file', path: ['suite'] };
+      const path = { file: 'file', path: ['suite', 'test1'] };
+      const suitePath1 = { file: 'file', path: [] };
+      const suitePath2 = { file: 'file', path: ['suite'] };
 
       testSuiteMarker(
         [path],
@@ -204,8 +205,8 @@ describe('SuiteMarker reporter', function () {
           {
             emit: { testPath: path, message: { type: 'start' } },
             expect: [
-              { testPath: null, message: { type: 'suiteStart', suite: suitePath1 } },
-              { testPath: null, message: { type: 'suiteStart', suite: suitePath2 } },
+              { testPath: suitePath1, message: { type: 'suiteStart', suite: suitePath1 } },
+              { testPath: suitePath2, message: { type: 'suiteStart', suite: suitePath2 } },
               { testPath: path, message: { type: 'start' } },
             ],
           },
@@ -216,18 +217,18 @@ describe('SuiteMarker reporter', function () {
 
   describe('suiteFinish', function () {
     it('should emit suiteFinish message', function () {
-      var path = { file: 'file', path: ['test'] };
-      var suitePath = { file: 'file', path: [] };
+      const path = { file: 'file', path: ['test'] };
+      const suitePath = { file: 'file', path: [] };
 
       testSuiteMarker(
         [path],
         [
           { emit: { testPath: path, message: { type: 'start' } } },
           {
-            emit: { testPath: path, message: { type: 'finish' } },
+            emit: { testPath: path, message: { type: 'finish', result: 'success' } },
             expect: [
-              { testPath: path, message: { type: 'finish' } },
-              { testPath: null, message: { type: 'suiteFinish', suite: suitePath } },
+              { testPath: path, message: { type: 'finish', result: 'success' } },
+              { testPath: suitePath, message: { type: 'suiteFinish', suite: suitePath } },
             ],
           },
         ]
@@ -235,42 +236,41 @@ describe('SuiteMarker reporter', function () {
     });
 
     it('should emit suiteFinish message with time parameter', function (done) {
-      var path = { file: 'file', path: ['test'] };
-      var time = new Date();
+      const path = { file: 'file', path: ['test'] };
 
-      var suiteMarker = new SuiteMarker(
-        new OnMessage(function (testPath, message, recievedTime) {
+      const suiteMarker = new SuiteMarker(
+        new OnMessage((_, message, recievedTime) => {
           if (message.type === 'suiteFinish') {
-            expect(recievedTime).to.be.deep.equal(time);
+            expect(recievedTime).to.be.deep.equal(DATE);
             done();
           }
         })
       );
 
-      suiteMarker.registerTests([path]);
-      suiteMarker.gotMessage(path, { type: 'start' });
-      suiteMarker.gotMessage(path, { type: 'finish' }, time);
+      suiteMarker.registerTests([path], REG_OPTS, DATE);
+      suiteMarker.gotMessage(path, { type: 'start' }, DATE);
+      suiteMarker.gotMessage(path, { type: 'finish', result: 'success' }, DATE);
     });
 
     it('should emit suiteFinish message when all tests in the suite are finished', function () {
-      var path1 = { file: 'file', path: ['test1'] };
-      var path2 = { file: 'file', path: ['test2'] };
-      var suitePath = { file: 'file', path: [] };
+      const path1 = { file: 'file', path: ['test1'] };
+      const path2 = { file: 'file', path: ['test2'] };
+      const suitePath = { file: 'file', path: [] };
 
       testSuiteMarker(
         [path1, path2],
         [
           { emit: { testPath: path1, message: { type: 'start' } } },
           {
-            emit: { testPath: path1, message: { type: 'finish' } },
-            expect: [{ testPath: path1, message: { type: 'finish' } }],
+            emit: { testPath: path1, message: { type: 'finish', result: 'success' } },
+            expect: [{ testPath: path1, message: { type: 'finish', result: 'success' } }],
           },
           { emit: { testPath: path2, message: { type: 'start' } } },
           {
-            emit: { testPath: path2, message: { type: 'finish' } },
+            emit: { testPath: path2, message: { type: 'finish', result: 'success' } },
             expect: [
-              { testPath: path2, message: { type: 'finish' } },
-              { testPath: null, message: { type: 'suiteFinish', suite: suitePath } },
+              { testPath: path2, message: { type: 'finish', result: 'success' } },
+              { testPath: suitePath, message: { type: 'suiteFinish', suite: suitePath } },
             ],
           },
         ]
@@ -278,26 +278,26 @@ describe('SuiteMarker reporter', function () {
     });
 
     it('should emit suiteFinish message when all tests, including tests in subsuites, are finished', function () {
-      var path1 = { file: 'file', path: ['test1'] };
-      var suitePath1 = { file: 'file', path: [] };
-      var path2 = { file: 'file', path: ['suite', 'test2'] };
-      var suitePath2 = { file: 'file', path: ['suite'] };
+      const path1 = { file: 'file', path: ['test1'] };
+      const suitePath1 = { file: 'file', path: [] };
+      const path2 = { file: 'file', path: ['suite', 'test2'] };
+      const suitePath2 = { file: 'file', path: ['suite'] };
 
       testSuiteMarker(
         [path1, path2],
         [
           { emit: { testPath: path1, message: { type: 'start' } } },
           {
-            emit: { testPath: path1, message: { type: 'finish' } },
-            expect: [{ testPath: path1, message: { type: 'finish' } }],
+            emit: { testPath: path1, message: { type: 'finish', result: 'success' } },
+            expect: [{ testPath: path1, message: { type: 'finish', result: 'success' } }],
           },
           { emit: { testPath: path2, message: { type: 'start' } } },
           {
-            emit: { testPath: path2, message: { type: 'finish' } },
+            emit: { testPath: path2, message: { type: 'finish', result: 'success' } },
             expect: [
-              { testPath: path2, message: { type: 'finish' } },
-              { testPath: null, message: { type: 'suiteFinish', suite: suitePath2 } },
-              { testPath: null, message: { type: 'suiteFinish', suite: suitePath1 } },
+              { testPath: path2, message: { type: 'finish', result: 'success' } },
+              { testPath: suitePath2, message: { type: 'suiteFinish', suite: suitePath2 } },
+              { testPath: suitePath1, message: { type: 'suiteFinish', suite: suitePath1 } },
             ],
           },
         ]

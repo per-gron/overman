@@ -20,7 +20,7 @@ var _ = require('lodash');
 var Combined = require('./combined').default;
 var ErrorDetail = require('./error_detail').default;
 var SpecProgress = require('./spec_progress').default;
-var SuiteMarker = require('./suite_marker');
+var SuiteMarker = require('./suite_marker').default;
 var Summary = require('./summary');
 var Timer = require('./timer');
 
