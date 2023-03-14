@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-'use strict';
+import { EventEmitter } from 'events';
+import { expect } from 'chai';
+import makeFakeClock from './util/fake_clock';
+import OnMessage from './util/on_message';
+import FakeReporter from '../fakes/fake_reporter';
+import Timer from '../reporters/timer';
+import { RegisterOptions } from '../reporters/reporter';
+import { TestPath } from '../test_path';
+import { Message } from '../reporters/message';
 
-var EventEmitter = require('events').EventEmitter;
-var expect = require('chai').expect;
-var makeFakeClock = require('./util/fake_clock').default;
-var OnMessage = require('./util/on_message').default;
-const { default: FakeReporter } = require('../fakes/fake_reporter');
-var Timer = require('../reporters/timer');
-
-const TEST_PATH = { file: 'file1', path: [] };
-const REG_OPTS = {
+const TEST_PATH: TestPath = { file: 'file1', path: [] };
+const REG_OPTS: RegisterOptions = {
   timeout: 0,
   listingTimeout: 0,
   slowThreshold: 0,
@@ -32,45 +33,45 @@ const REG_OPTS = {
   attempts: 0,
 };
 const REG_ERR = new Error('registrationFailed');
-const MESSAGE = { type: 'start' };
+const MESSAGE: Message = { type: 'start' };
 const DATE = new Date(42);
 
 describe('Timer reporter', function () {
-  var clock;
-  var messages;
-  var timer;
-  var slowThreshold;
+  let clock: ReturnType<typeof makeFakeClock>;
+  let messages: EventEmitter;
+  let timer: Timer;
+  const slowThreshold = 1000;
+
   beforeEach(function () {
     clock = makeFakeClock();
     messages = new EventEmitter();
-    slowThreshold = 1000;
     timer = new Timer(new OnMessage(messages.emit.bind(messages, 'message')));
-    timer.registerTests([], { slowThreshold: slowThreshold });
+    timer.registerTests([], { ...REG_OPTS, slowThreshold }, DATE);
   });
 
   describe('Forwarding', function () {
     const reporter = new FakeReporter();
 
     it('should forward registerTests calls', function () {
-      var timer = new Timer(reporter);
+      const timer = new Timer(reporter);
       timer.registerTests([TEST_PATH], REG_OPTS, DATE);
       expect(reporter.registerTestsCalls).to.deep.equal([[[TEST_PATH], REG_OPTS, DATE]]);
     });
 
     it('should forward registrationFailed calls', function () {
-      var timer = new Timer(reporter);
+      const timer = new Timer(reporter);
       timer.registrationFailed(REG_ERR, DATE);
       expect(reporter.registrationFailedCalls).to.deep.equal([[REG_ERR, DATE]]);
     });
 
     it('should forward gotMessage calls', function () {
-      var timer = new Timer(reporter);
+      const timer = new Timer(reporter);
       timer.gotMessage(TEST_PATH, MESSAGE, DATE);
       expect(reporter.gotMessageCalls).to.deep.equal([[TEST_PATH, MESSAGE, DATE]]);
     });
 
     it('should forward done calls', function () {
-      var timer = new Timer(reporter);
+      const timer = new Timer(reporter);
       timer.done(DATE);
       expect(reporter.doneCalls).to.deep.equal([[DATE]]);
     });
@@ -78,30 +79,30 @@ describe('Timer reporter', function () {
 
   describe('Time', function () {
     it('should add time to finish messages', function (done) {
-      messages.on('message', function (path, message) {
+      messages.on('message', (_, message) => {
         if (message.type === 'finish') {
           expect(message).property('duration').to.be.equal(100);
           done();
         }
       });
 
-      timer.gotMessage('test', { type: 'start' }, clock.clock());
+      timer.gotMessage(TEST_PATH, { type: 'start' }, clock.clock());
       clock.step(10);
-      timer.gotMessage('test', { type: 'startedTest' }, clock.clock());
+      timer.gotMessage(TEST_PATH, { type: 'startedTest' }, clock.clock());
       clock.step(100);
-      timer.gotMessage('test', { type: 'startedAfterHooks' }, clock.clock());
+      timer.gotMessage(TEST_PATH, { type: 'startedAfterHooks' }, clock.clock());
       clock.step(1000);
-      timer.gotMessage('test', { type: 'finish' }, clock.clock());
+      timer.gotMessage(TEST_PATH, { type: 'finish', result: 'success' }, clock.clock());
     });
 
     it('should not crash when receiving mismatched finish message', function (done) {
-      messages.on('message', function (path, message) {
+      messages.on('message', (_, message) => {
         if (message.type === 'finish') {
           done();
         }
       });
 
-      timer.gotMessage('test', { type: 'finish' }, clock.clock());
+      timer.gotMessage(TEST_PATH, { type: 'finish', result: 'success' }, clock.clock());
     });
   });
 
@@ -111,7 +112,7 @@ describe('Timer reporter', function () {
         'should not mark fast test as slow or halfSlow' +
           (shouldEmitSetSlowThresholdMessage ? ' when slow threshold is modified' : ''),
         function (done) {
-          messages.on('message', function (path, message) {
+          messages.on('message', (_, message) => {
             if (message.type === 'finish') {
               expect(message).property('slow').to.be.false;
               expect(message).property('halfSlow').to.be.false;
@@ -119,14 +120,14 @@ describe('Timer reporter', function () {
             }
           });
 
-          timer.gotMessage('test', { type: 'start' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'start' }, clock.clock());
           if (shouldEmitSetSlowThresholdMessage) {
-            timer.gotMessage('test', { type: 'setSlowThreshold', value: 2000 }, clock.clock());
+            timer.gotMessage(TEST_PATH, { type: 'setSlowThreshold', value: 2000 }, clock.clock());
           }
-          timer.gotMessage('test', { type: 'startedTest' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'startedTest' }, clock.clock());
           clock.step(shouldEmitSetSlowThresholdMessage ? 999 : 499);
-          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock.clock());
-          timer.gotMessage('test', { type: 'finish' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'startedAfterHooks' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'finish', result: 'success' }, clock.clock());
         }
       );
 
@@ -134,7 +135,7 @@ describe('Timer reporter', function () {
         'should not mark half-slow test as halfSlow' +
           (shouldEmitSetSlowThresholdMessage ? ' when slow threshold is modified' : ''),
         function (done) {
-          messages.on('message', function (path, message) {
+          messages.on('message', (_, message) => {
             if (message.type === 'finish') {
               expect(message).property('slow').to.be.false;
               expect(message).property('halfSlow').to.be.true;
@@ -142,14 +143,14 @@ describe('Timer reporter', function () {
             }
           });
 
-          timer.gotMessage('test', { type: 'start' }, clock.clock());
-          timer.gotMessage('test', { type: 'startedTest' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'start' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'startedTest' }, clock.clock());
           if (shouldEmitSetSlowThresholdMessage) {
-            timer.gotMessage('test', { type: 'setSlowThreshold', value: 500 }, clock.clock());
+            timer.gotMessage(TEST_PATH, { type: 'setSlowThreshold', value: 500 }, clock.clock());
           }
           clock.step(shouldEmitSetSlowThresholdMessage ? 250 : 500);
-          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock.clock());
-          timer.gotMessage('test', { type: 'finish' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'startedAfterHooks' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'finish', result: 'success' }, clock.clock());
         }
       );
 
@@ -157,7 +158,7 @@ describe('Timer reporter', function () {
         'should not mark slow test as slow and halfSlow' +
           (shouldEmitSetSlowThresholdMessage ? ' when slow threshold is modified' : ''),
         function (done) {
-          messages.on('message', function (path, message) {
+          messages.on('message', (_, message) => {
             if (message.type === 'finish') {
               expect(message).property('slow').to.be.true;
               expect(message).property('halfSlow').to.be.true;
@@ -165,14 +166,14 @@ describe('Timer reporter', function () {
             }
           });
 
-          timer.gotMessage('test', { type: 'start' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'start' }, clock.clock());
           if (shouldEmitSetSlowThresholdMessage) {
-            timer.gotMessage('test', { type: 'setSlowThreshold', value: 2000 }, clock.clock());
+            timer.gotMessage(TEST_PATH, { type: 'setSlowThreshold', value: 2000 }, clock.clock());
           }
-          timer.gotMessage('test', { type: 'startedTest' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'startedTest' }, clock.clock());
           clock.step(shouldEmitSetSlowThresholdMessage ? 2000 : 1000);
-          timer.gotMessage('test', { type: 'startedAfterHooks' }, clock.clock());
-          timer.gotMessage('test', { type: 'finish' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'startedAfterHooks' }, clock.clock());
+          timer.gotMessage(TEST_PATH, { type: 'finish', result: 'success' }, clock.clock());
         }
       );
     });

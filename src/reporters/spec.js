@@ -22,7 +22,7 @@ var ErrorDetail = require('./error_detail').default;
 var SpecProgress = require('./spec_progress').default;
 var SuiteMarker = require('./suite_marker').default;
 var Summary = require('./summary').default;
-var Timer = require('./timer');
+var Timer = require('./timer').default;
 
 /**
  * Spec is a reporter that combines other reporters to form a complete bdd spec

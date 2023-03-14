@@ -22,18 +22,18 @@ var suiteRunner = require('../suite_runner');
 var OnMessage = require('./util/on_message').default;
 var streamUtil = require('./util/stream');
 
+const DATE = new Date(42);
+
 function simulateOneTest(spec) {
   var path = { file: 'file', path: ['suite_name', 'test'] };
+  const END = new Date(DATE.getTime() + 123);
 
-  spec.registerTests([path], { slowThreshold: 100 }, new Date());
-  spec.gotMessage(path, { type: 'start' });
-  spec.gotMessage(path, {
-    type: 'finish',
-    result: 'success',
-    slow: true,
-    duration: 123,
-  });
-  spec.done(new Date());
+  spec.registerTests([path], { slowThreshold: 100 }, DATE);
+  spec.gotMessage(path, { type: 'start' }, DATE);
+  spec.gotMessage(path, { type: 'startedTest' }, DATE);
+  spec.gotMessage(path, { type: 'startedAfterHooks' }, END);
+  spec.gotMessage(path, { type: 'finish', result: 'success' }, END);
+  spec.done(END);
 }
 
 function simulateAndWaitForLine(simulate, line) {
