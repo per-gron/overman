@@ -24,6 +24,7 @@ import TestFailureError from './test_failure_error';
 export default suiteRunner;
 export * from './reporters/message';
 export * from './reporters/reporter';
+export * from './interfaces/interface';
 export * from './suite_runner';
 export * from './test_path';
 export { reporters, Reporter, TestFailureError };
