@@ -145,9 +145,7 @@ function ensureOutputFromTests(
 
 describe('Suite runner', function () {
   it('should require files parameter', function () {
-    expect(function () {
-      suiteRunner({} as Options);
-    }).to.throw(/not present or not Array/);
+    expect(suiteRunner({} as Options)).to.eventually.be.rejectedWith(/not present or not Array/);
   });
 
   it('should throw on no test cases', function () {

@@ -31,7 +31,7 @@ import TimeoutTimer, { Timer } from './timeout_timer';
 import Reporter, { RegisterOptions } from './reporters/reporter';
 import { TestPath } from './test_path';
 import { Readable, Writable } from 'stream';
-import { FinishMessage, IOMessage, Message, RetryMessage } from './reporters/message';
+import { ErrorMessage, FinishMessage, IOMessage, Message, RetryMessage } from './reporters/message';
 import InternalReporter from './reporters/internal_reporter';
 import { TestSpec } from './test_spec';
 import { ProcessLike } from './process_like';
@@ -471,7 +471,7 @@ export { ProcessLike, Timer, TestSpec, SoftKill };
  * other type of error, it means that there is a bug, for example in a reporter
  * or in the suite runner.
  */
-export default function (options: Options) {
+export default async function (options: Options) {
   const timeout = options.timeout ?? 10000;
   const listingTimeout = options.listingTimeout ?? 60000;
   const slowThreshold = options.slowThreshold || 1000;
@@ -503,86 +503,85 @@ export default function (options: Options) {
     }
   });
 
-  const resultPromise = listTests(
-    reporter,
-    listingTimeout,
-    testInterfacePath,
-    testInterfaceParameter,
-    options.files
-  )
-    .then((tests) => filterOnly(options.disallowOnly, tests))
-    .then((tests) => filterAttributes(options.attributeFilter, tests))
-    .then((tests) => filterTest(options.testFilter, tests))
-    .then((tests) => filterGrep(options.grep, options.invertGrep, tests))
-    .then((tests) => {
-      if (options.debugPort) {
-        tests = tests.slice(0, 1); // Only run one test when debugging
-      }
+  try {
+    let tests = await listTests(
+      reporter,
+      listingTimeout,
+      testInterfacePath,
+      testInterfaceParameter,
+      options.files
+    );
+    tests = filterOnly(options.disallowOnly, tests);
+    tests = filterAttributes(options.attributeFilter, tests);
+    tests = filterTest(options.testFilter, tests);
+    tests = filterGrep(options.grep, options.invertGrep, tests);
 
-      if (!tests.length) {
-        throw new Error('No tests found');
-      }
+    if (options.debugPort) {
+      tests = tests.slice(0, 1); // Only run one test when debugging
+    }
 
-      reporter.registerTests(
-        tests.map((test) => test.path),
-        { timeout, listingTimeout, slowThreshold, graceTime, attempts }
+    if (!tests.length) {
+      throw new Error('No tests found');
+    }
+
+    reporter.registerTests(
+      tests.map((test) => test.path),
+      { timeout, listingTimeout, slowThreshold, graceTime, attempts }
+    );
+
+    await async.parallelLimit(
+      tests.map((test) => (done) => {
+        if (reporter.isFinished()) {
+          done();
+          return;
+        }
+        return runOrSkipTest(
+          options.softKill ?? defaultSoftKill,
+          options.timerFactory ?? ((timeout) => new TimeoutTimer(timeout)),
+          options.childProcess ?? childProcess,
+          options.debugPort,
+          attempts,
+          timeout,
+          graceTime,
+          slowThreshold,
+          reporter,
+          testInterfacePath,
+          testInterfaceParameter,
+          test,
+          options.runUnstable,
+          options.killSubProcesses
+        )
+          .catch(() => {})
+          .finally(() => done());
+      }),
+      options.parallelism || 8
+    );
+
+    const cancelled = reporter.isFinished();
+
+    reporter.done();
+
+    if (cancelled) {
+      throw new TestFailureError('Tests cancelled');
+    }
+    if (errorDetector.didFail()) {
+      const testPath = JSON.stringify(errorDetector.testPath());
+      const message = JSON.stringify(errorDetector.message());
+      throw new TestFailureError(`Tests failed: testpath: ${testPath} message: ${message}`);
+    }
+  } catch (error) {
+    if (!(error instanceof TestFailureError)) {
+      // Test failures will already have been reported by reporters, so there
+      // is no need for us to report them here.
+      internalErrorOutput.write('Internal error in Overman or a reporter:\n');
+      internalErrorOutput.write(
+        `${errorMessageUtil.indent(
+          errorMessageUtil.prettyError(error as Partial<ErrorMessage>),
+          2
+        )}\n`
       );
+    }
 
-      return async.parallelLimit(
-        tests.map((test) => (done) => {
-          if (reporter.isFinished()) {
-            done();
-            return;
-          }
-          return runOrSkipTest(
-            options.softKill ?? defaultSoftKill,
-            options.timerFactory ?? ((timeout) => new TimeoutTimer(timeout)),
-            options.childProcess ?? childProcess,
-            options.debugPort,
-            attempts,
-            timeout,
-            graceTime,
-            slowThreshold,
-            reporter,
-            testInterfacePath,
-            testInterfaceParameter,
-            test,
-            options.runUnstable,
-            options.killSubProcesses
-          )
-            .catch(() => {})
-            .finally(() => done());
-        }),
-        options.parallelism || 8
-      );
-    })
-    .then(async () => {
-      const cancelled = reporter.isFinished();
-
-      reporter.done();
-
-      if (cancelled) {
-        throw new TestFailureError('Tests cancelled');
-      } else if (errorDetector.didFail()) {
-        throw new TestFailureError(
-          `Tests failed: testpath: ${JSON.stringify(
-            errorDetector.testPath()
-          )} message: ${JSON.stringify(errorDetector.message())}`
-        );
-      }
-    })
-    .catch((error) => {
-      if (!(error instanceof TestFailureError)) {
-        // Test failures will already have been reported by reporters, so there
-        // is no need for us to report them here.
-        internalErrorOutput.write('Internal error in Overman or a reporter:\n');
-        internalErrorOutput.write(
-          `${errorMessageUtil.indent(errorMessageUtil.prettyError(error), 2)}\n`
-        );
-      }
-
-      throw error;
-    });
-
-  return resultPromise;
+    throw error;
+  }
 }
