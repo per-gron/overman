@@ -6,14 +6,15 @@
   "types": "dist/overman.d.ts",
   "files": [
     "dist",
-    "!dist/tsconfig.tsbuildinfo"
+    "!dist/tsconfig.tsbuildinfo",
+    "!dist/test",
+    "!dist/fakes"
   ],
   "scripts": {
     "lint": "eslint --ext .ts src",
     "build": "tsc -b src",
-    "build:test": "npm run build && tsc -b test",
-    "test:mocha": "npm run build && npm run lint && mocha -r ts-node/register --timeout 5000 --slow 1000 --colors test/test_*",
-    "test:overman": "npm run build:test && node test.js",
+    "test:mocha": "npm run build && npm run lint && mocha -r ts-node/register --timeout 5000 --slow 1000 --colors src/test",
+    "test:overman": "npm run build && node test.js",
     "test": "npm run test:mocha"
   },
   "repository": {
@@ -85,7 +86,7 @@
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended"
     ],
-    "ignorePatterns": "test/suite/suite_syntax_error.js",
+    "ignorePatterns": "data/suite",
     "rules": {
       "@typescript-eslint/ban-ts-comment": [
         "error",
@@ -126,7 +127,7 @@
       },
       {
         "files": [
-          "test/**"
+          "src/test/**"
         ],
         "env": {
           "mocha": true

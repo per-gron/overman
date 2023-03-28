@@ -24,12 +24,12 @@ var promiseUtil = require('./dist/promise_util');
 process.env['FORCE_COLOR'] = 'true';
 
 var suiteFiles = fs
-  .readdirSync('build')
+  .readdirSync('dist/test')
   .filter(function (filename) {
-    return filename.match(/^test_/);
+    return filename.match(/^test_.*\.js$/);
   })
   .map(function (filename) {
-    return path.join('build', filename);
+    return path.join('dist/test', filename);
   });
 
 const reporters = [
