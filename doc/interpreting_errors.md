@@ -1,6 +1,6 @@
 # How to interpret error messages from Overman
 
-When it comes to testing frameworks, what really separates the men from the boys is how useful the output is when the tests fail. In the development of Overman much effort has been put into making sure that it is capable of emitting good and informative error messages. This document describes how to interpret Overman's error messages and has some tips on how to write tests that are capable of providing good error information.
+When it comes to testing frameworks, it's important to have useful output when the tests fail. In the development of Overman much effort has been put into making sure that it is capable of emitting good and informative error messages. This document describes how to interpret Overman's error messages and has some tips on how to write tests that are capable of providing good error information.
 
 
 ## Test execution errors
