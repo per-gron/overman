@@ -253,7 +253,7 @@ describe('List suite', function () {
       let paramChecked = false;
 
       function fork(path, parameters) {
-        expect(parameters).deep.property('[1]').to.be.equal('param');
+        expect(parameters).to.have.nested.property('[1]', 'param');
 
         // Trick the listTestsOfFile function that the process closes
         paramChecked = true;
