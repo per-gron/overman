@@ -9,7 +9,7 @@
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
-    "lint": "eslint test src",
+    "lint": "eslint --ext .ts src",
     "build": "tsc -b src",
     "build:test": "npm run build && tsc -b test",
     "test:mocha": "npm run build && npm run lint && mocha -r ts-node/register --timeout 5000 --slow 1000 --colors test/test_*",
@@ -50,6 +50,8 @@
     "@types/recursive-readdir": "^2.2.1",
     "@types/source-map-support": "^0.5.6",
     "@types/through": "^0.0.30",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "eslint": "^8.36.0",
@@ -71,14 +73,57 @@
       "es2020": true,
       "node": true
     },
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "root": true,
+    "parserOptions": {
+      "sourceType": "module"
+    },
     "extends": [
-      "eslint:recommended"
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
     ],
     "ignorePatterns": "test/suite/suite_syntax_error.js",
     "rules": {
-      "no-regex-spaces": 0
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        {
+          "ts-ignore": "allow-with-description"
+        }
+      ],
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/no-empty-interface": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ],
+      "no-regex-spaces": "off"
     },
     "overrides": [
+      {
+        "files": [
+          "src/overman.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/triple-slash-reference": "off"
+        }
+      },
+      {
+        "files": [
+          "src/interfaces/bdd_mocha.globals.ts"
+        ],
+        "rules": {
+          "no-var": "off",
+          "@typescript-eslint/no-explicit-any": "off",
+          "@typescript-eslint/no-namespace": "off",
+          "@typescript-eslint/no-unused-vars": "off"
+        }
+      },
       {
         "files": [
           "test/**"
