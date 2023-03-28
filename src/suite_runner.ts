@@ -452,6 +452,7 @@ export interface Options {
   runUnstable?: boolean;
   killSubProcesses?: boolean;
   parallelism?: number;
+  signal?: AbortSignal;
 }
 export { ProcessLike, Timer, TestSpec, SoftKill };
 
@@ -495,6 +496,12 @@ export default function (options: Options) {
   if (!Array.isArray(options.files)) {
     throw new Error('Option "files" not present or not Array');
   }
+
+  options.signal?.addEventListener('abort', () => {
+    if (!reporter.isFinished()) {
+      reporter.cancel();
+    }
+  });
 
   const resultPromise = listTests(
     reporter,
@@ -577,11 +584,5 @@ export default function (options: Options) {
       throw error;
     });
 
-  const cancel = () => {
-    if (!reporter.isFinished()) {
-      reporter.cancel();
-    }
-  };
-
-  return Object.assign(resultPromise, { cancel });
+  return resultPromise;
 }

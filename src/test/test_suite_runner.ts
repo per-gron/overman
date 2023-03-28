@@ -298,13 +298,18 @@ describe('Suite runner', function () {
 
   describe('Suite cancellation', function () {
     it('should fail when the suite is cancelled', function () {
-      const suitePromise = runTestSuite('suite_single_successful_test', [
-        new OnMessage((_, message) => {
-          if (message.type === 'start') {
-            suitePromise.cancel();
-          }
-        }),
-      ]);
+      const abortController = new AbortController();
+      const suitePromise = runTestSuite(
+        'suite_single_successful_test',
+        [
+          new OnMessage((_, message) => {
+            if (message.type === 'start') {
+              abortController.abort();
+            }
+          }),
+        ],
+        { signal: abortController.signal }
+      );
       return shouldFail(
         suitePromise,
         (error) => error instanceof TestFailureError && /cancelled/.test(error.message)
@@ -314,12 +319,15 @@ describe('Suite runner', function () {
     it('should do nothing when cancelled after the suite is done', async function () {
       let doneCalledTimes = 0;
 
-      const suitePromise = runTestSuite('suite_single_successful_test', [
-        { done: () => doneCalledTimes++ },
-      ]);
+      const abortController = new AbortController();
+      const suitePromise = runTestSuite(
+        'suite_single_successful_test',
+        [{ done: () => doneCalledTimes++ }],
+        { signal: abortController.signal }
+      );
       await suitePromise;
       expect(doneCalledTimes, 'done should have been called').to.be.equal(1);
-      suitePromise.cancel();
+      abortController.abort();
       expect(
         doneCalledTimes,
         'done should not be called when cancelling finished suite'
@@ -329,25 +337,30 @@ describe('Suite runner', function () {
     it('should do nothing when cancelled subsequent times', function () {
       let doneCalledTimes = 0;
 
-      const suitePromise = runTestSuite('suite_single_successful_test', [
-        {
-          gotMessage: (_, message) => {
-            if (message.type === 'start') {
-              suitePromise.cancel();
-              expect(
-                doneCalledTimes,
-                'done should be called when cancelling the first time'
-              ).to.be.equal(1);
-              suitePromise.cancel();
-              expect(
-                doneCalledTimes,
-                'done should not be called when cancelling the second time'
-              ).to.be.equal(1);
-            }
+      const abortController = new AbortController();
+      const suitePromise = runTestSuite(
+        'suite_single_successful_test',
+        [
+          {
+            gotMessage: (_, message) => {
+              if (message.type === 'start') {
+                abortController.abort();
+                expect(
+                  doneCalledTimes,
+                  'done should be called when cancelling the first time'
+                ).to.be.equal(1);
+                abortController.abort();
+                expect(
+                  doneCalledTimes,
+                  'done should not be called when cancelling the second time'
+                ).to.be.equal(1);
+              }
+            },
+            done: () => doneCalledTimes++,
           },
-          done: () => doneCalledTimes++,
-        },
-      ]);
+        ],
+        { signal: abortController.signal }
+      );
       return shouldFail(
         suitePromise,
         (error) => error instanceof TestFailureError && /cancelled/.test(error.message)

@@ -25,3 +25,5 @@ Mocha inspired test framework for integration and system tests.
 - suiteRunner({ timeoutTimer: MyTimerClass });
 + suiteRunner({ timerFactory: (timeout) => new MyTimerClass(timeout) });
 ```
+
+- Suite runner (module default export) now returns a pure Promise. Cancellation is done by providing a `signal: AbortSignal` in `Options`.

@@ -28,7 +28,7 @@ const reporters = [
   new overmanReporters.Summary(process.stdout),
 ];
 
-const suitePromise = overman({ files: suiteFiles, reporters });
+const ctrl = new AbortController();
 
 let finished = false;
 
@@ -39,13 +39,13 @@ process.on('SIGINT', () => {
     // prevent the user from shutting down the process.
     process.exit(1);
   } else {
-    suitePromise.cancel();
+    ctrl.abort();
   }
 });
 
 async function main() {
   try {
-    await suitePromise;
+    await overman({ files: suiteFiles, reporters, signal: ctrl.signal });
     finished = true;
   } catch (_: unknown) {
     finished = true;

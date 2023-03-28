@@ -569,16 +569,18 @@ describe('Reporter API', async function () {
   it('should emit an aborted finish message when suite is cancelled while the test is running', function () {
     let deferredResolve = () => {};
     const deferredPromise = new Promise<void>((resolve) => (deferredResolve = resolve));
+    const abortController = new AbortController();
     const suitePromise = runTestSuite(
       'suite_single_successful_test',
       new OnMessage(function (testPath, message) {
         if (message.type === 'start') {
-          suitePromise.cancel();
+          abortController.abort();
         } else if (message.type === 'finish') {
           expect(message).property('result').to.be.equal('aborted');
           deferredResolve();
         }
-      })
+      }),
+      { signal: abortController.signal }
     );
 
     return Promise.all([
@@ -593,6 +595,7 @@ describe('Reporter API', async function () {
     let cancelled = false;
     let deferredReject = (_: Error) => {};
     const deferredPromise = new Promise((_, reject) => (deferredReject = reject));
+    const abortController = new AbortController();
     const suitePromise = runTestSuite(
       'suite_various_tests',
       new OnMessage((_, message) => {
@@ -600,11 +603,12 @@ describe('Reporter API', async function () {
           if (cancelled) {
             deferredReject(new Error('Got start message after cancellation'));
           } else {
-            suitePromise.cancel();
+            abortController.abort();
             cancelled = true;
           }
         }
-      })
+      }),
+      { signal: abortController.signal }
     );
 
     return Promise.race([shouldFail(suitePromise), deferredPromise]);
@@ -613,16 +617,21 @@ describe('Reporter API', async function () {
   it('should emit a done message after a suite has been cancelled', function () {
     let deferredResolve = () => {};
     const deferredPromise = new Promise<void>((resolve) => (deferredResolve = resolve));
-    const suitePromise = runTestSuite('suite_single_successful_test', {
-      gotMessage(_, message) {
-        if (message.type === 'start') {
-          suitePromise.cancel();
-        }
+    const abortController = new AbortController();
+    const suitePromise = runTestSuite(
+      'suite_single_successful_test',
+      {
+        gotMessage(_, message) {
+          if (message.type === 'start') {
+            abortController.abort();
+          }
+        },
+        done() {
+          deferredResolve();
+        },
       },
-      done() {
-        deferredResolve();
-      },
-    });
+      { signal: abortController.signal }
+    );
 
     return Promise.all([
       shouldFail(suitePromise, function (error) {
