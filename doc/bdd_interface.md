@@ -17,7 +17,7 @@ for the project.
 A test file with a single test looks like this:
 
 ```javascript
-it('should be a test', function() {
+it('should be a test', function () {
   // Put test code here
 });
 ```
@@ -30,8 +30,8 @@ same name:
 ```javascript
 // The following code will result in an error when Overman is calculating the
 // list of tests to be run:
-it('should succeed', function() {});
-it('should succeed', function() {});
+it('should succeed', function () {});
+it('should succeed', function () {});
 ```
 
 ### Attributes
@@ -39,7 +39,7 @@ it('should succeed', function() {});
 A test with custom optional attributes looks like this:
 
 ```javascript
-it('should be a test', { requirements: 'Requirement1' }, function() {
+it('should be a test', { requirements: 'Requirement1' }, function () {
   // Put test code here
 });
 ```
@@ -57,9 +57,9 @@ some assertion libraries that can be used:
 Here's an example of a test that uses [Chai](http://chaijs.com):
 
 ```javascript
-var expect = require('chai').expect;
+import { expect } from 'chai';
 
-it('should assert', function() {
+it('should assert', function () {
   expect(Math.random()).to.be.within(0, 1);
 });
 ```
@@ -69,12 +69,12 @@ it('should assert', function() {
 Tests in test files can be grouped together into suites:
 
 ```javascript
-describe('Some functionality', function() {
-  it('should work', function() {
+describe('Some functionality', function () {
+  it('should work', function () {
     // Test something
   });
 
-  it('should do the right thing', function() {
+  it('should do the right thing', function () {
     // Test something else
   });
 });
@@ -83,9 +83,9 @@ describe('Some functionality', function() {
 Suites can be nested:
 
 ```javascript
-describe('Some functionality', function() {
-  describe('A certain aspect', function() {
-    it('should work', function() {
+describe('Some functionality', function () {
+  describe('A certain aspect', function () {
+    it('should work', function () {
       // Test something
     });
   });
@@ -97,7 +97,7 @@ describe('Some functionality', function() {
 Tests can be skipped with `it.skip`:
 
 ```javascript
-it.skip('should not be run', function() {
+it.skip('should not be run', function () {
   // Will not be run
 });
 ```
@@ -113,7 +113,7 @@ While working on tests, it is sometimes useful to run only a certain test. That
 can be done with `it.only`:
 
 ```javascript
-it.only('should be run and all other tests should not', function() {
+it.only('should be run and all other tests should not', function () {
   // Test something
 });
 ```
@@ -121,7 +121,7 @@ it.only('should be run and all other tests should not', function() {
 Tests can be marked unstable with `it.unstable`:
 
 ```javascript
-it.unstable('should be run only if options.runUnstable is true', function() {
+it.unstable('should be run only if options.runUnstable is true', function () {
   // Will not be run
 });
 ```
@@ -140,15 +140,15 @@ provides `beforeEach` and `afterEach`.
 
 ```javascript
 
-beforeEach(function() {
+beforeEach(function () {
   // Will be run before all tests  
 });
 
-it('should succeed', function() {
+it('should succeed', function () {
   // ...
 });
 
-afterEach(function() {
+afterEach(function () {
   // Will be run after all tests
 });
 ```
@@ -157,7 +157,7 @@ Hooks can be named. This is makes the code more self-documenting and can help
 when troubleshooting test failures:
 
 ```javascript
-beforeEach('Log in', function() {
+beforeEach('Log in', function () {
   // Log in
 });
 
@@ -170,18 +170,18 @@ Hooks can be defined within suites. Then they are only run for tests in that
 suite:
 
 ```javascript
-beforeEach(function() {
+beforeEach(function () {
   // When this test file is tested, this hook will be invoked twice.
 });
 
-it('should succeed', function() {});
+it('should succeed', function () {});
 
-describe('Something', function() {
-  beforeEach(function() {
+describe('Something', function () {
+  beforeEach(function () {
     // When this test file is tested, this hook will be invoked once.
   });
 
-  it('should also succeed', function() {});
+  it('should also succeed', function () {});
 });
 ```
 
@@ -191,7 +191,7 @@ after hooks are run first, and the top level suite's after hooks are run last.
 Hooks within a given suite or subsuite are run in the order they are specified.
 
 Like tests, before and after hooks can be synchronous or asynchronous. Both the
-`done` style of asynchrony, promises and generators are supported.
+`done` style of asynchrony and promises are supported.
 
 When a before hook fails, subsequent before hooks and the test will not be run.
 
@@ -218,14 +218,37 @@ Overman's speciality is tests that are a bit more complex and run a little
 longer than a typical unit test. Because of this, support for asynchronous tests
 is very important for Overman.
 
-### done
+### `async` functions
 
-In addition to synchronous tests, overman supports two styles of asynchronous
-tests. One is using a `done` callback:
+In addition to synchronous tests, overman supports four styles of asynchronous
+tests. The recommended way is to use a `async function` (which returns a `Promise`):
+
+```javascript
+it('should invoke setTimeout callback', async function() {
+  await setTimeout(10);
+});
+```
+
+#### Promises
+
+A test function may return a `PromiseLike` object explicitly too:
+
+```javascript
+it('should succeed', function () {
+  return new Promise(function(resolve) {
+    setTimeout(resolve, 100);
+  });
+});
+```
+
+### done (not recommended)
+
+Overman also supports callback-style, for backwards compatibility.
+The same result can be achieved by using the `Promise` constructor, as seen above.
 
 ```javascript
 it('should invoke setTimeout callback', function(done) {
-  setTimeout(function() {
+  setTimeout(function () {
     done();
   }, 10);
 });
@@ -235,7 +258,7 @@ Failure is expressed by passing in an `Error` object to the `done` callback:
 
 ```javascript
 it('should fail asynchronously', function(done) {
-  setTimeout(function() {
+  setTimeout(function () {
     done(new Error('Failure'));
   }, 10);
 });
@@ -263,11 +286,11 @@ Overman will not always detect tests that were going to invoke `done` more than
 once:
 
 ```javascript
-it('should call done twice, but with a long delay', function() {
+it('should call done twice, but with a long delay', function () {
   done();
   // In this case, the test will have finished and the node process exited
   // before the callback is run, so this will not cause the test to fail.
-  setTimeout(function() { done(); }, 10000);
+  setTimeout(function () { done(); }, 10000);
 });
 ```
 
@@ -280,38 +303,11 @@ it('should time out', function(options) {
   // it, the test will always time out.
 });
 
-it('should fail', function() {
+it('should fail', function () {
   var done = arguments[0];
   // Here, done will be undefined so the test will fail. Only if the test
   // function takes an argument will it be counted as a done callback test.
   done();
-});
-```
-
-### Promises
-
-Overman also supports promise style asynchronous tests. When a test function
-returns a promise-like object, the test result will be the value of the promise:
-
-```javascript
-it('should succeed', function() {
-  return new Promise(function(resolve) {
-    setTimeout(resolve, 100);
-  });
-});
-```
-
-### Generators
-
-In node 0.11+ and iojs, overman offers support for writing tests with
-[co](https://github.com/tj/co) style asynchronous generators. When a test
-function returns a generator-like object, Overman uses `co` to run the test.
-
-```javascript
-it('should use generators', function *() {
-  if ((yield Promise.resolve(1)) != (yield Promise.resolve(1))) {
-    throw new Error('Insanity!');
-  }
 });
 ```
 
@@ -322,12 +318,12 @@ achieved by accessing the `Context` object. From tests and hooks it can be
 accessed with `this`:
 
 ```javascript
-beforeEach(function() {
-  var theContext = this;
+beforeEach(function () {
+  const theContext = this;
 });
 
-it('should get the Context', function() {
-  var theContext = this;
+it('should get the Context', function () {
+  const theContext = this;
 });
 ```
 
@@ -338,7 +334,7 @@ The `Context` is also accessible with the global variable `context`.
 A test get its attributes like this:
 
 ```javascript
-it('should be a test', { requirement: 'Requirement1' }, function() {
+it('should be a test', { requirement: 'Requirement1' }, function () {
   console.log(this.attributes.requirement);
 });
 ```
@@ -351,11 +347,11 @@ locks that tests acquire, setting the timeout can be useful if a certain test
 takes particularly long time to run.
 
 ```javascript
-it('should print its timeout', function() {
+it('should print its timeout', function () {
   console.log(this.timeout());
 });
 
-it('should set its timeout', function() {
+it('should set its timeout', function () {
   this.timeout(1000);  
 });
 ```
@@ -363,7 +359,7 @@ it('should set its timeout', function() {
 Timeouts for tests can also be overriden on the suite level:
 
 ```javascript
-describe('A suite', function() {
+describe('A suite', function () {
   this.timeout(10000);  // Set the timeout for all tests in this suite
   console.log(this.timeout());
 });
@@ -391,11 +387,11 @@ Typically, this threshold is configured when the whole suite is run, but it can
 be useful to increase the threshold for certain tests that are extra slow.
 
 ```javascript
-it('should print its slow threshold', function() {
+it('should print its slow threshold', function () {
   console.log(this.slow());
 });
 
-it('should set its slow threshold', function() {
+it('should set its slow threshold', function () {
   this.slow(1000);  
 });
 ```
@@ -418,7 +414,7 @@ Breadcrumbs consist of a message and the stack trace of where they were
 generated.
 
 ```javascript
-it('should leave a breadcrumb', function() {
+it('should leave a breadcrumb', function () {
   this.breadcrumb('Did begin');
 });
 ```

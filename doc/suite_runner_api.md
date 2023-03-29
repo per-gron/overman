@@ -5,20 +5,21 @@ API consists of one function. Here's a basic example that runs some tests with
 the default spec reporter and uses the default BDD interface:
 
 ```javascript
-var overman = require('overman');
+import overman from 'overman';
 
-overman({
-  files: ['some.js', 'test.js', 'files.js']
-  // More options go here
-}).done(function() {
+try {
+  await overman({
+    files: ['some.js', 'test.js', 'files.js']
+    // More options go here
+  });
   console.log('Tests completed successfully');
-}, function(error) {
+} catch (error) {
   console.error('Tests failed!');
-});
+}
 ```
 
 The suite runner takes a dictionary of options and returns a promise of the
-test result. If the promise fails with an `overman.TestFailureError` error, it
+test result. If the promise fails with an `TestFailureError` error, it
 means that one or more tests failed. If the promise fails with any other error,
 it signifies an internal error in the test runner or a reporter. By default,
 information about internal errors are printed to stderr, but this can be
@@ -67,25 +68,27 @@ runner:
   has finished. There could be an issue that the subprocess does not get the chance
   of cleaning up so that has to be done synchrously before the test finishes.
   SIGKILL was choosen since its supported by the platforms used.
+* `signal`: `AbortSignal`. Used to cancel the test suite.
 
 ## Cancelling the test runner
 
 The suite runner supports cancellation. This is useful to do for example as a
-response to the `SIGINT` signal. Cancellation is done by calling `cancel` on the
-promise that is returned from the suite runner function.
+response to the `SIGINT` signal. Cancellation is done by creating an
+`AbortController`, passing the `controller.signal` in the `signal` option, and
+calling `abort` on the controller.
 
 Here's an example of how this can be used:
 
 ```javascript
-var overman = require('overman');
+import overman from 'overman';
 
-var suitePromise = overman({ files: process.argv.slice(1) });
+const ctrl = new AbortController();
 
-process.on('SIGINT', function() {
-  suitePromise.cancel();
-});
+process.on('SIGINT', () => ctrl.abort());
 
-suitePromise.done(function() {}, function(err) {
+try {
+  await overman({ files: process.argv.slice(1), signal: ctrl.signal });
+} catch (err) {
   process.exit(1);
-});
+}
 ```
