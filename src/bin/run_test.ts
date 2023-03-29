@@ -39,8 +39,6 @@
  * information about the test run is reported to its parent process over process.send.
  */
 
-// @ts-ignore Types incorrect: co can accept a Generator as first param.
-import * as co from 'co';
 // process.exit that works on Windows
 import exit = require('exit');
 import * as sourceMapSupport from 'source-map-support';
@@ -51,7 +49,6 @@ import {
   Hook,
   Runner,
   RunnerAsync,
-  RunnerCo,
   SuiteEntry,
   TestEntry,
 } from '../interfaces/interface';
@@ -98,24 +95,13 @@ function sendError(error: unknown, extras: ErrorExtra) {
   sendMessage({ type: 'error', stack, ...extras });
 }
 
-function isGeneratorOrPromiseFunc<T>(f: Runner<T>): f is RunnerAsync<T> | RunnerCo<T> {
+function isPromiseFunc<T>(f: Runner<T>): f is RunnerAsync<T> {
   return f.length === 0;
 }
 
-function isGenerator<T>(t?: unknown): t is Iterator<T> {
-  return typeof t === 'object' && t !== null && 'next' in t && typeof t.next === 'function';
-}
-
-// Takes a function that returns either a promise or a generator and
-// returns a promise.
-async function invokeGeneratorOrPromiseFunction<T>(f: RunnerAsync<T> | RunnerCo<T>) {
-  const result = await f();
-  return isGenerator(result) ? co(result) : result;
-}
-
 function invokeFunctionNoErrorHandling<T>(f: Runner<T>, extra: ErrorExtra) {
-  if (isGeneratorOrPromiseFunc(f)) {
-    return invokeGeneratorOrPromiseFunction(f);
+  if (isPromiseFunc(f)) {
+    return f();
   }
   return new Promise<void>((resolve, reject) => {
     let callbackCalled = false;

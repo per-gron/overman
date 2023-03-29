@@ -4,9 +4,8 @@ export type Done = (err?: unknown) => void;
 
 export type RunnerCallback = (done: Done) => void;
 export type RunnerAsync<T> = () => PromiseLike<T> | void;
-export type RunnerCo<T> = () => Iterator<T>;
 
-export type Runner<T = unknown> = RunnerCallback | RunnerAsync<T> | RunnerCo<T>;
+export type Runner<T = unknown> = RunnerCallback | RunnerAsync<T>;
 
 interface EntryOptions {
   /**

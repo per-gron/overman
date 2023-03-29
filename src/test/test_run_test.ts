@@ -190,18 +190,6 @@ describe('Test runner', function () {
     ]);
   });
 
-  it('should run tests with generators', function () {
-    const process = runTest('suite_test_with_generator', 'should succeed');
-    return Promise.all([
-      waitForProcessToExit(process),
-      waitForStreamToEmitLines(process.stdout, [
-        /running_test/,
-        /still_running_test/,
-        /running_after_hook/,
-      ]),
-    ]);
-  });
-
   it('should run tests that take a done callback', function () {
     const process = runTest('suite_test_invoking_done', 'should succeed');
     return Promise.all([
