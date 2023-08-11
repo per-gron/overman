@@ -100,7 +100,7 @@ export default class SpecProgress implements Reporter<MessageWithSlowness> {
   // last line that was inserted for each test suite.
   _lastLineIdForSuite = new Map<string, string>();
   _isUnstable = new Set<string>();
-  _recentBreadcrumb = new Map<string, string>();
+  _testStartTime = new Map<string, number>();
   _stdio = new Map<string, { stdout: Writable; stderr: Writable }>();
 
   constructor(
@@ -128,7 +128,7 @@ export default class SpecProgress implements Reporter<MessageWithSlowness> {
     return input;
   }
 
-  gotMessage(testPath: TestPath, message: MessageWithSlowness) {
+  gotMessage(testPath: TestPath, message: MessageWithSlowness, time: Date) {
     const pathAsString = JSON.stringify(testPath);
 
     if (message.type === 'suiteStart') {
@@ -139,12 +139,12 @@ export default class SpecProgress implements Reporter<MessageWithSlowness> {
       this._log.log(spacesForPath(suitePath) + suiteName, suitePathString);
       this._lastLineIdForSuite.set(suitePathString, suitePathString);
     } else if (message.type === 'breadcrumb' && testPath && !this._disableBreadcrumbs) {
-      this._recentBreadcrumb.set(pathAsString, message.message);
+      const elapsedMs = time.getTime() - (this._testStartTime.get(pathAsString) ?? 0);
       const line = getLine(
         testPath,
         this._isUnstable.has(pathAsString),
         undefined,
-        message.message
+        `[${(elapsedMs / 1000).toFixed(1)}s]: ${message.message}`
       );
       this._log.replace(pathAsString, line);
     } else if (message.type === 'stdout') {
@@ -174,6 +174,8 @@ export default class SpecProgress implements Reporter<MessageWithSlowness> {
         }
         this._log.replace(pathAsString, line);
       }
+    } else if (message.type === 'startedTest') {
+      this._testStartTime.set(pathAsString, time.getTime());
     }
   }
 }

@@ -22,6 +22,7 @@ import { TestPath } from '../test_path';
 import { FinishMessage, MessageWithSlowness } from '../reporters/message';
 
 const TEST_PATH: TestPath = { file: 'file', path: [] };
+const DATE = new Date(42);
 
 const NOP = () => {};
 
@@ -65,7 +66,7 @@ describe('Spec progress reporter', function () {
         );
 
         const suitePath: TestPath = { file: 'file', path };
-        reporter.gotMessage(TEST_PATH, { type: 'suiteStart', suite: suitePath });
+        reporter.gotMessage(TEST_PATH, { type: 'suiteStart', suite: suitePath }, DATE);
       });
     }
 
@@ -101,8 +102,8 @@ describe('Spec progress reporter', function () {
 
         const suitePath = { file: 'file', path: [] };
         const testPath = { file: 'file', path: ['test'] };
-        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath });
-        reporter.gotMessage(testPath, { type: 'start' });
+        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath }, DATE);
+        reporter.gotMessage(testPath, { type: 'start' }, DATE);
       });
     });
 
@@ -136,9 +137,9 @@ describe('Spec progress reporter', function () {
         const suitePath = { file: 'file', path: [] };
         const testPath1 = { file: 'file', path: ['test1'] };
         const testPath2 = { file: 'file', path: ['test2'] };
-        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath });
-        reporter.gotMessage(testPath1, { type: 'start' });
-        reporter.gotMessage(testPath2, { type: 'start' });
+        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath }, DATE);
+        reporter.gotMessage(testPath1, { type: 'start' }, DATE);
+        reporter.gotMessage(testPath2, { type: 'start' }, DATE);
       });
     });
   });
@@ -159,7 +160,7 @@ describe('Spec progress reporter', function () {
               replace(replacedId, line) {
                 expect(testLineId).to.not.be.null;
                 expect(replacedId).to.be.equal(testLineId);
-                expect(stripAnsi(line)).to.be.equal('    test  >  42');
+                expect(stripAnsi(line)).to.be.equal('    test  >  [0.0s]: 42');
                 resolve();
               },
             })
@@ -167,9 +168,9 @@ describe('Spec progress reporter', function () {
 
         const suitePath = { file: 'file', path: [] };
         const testPath = { file: 'file', path: ['test'] };
-        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath });
-        reporter.gotMessage(testPath, { type: 'start' });
-        reporter.gotMessage(testPath, { type: 'breadcrumb', message: '42', trace: '' });
+        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath }, DATE);
+        reporter.gotMessage(testPath, { type: 'start' }, DATE);
+        reporter.gotMessage(testPath, { type: 'breadcrumb', message: '42', trace: '' }, DATE);
       });
     });
 
@@ -196,10 +197,10 @@ describe('Spec progress reporter', function () {
 
         const suitePath = { file: 'file', path: [] };
         const testPath = { file: 'file', path: ['test'] };
-        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath });
-        reporter.gotMessage(testPath, { type: 'start' });
-        reporter.gotMessage(testPath, { type: 'breadcrumb', message: '42', trace: '' });
-        reporter.gotMessage(testPath, { type: 'finish', result: 'success' });
+        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath }, DATE);
+        reporter.gotMessage(testPath, { type: 'start' }, DATE);
+        reporter.gotMessage(testPath, { type: 'breadcrumb', message: '42', trace: '' }, DATE);
+        reporter.gotMessage(testPath, { type: 'finish', result: 'success' }, DATE);
       });
     });
   });
@@ -232,9 +233,9 @@ describe('Spec progress reporter', function () {
 
         const suitePath = { file: 'file', path: [] };
         const testPath = { file: 'file', path: ['test'] };
-        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath });
-        reporter.gotMessage(testPath, { type: 'start' });
-        reporter.gotMessage(testPath, { ...extraFinishOptions, type: 'finish', result });
+        reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath }, DATE);
+        reporter.gotMessage(testPath, { type: 'start' }, DATE);
+        reporter.gotMessage(testPath, { ...extraFinishOptions, type: 'finish', result }, DATE);
       });
     }
 
@@ -280,17 +281,25 @@ describe('Spec progress reporter', function () {
 
           const suitePath = { file: 'file', path: [] };
           const testPath = { file: 'file', path: ['test'] };
-          reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath });
-          reporter.gotMessage(testPath, { type: 'start' });
+          reporter.gotMessage(suitePath, { type: 'suiteStart', suite: suitePath }, DATE);
+          reporter.gotMessage(testPath, { type: 'start' }, DATE);
 
-          reporter.gotMessage(testPath, {
-            type: streamName,
-            data: 'a_line\n',
-          });
-          reporter.gotMessage(testPath, {
-            type: streamName,
-            data: 'a_second_line\n',
-          });
+          reporter.gotMessage(
+            testPath,
+            {
+              type: streamName,
+              data: 'a_line\n',
+            },
+            DATE
+          );
+          reporter.gotMessage(
+            testPath,
+            {
+              type: streamName,
+              data: 'a_second_line\n',
+            },
+            DATE
+          );
         });
       });
     });
@@ -299,6 +308,6 @@ describe('Spec progress reporter', function () {
   it('should do nothing on other messages', function () {
     const reporter = new SpecProgress({ stdout: through() }, () => new FakeInsertionLog());
     const suitePath = { file: 'file', path: [] };
-    reporter.gotMessage(suitePath, { type: 'breadcrumb', message: '', trace: '' });
+    reporter.gotMessage(suitePath, { type: 'breadcrumb', message: '', trace: '' }, DATE);
   });
 });
