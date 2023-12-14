@@ -14,7 +14,8 @@ export class FakeProcess<T extends Serializable = Serializable>
     public send = (_: T) => {},
     public stdin: Writable | null = null,
     public stdout: Readable | null = null,
-    public stderr: Readable | null = null
+    public stderr: Readable | null = null,
+    public connected = true
   ) {
     super();
   }
