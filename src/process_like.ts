@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import { Readable, Writable } from 'stream';
 
 export interface ProcessLike extends EventEmitter {
+  connected: boolean;
   stdin: Writable | null;
   stdout: Readable | null;
   stderr: Readable | null;

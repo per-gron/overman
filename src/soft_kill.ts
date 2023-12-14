@@ -26,7 +26,9 @@ export default function softKill(
   timeout: number,
   timerFactory?: (timeout: number) => Timer
 ) {
-  if (timeout === 0) {
+  if (!process.connected) {
+    return;
+  } else if (timeout === 0) {
     process.kill('SIGKILL');
     return;
   }
