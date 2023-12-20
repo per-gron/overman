@@ -37,10 +37,15 @@ export default function softKill(
   timer.on('timeout', () => process.kill('SIGKILL'));
 
   process.on('exit', () => timer.cancel());
-  // Instead of sending a real SIGINT, send a message to the sub-process and
-  // let it treat it as if it received a SIGINT. SIGINT doesn't exist on
-  // Windows.
-  process.send({ type: 'sigint' });
+  // Instead of sending a real SIGINT, try to send a message to the sub-process
+  // and let it treat it as if it received a SIGINT. SIGINT doesn't exist on
+  // Windows. The process connected property doesn't seem to be a guarantee
+  // against EPIPE.
+  try {
+    process.send({ type: 'sigint' });
+  } catch (e) {
+    // Ignored. The timeout will trigger a SIGKILL instead.
+  }
 }
 
 export type SoftKill = typeof softKill;
